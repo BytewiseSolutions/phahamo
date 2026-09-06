@@ -25,6 +25,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 24px;
   padding: 52px;
   background: var(--primary);
   color: #ffffff;
@@ -59,8 +61,6 @@
 
 .showcase-content {
   max-width: 500px;
-  margin-top: auto;
-  margin-bottom: auto;
 }
 
 .eyebrow {
