@@ -1,1 +1,225 @@
-<p>login works!</p>
+<div class="login-page">
+
+  <div class="login-container">
+    <section class="login-showcase">
+
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="assets/logos.png" alt="School Management System" class="brand-logo"/>
+        </div>
+        <span>School Management System</span>
+      </div>
+
+      <div class="showcase-content">
+        <p class="eyebrow">WELCOME TO SCHOOL MANAGEMENT SYSTEM</p>
+        <h1>Everything your school needs,<span>in one place.</span></h1>
+      </div>
+    </section>
+
+    <section class="login-form-section">
+      <div class="login-form-wrapper">
+        <div class="mobile-brand">
+
+          <div class="brand-mark">
+            <img src="assets/logo.png" alt="School Management System" class="brand-logo"/>
+          </div>
+
+          <span>School Management System</span>
+        </div>
+
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active">Sign In</button>
+          <button type="button" class="auth-tab">Sign Up</button>
+        </div>
+
+        <div class="form-header">
+          <h2>Sign in to your account</h2>
+
+          <p>Enter your details to continue.</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <div class="input-wrapper">
+
+              <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+
+              <input id="email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email"/>
+
+            </div>
+
+            @if (
+              loginForm.get('email')?.touched &&
+              loginForm.get('email')?.invalid
+              ) {
+
+              <div class="error">
+
+                @if (
+                  loginForm.get('email')?.errors?.['required']
+                  ) {
+                  <span>
+                    Email is required.
+                  </span>
+                }
+
+                @if (
+                  loginForm.get('email')?.errors?.['email']
+                  ) {
+                  <span>
+                    Please enter a valid email address.
+                  </span>
+                }
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- Password -->
+          <div class="form-group">
+
+            <div class="password-label">
+
+              <label for="password">
+                Password
+              </label>
+
+            </div>
+
+            <div class="input-wrapper">
+
+              <i
+                class="fa-solid fa-lock input-icon"
+                aria-hidden="true"
+              ></i>
+
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+
+            </div>
+
+            @if (
+              loginForm.get('password')?.touched &&
+              loginForm.get('password')?.invalid
+              ) {
+
+              <div class="error">
+                Password is required.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- Remember Me / Forgot Password -->
+          <div class="form-options">
+
+            <label class="remember-me">
+
+              <input
+                type="checkbox"
+                formControlName="rememberMe"
+              />
+
+              <span class="checkmark"></span>
+
+              <span>
+                Remember me
+              </span>
+
+            </label>
+
+            <a
+              routerLink="/forgot-password"
+              class="forgot-password"
+            >
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <!-- Sign In Button -->
+          <button
+            type="submit"
+            class="login-button"
+          >
+
+            <span>
+              Sign In
+            </span>
+
+            <i
+              class="fa-solid fa-arrow-right"
+              aria-hidden="true"
+            ></i>
+
+          </button>
+
+        </form>
+
+
+        <!-- Divider -->
+        <div class="divider">
+
+          <span></span>
+
+          <p>
+            or continue with
+          </p>
+
+          <span></span>
+
+        </div>
+
+
+        <!-- Google -->
+        <button
+          type="button"
+          class="google-button"
+        >
+
+          <i
+            class="fa-brands fa-google google-icon"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            Continue with Google
+          </span>
+
+        </button>
+
+        <div class="security-note">
+
+          <i
+            class="fa-solid fa-shield-halved"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            Your information is protected with secure authentication.
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
