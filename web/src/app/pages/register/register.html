@@ -1,1 +1,132 @@
-<p>register works!</p>
+<div class="auth-page">
+  <div class="auth-container">
+    <section class="auth-showcase">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="assets/logos.png" alt="School Management System" class="brand-logo"/>
+        </div>
+        <span>School Management System</span>
+      </div>
+
+      <div class="showcase-content">
+        <p class="eyebrow">GET STARTED</p>
+        <h1>Register your school,<span>in minutes.</span></h1>
+      </div>
+    </section>
+
+    <section class="auth-form-section">
+      <div class="auth-form-wrapper">
+        <div class="mobile-brand">
+          <div class="brand-mark">
+            <img src="assets/logos.png" alt="School Management System" class="brand-logo"/>
+          </div>
+          <span>School Management System</span>
+        </div>
+
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab" routerLink="/login">Sign In</button>
+          <button type="button" class="auth-tab active">Sign Up</button>
+        </div>
+
+        <div class="form-header">
+          <h2>Register your school</h2>
+          <p>Step {{ currentStep }} of 2 — {{ currentStep === 1 ? 'Your details' : 'School details' }}</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="success-banner">{{ successMessage }}</div>
+          }
+
+          @if (currentStep === 1) {
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input id="fullName" type="text" formControlName="fullName" placeholder="Lebohang Monamane"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Your Email</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-envelope input-icon"></i>
+                <input id="email" type="email" formControlName="email" placeholder="you@example.com"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Your Phone</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-phone input-icon"></i>
+                <input id="phone" type="text" formControlName="phone" placeholder="58812345"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input id="password" type="password" formControlName="password" placeholder="At least 8 characters"/>
+              </div>
+            </div>
+
+            <button type="button" class="auth-button" (click)="goToNextStep()">
+              <span>Next: School Details</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          }
+
+          @if (currentStep === 2) {
+            <div class="form-group">
+              <label for="schoolName">School Name</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-school input-icon"></i>
+                <input id="schoolName" type="text" formControlName="schoolName" placeholder="Maseru Primary School"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="schoolAddress">School Address</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-location-dot input-icon"></i>
+                <input id="schoolAddress" type="text" formControlName="schoolAddress" placeholder="123 Main Road, Maseru"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="schoolContactEmail">School Contact Email</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-envelope input-icon"></i>
+                <input id="schoolContactEmail" type="email" formControlName="schoolContactEmail" placeholder="info@school.com"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="schoolContactPhone">School Contact Phone</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-phone input-icon"></i>
+                <input id="schoolContactPhone" type="text" formControlName="schoolContactPhone" placeholder="58812346"/>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="secondary-button" (click)="goToPreviousStep()">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back</span>
+              </button>
+
+              <button type="submit" class="auth-button">
+                <span>Register School</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          }
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
