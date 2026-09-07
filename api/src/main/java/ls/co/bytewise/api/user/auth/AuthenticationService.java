@@ -2,12 +2,14 @@ package ls.co.bytewise.api.user.auth;
 
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.security.JwtService;
+import ls.co.bytewise.api.security.TokenBlacklistService;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,24 +18,33 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthenticationService(UserRepository userRepository,
                                  PasswordEncoder passwordEncoder,
-                                 JwtService jwtService) {
+                                 JwtService jwtService,
+                                 TokenBlacklistService tokenBlacklistService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+                .orElseThrow(() ->
+                        new BadCredentialsException("Invalid email or password"));
 
         if (user.getStatus() != Status.ACTIVE) {
-            throw new BadCredentialsException("Account is " + user.getStatus().name().toLowerCase());
+            throw new BadCredentialsException(
+                    "Account is " + user.getStatus().name().toLowerCase()
+            );
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        )) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
@@ -44,7 +55,18 @@ public class AuthenticationService {
                 user.getId(),
                 user.getFullName(),
                 user.getRoles(),
-                user.getSchools().stream().map(school -> school.getId()).collect(Collectors.toSet())
+                user.getSchools()
+                        .stream()
+                        .map(school -> school.getId())
+                        .collect(Collectors.toSet())
+        );
+    }
+
+    public void logout(String token) {
+        Date expiration = jwtService.extractExpiration(token);
+        tokenBlacklistService.blacklist(
+                token,
+                expiration.toInstant()
         );
     }
 }
