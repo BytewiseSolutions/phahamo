@@ -21,6 +21,12 @@ export class AuthService {
   }
 
   logout(): void {
+    this.backend.post<void>('/auth/logout', {}).subscribe({
+      next: () => this.completeLogout(),
+      error: () => this.completeLogout()
+    });
+  }
+  private completeLogout(): void {
     localStorage.removeItem(this.tokenKey);
     this.router.navigate(['/login']);
   }
