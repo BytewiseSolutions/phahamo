@@ -58,12 +58,18 @@ public class AuthenticationService {
 
         String token = jwtService.generateToken(user);
 
+        String schoolName = user.getSchools().stream()
+                .findFirst()
+                .map(school -> school.getName())
+                .orElse("");
+
         return new LoginResponse(
                 token,
                 user.getId(),
                 user.getFullName(),
                 user.getRoles(),
                 user.getSchools().stream().map(school -> school.getId()).collect(Collectors.toSet()),
+                schoolName,
                 user.isMustChangePassword()
         );
     }

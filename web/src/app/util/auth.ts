@@ -9,6 +9,7 @@ export interface LoginResponse {
   fullName: string;
   roles: string[];
   schoolIds: number[];
+  schoolName: string;
   mustChangePassword: boolean;
 }
 
@@ -24,4 +25,9 @@ export interface ResetPasswordRequest {
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
+}
+
+export interface JwtPayload {
+  roles?: string[];
+  [key: string]: any;
 }

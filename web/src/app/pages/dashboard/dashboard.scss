@@ -1,3 +1,12 @@
+.dashboard-layout {
+  display: flex;
+}
+
+.dashboard-page {
+  flex: 1;
+  padding: 1.5rem;
+}
+
 .dashboard-page {
   padding: 40px;
 }

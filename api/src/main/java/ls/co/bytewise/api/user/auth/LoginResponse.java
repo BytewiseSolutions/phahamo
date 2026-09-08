@@ -17,5 +17,6 @@ public class LoginResponse {
     private String fullName;
     private Set<UserRole> roles;
     private Set<Long> schoolIds;
+    private String schoolName;
     private boolean mustChangePassword;
 }
