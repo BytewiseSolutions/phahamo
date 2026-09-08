@@ -1,5 +1,6 @@
 package ls.co.bytewise.api.common;
 
+import ls.co.bytewise.api.user.auth.InvalidTokenException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,5 +54,10 @@ public class GlobalExceptionHandler {
         body.put("message", message);
 
         return ResponseEntity.status(status).body(body);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidToken(InvalidTokenException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

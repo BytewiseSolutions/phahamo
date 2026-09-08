@@ -1,5 +1,38 @@
 <div class="dashboard-page">
   <h1>Dashboard</h1>
   <p>You're logged in. This is a placeholder — real dashboard content comes next.</p>
+
+  <button type="button" (click)="toggleChangePassword()">
+    {{ showChangePassword ? 'Hide' : 'Change Password' }}
+  </button>
+
+  @if (showChangePassword) {
+    <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()">
+      @if (errorMessage) {
+        <p class="error-banner">{{ errorMessage }}</p>
+      }
+      @if (successMessage) {
+        <p class="success-banner">{{ successMessage }}</p>
+      }
+
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <input id="currentPassword" type="password" formControlName="currentPassword"/>
+      </div>
+
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input id="newPassword" type="password" formControlName="newPassword"/>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword"/>
+      </div>
+
+      <button type="submit">Save New Password</button>
+    </form>
+  }
+
   <button type="button" (click)="onLogout()">Log out</button>
 </div>

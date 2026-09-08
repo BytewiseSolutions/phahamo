@@ -9,13 +9,17 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {AuthInterceptor} from './util/auth.interceptor';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { ForgotPassword } from './pages/forgot-password/forgot-password';
+import { ResetPassword } from './pages/reset-password/reset-password';
 
 @NgModule({
   declarations: [
     App,
     Login,
     Register,
-    Dashboard
+    Dashboard,
+    ForgotPassword,
+    ResetPassword
   ],
   imports: [
     BrowserModule,
