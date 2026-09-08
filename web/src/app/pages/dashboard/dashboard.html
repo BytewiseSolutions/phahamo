@@ -6,6 +6,10 @@
     {{ showChangePassword ? 'Hide' : 'Change Password' }}
   </button>
 
+  <button type="button" (click)="openUsers()">
+    Users
+  </button>
+
   @if (showChangePassword) {
     <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()">
       @if (errorMessage) {

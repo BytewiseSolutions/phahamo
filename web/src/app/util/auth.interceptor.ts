@@ -9,13 +9,20 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
+    const schoolId = this.authService.getActiveSchoolId();
+
+    let headers: { [key: string]: string } = {};
 
     if (token) {
-      const cloned = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    if (schoolId) {
+      headers['X-School-Id'] = schoolId;
+    }
+
+    if (Object.keys(headers).length > 0) {
+      const cloned = req.clone({ setHeaders: headers });
       return next.handle(cloned);
     }
 

@@ -11,9 +11,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 public class LoginResponse {
+
     private String token;
     private Long userId;
     private String fullName;
     private Set<UserRole> roles;
     private Set<Long> schoolIds;
+    private boolean mustChangePassword;
 }

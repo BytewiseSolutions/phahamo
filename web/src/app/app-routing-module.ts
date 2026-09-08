@@ -6,6 +6,7 @@ import {Dashboard} from './pages/dashboard/dashboard';
 import {authGuard} from './util/auth.guard';
 import {ForgotPassword} from './pages/forgot-password/forgot-password';
 import {ResetPassword} from './pages/reset-password/reset-password';
+import {UserList} from './pages/user/user-list/user-list';
 
 const routes: Routes = [
   {path: 'login', component: Login},
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'reset-password', component: ResetPassword },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'users', component: UserList, canActivate: [authGuard] },
   {path: '', redirectTo: 'login', pathMatch: 'full'}
 ];
 

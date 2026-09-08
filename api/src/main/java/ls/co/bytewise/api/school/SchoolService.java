@@ -1,5 +1,6 @@
 package ls.co.bytewise.api.school;
 
+import ls.co.bytewise.api.common.InvalidPasswordException;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.school.subscription.Subscription;
@@ -41,8 +42,15 @@ public class SchoolService {
     @Transactional
     public School registerSchool(UserDto admin) {
 
-        SchoolDto school = admin.getSchool();
+        if (admin.getPassword() == null || admin.getPassword().isBlank()) {
+            throw new InvalidPasswordException("Password is required");
+        }
 
+        if (admin.getPassword().length() < 8) {
+            throw new InvalidPasswordException("Password must be at least 8 characters");
+        }
+
+        SchoolDto school = admin.getSchool();
         validateRegistration(admin.getEmail(), school.getSchoolContactEmail());
 
         School newSchool = new School();

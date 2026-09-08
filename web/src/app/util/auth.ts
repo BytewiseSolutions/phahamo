@@ -5,10 +5,11 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  userId: string;
+  userId: number;
   fullName: string;
-  role: string;
-  schoolId: string;
+  roles: string[];
+  schoolIds: number[];
+  mustChangePassword: boolean;
 }
 
 export interface ForgotPasswordRequest {
@@ -19,6 +20,7 @@ export interface ResetPasswordRequest {
   token: string;
   newPassword: string;
 }
+
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;

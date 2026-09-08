@@ -43,6 +43,9 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(nullable = false)
+    private boolean mustChangePassword = false;
+
+    @Column(nullable = false)
     private String phone;
 
     @Enumerated(EnumType.STRING)

@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
@@ -62,7 +63,8 @@ public class AuthenticationService {
                 user.getId(),
                 user.getFullName(),
                 user.getRoles(),
-                user.getSchools().stream().map(school -> school.getId()).collect(java.util.stream.Collectors.toSet())
+                user.getSchools().stream().map(school -> school.getId()).collect(Collectors.toSet()),
+                user.isMustChangePassword()
         );
     }
 
@@ -119,6 +121,7 @@ public class AuthenticationService {
 
         mailSender.send(message);
     }
+
     @Transactional
     public void changePassword(User currentUser, ChangePasswordRequest request) {
         if (!passwordEncoder.matches(request.getCurrentPassword(), currentUser.getPassword())) {
@@ -126,6 +129,7 @@ public class AuthenticationService {
         }
 
         currentUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        currentUser.setMustChangePassword(false);
         userRepository.save(currentUser);
     }
 }
