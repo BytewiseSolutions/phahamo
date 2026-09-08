@@ -1,5 +1,6 @@
 package ls.co.bytewise.api.user;
 
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,5 +13,11 @@ public class UserController {
     @GetMapping("/me")
     public User me(@AuthenticationPrincipal User currentUser) {
         return currentUser;
+    }
+
+    @GetMapping("/admin-only-test")
+    @Secured("ROLE_SCHOOL_ADMIN")
+    public String adminOnlyTest() {
+        return "You are a School Admin — role check passed.";
     }
 }
