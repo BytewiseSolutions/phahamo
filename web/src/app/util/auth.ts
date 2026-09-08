@@ -5,10 +5,12 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  userId: string;
+  userId: number;
   fullName: string;
-  role: string;
-  schoolId: string;
+  roles: string[];
+  schoolIds: number[];
+  schoolName: string;
+  mustChangePassword: boolean;
 }
 
 export interface ForgotPasswordRequest {
@@ -19,7 +21,13 @@ export interface ResetPasswordRequest {
   token: string;
   newPassword: string;
 }
+
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
+}
+
+export interface JwtPayload {
+  roles?: string[];
+  [key: string]: any;
 }

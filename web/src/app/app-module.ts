@@ -11,6 +11,11 @@ import {AuthInterceptor} from './util/auth.interceptor';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
+import { UserForm } from './pages/user/user-form/user-form';
+import { UserList } from './pages/user/user-list/user-list';
+import { Sidebar } from './components/sidebar/sidebar';
+import { Layout } from './components/layout/layout';
+import { Header } from './components/header/header';
 
 @NgModule({
   declarations: [
@@ -19,7 +24,12 @@ import { ResetPassword } from './pages/reset-password/reset-password';
     Register,
     Dashboard,
     ForgotPassword,
-    ResetPassword
+    ResetPassword,
+    UserForm,
+    UserList,
+    Sidebar,
+    Layout,
+    Header
   ],
   imports: [
     BrowserModule,

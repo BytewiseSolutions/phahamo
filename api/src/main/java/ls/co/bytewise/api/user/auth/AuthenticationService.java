@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
@@ -57,12 +58,19 @@ public class AuthenticationService {
 
         String token = jwtService.generateToken(user);
 
+        String schoolName = user.getSchools().stream()
+                .findFirst()
+                .map(school -> school.getName())
+                .orElse("");
+
         return new LoginResponse(
                 token,
                 user.getId(),
                 user.getFullName(),
                 user.getRoles(),
-                user.getSchools().stream().map(school -> school.getId()).collect(java.util.stream.Collectors.toSet())
+                user.getSchools().stream().map(school -> school.getId()).collect(Collectors.toSet()),
+                schoolName,
+                user.isMustChangePassword()
         );
     }
 
@@ -119,6 +127,7 @@ public class AuthenticationService {
 
         mailSender.send(message);
     }
+
     @Transactional
     public void changePassword(User currentUser, ChangePasswordRequest request) {
         if (!passwordEncoder.matches(request.getCurrentPassword(), currentUser.getPassword())) {
@@ -126,6 +135,7 @@ public class AuthenticationService {
         }
 
         currentUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        currentUser.setMustChangePassword(false);
         userRepository.save(currentUser);
     }
 }

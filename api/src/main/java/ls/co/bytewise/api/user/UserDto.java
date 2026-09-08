@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import ls.co.bytewise.api.common.BaseDto;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
@@ -31,8 +30,6 @@ public class UserDto extends BaseDto {
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
     @NotBlank(message = "Phone number is required")

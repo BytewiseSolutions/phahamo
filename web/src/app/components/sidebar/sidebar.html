@@ -1,0 +1,63 @@
+<button
+  class="sidebar-mobile-toggle"
+  type="button"
+  (click)="toggleMobile()"
+  aria-label="Toggle navigation menu"
+>
+  <i class="fa-solid" [class.fa-bars]="!mobileOpen" [class.fa-xmark]="mobileOpen"></i>
+</button>
+
+@if (mobileOpen) {
+  <div class="sidebar-backdrop" (click)="toggleMobile()"></div>
+}
+
+<aside class="sidebar" [class.collapsed]="collapsed" [class.mobile-open]="mobileOpen">
+
+  <div class="sidebar-header">
+    <span class="sidebar-logo" [class.hidden]="collapsed">School System</span>
+    <button
+      class="sidebar-collapse-btn"
+      type="button"
+      (click)="toggleCollapsed()"
+      aria-label="Collapse sidebar"
+    >
+      <i class="fa-solid" [class.fa-angles-left]="!collapsed" [class.fa-angles-right]="collapsed"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      @for (link of links; track link.path) {
+        <li [title]="collapsed ? link.label : ''">
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="sidebar-link"
+          >
+            <i [class]="link.icon"></i>
+            <span class="sidebar-label" [class.hidden]="collapsed">{{ link.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-school" [class.hidden]="collapsed" [title]="schoolName">
+      <i class="fa-solid fa-school"></i>
+      <span class="school-name">{{ schoolName || 'School Management System' }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="sidebar-logout"
+      (click)="onLogout()"
+      [title]="collapsed ? 'Logout' : ''"
+    >
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span class="sidebar-label" [class.hidden]="collapsed">Logout</span>
+    </button>
+  </div>
+
+</aside>

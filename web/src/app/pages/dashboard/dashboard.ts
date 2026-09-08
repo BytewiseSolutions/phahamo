@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
 import { ChangePasswordRequest } from '../../util/auth';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +21,8 @@ export class Dashboard {
   constructor(
     private authService: AuthService,
     private backend: BackendService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.changePasswordForm = this.fb.group({
       currentPassword: ['', Validators.required],
@@ -69,5 +71,9 @@ export class Dashboard {
           : 'Something went wrong. Please try again.';
       }
     });
+  }
+
+  protected openUsers(): void {
+    this.router.navigate(['/users']);
   }
 }
