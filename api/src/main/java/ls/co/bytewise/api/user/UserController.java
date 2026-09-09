@@ -27,8 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public User me(@AuthenticationPrincipal User currentUser) {
-        return currentUser;
+    public UserDto me(@AuthenticationPrincipal User currentUser) {
+        return new UserDto(currentUser);
     }
 
     @GetMapping("/admin-only-test")
@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @PostMapping
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<UserDto> createUser(@AuthenticationPrincipal User currentUser,
                                               @Valid @RequestBody UserDto dto) {
         UserDto created = userService.createUser(currentUser, dto);
@@ -46,13 +46,13 @@ public class UserController {
     }
 
     @GetMapping
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public List<UserDto> listUsers() {
         return userService.listUsers();
     }
 
     @PutMapping("/{id}")
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public UserDto updateUser(@AuthenticationPrincipal User currentUser,
                               @PathVariable Long id,
                               @Valid @RequestBody UserDto dto) {
@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
         userService.deactivateUser(id);
         return ResponseEntity.noContent().build();
