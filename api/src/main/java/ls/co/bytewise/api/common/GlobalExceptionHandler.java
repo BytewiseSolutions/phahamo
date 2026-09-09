@@ -2,6 +2,7 @@ package ls.co.bytewise.api.common;
 
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
+import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -93,5 +94,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "You do not have access to this resource");
+    }
+    @ExceptionHandler(UserExceptions.UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserExceptions.UserNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(UserExceptions.InvalidRoleAssignmentException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidRoleAssignment(UserExceptions.InvalidRoleAssignmentException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

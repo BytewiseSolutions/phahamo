@@ -2,7 +2,7 @@
   <div class="modal-overlay" (click)="onOverlayClick($event)">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Add User</h2>
+        <h2>{{ isEditMode ? 'Edit User' : 'Add User' }}</h2>
         <button type="button" class="close-button" (click)="onClose()">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -34,16 +34,27 @@
         <div class="form-group">
           <label for="role">Role</label>
           <select id="role" formControlName="role">
-            <option value="" disabled selected>Select a role</option>
+            <option value="" disabled>Select a role</option>
             @for (role of availableRoles; track role) {
               <option [value]="role">{{ role }}</option>
             }
           </select>
         </div>
 
+        @if (isEditMode) {
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status">
+              @for (status of availableStatuses; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </div>
+        }
+
         <div class="modal-actions">
           <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
-          <button type="submit" class="primary-button">Create User</button>
+          <button type="submit" class="primary-button">{{ isEditMode ? 'Save Changes' : 'Create User' }}</button>
         </div>
       </form>
     </div>

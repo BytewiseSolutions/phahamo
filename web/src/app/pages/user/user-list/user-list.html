@@ -15,8 +15,10 @@
 
   <app-user-form
     [visible]="showCreateForm"
-    (closed)="toggleCreateForm()"
-    (userCreated)="onCreateUser($event)">
+    [editingUser]="editingUser"
+    (closed)="onFormClosed()"
+    (userCreated)="onCreateUser($event)"
+    (userUpdated)="onUpdateUser($event)">
   </app-user-form>
 
   @if (loading) {
@@ -46,8 +48,11 @@
               </span>
             </td>
             <td>
+              <button type="button" class="link-button" (click)="onEdit(user)">Edit</button>
               @if (user.status === 'ACTIVE') {
                 <button type="button" class="link-button" (click)="onDeactivate(user.id)">Deactivate</button>
+              } @else {
+                <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
               }
             </td>
           </tr>

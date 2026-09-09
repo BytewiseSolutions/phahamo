@@ -9,11 +9,3 @@ export interface User {
   status: string;
   roles: string[];
 }
-
-export interface NewUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  roles: string[];
-}
