@@ -104,4 +104,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidRoleAssignment(UserExceptions.InvalidRoleAssignmentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(SchoolExceptions.InvalidSchoolProfileException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidSchoolProfile(SchoolExceptions.InvalidSchoolProfileException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }

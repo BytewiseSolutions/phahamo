@@ -105,6 +105,16 @@ public class SchoolService {
         School school = findSchoolOrThrow(id);
         assertTenantAccess(id);
 
+        if (dto.getSchoolTermStructure() == null) {
+            throw new SchoolExceptions.InvalidSchoolProfileException("Term structure is required");
+        }
+        if (dto.getSchoolCurrency() == null) {
+            throw new SchoolExceptions.InvalidSchoolProfileException("Currency is required");
+        }
+        if (dto.getSchoolTimezone() == null || dto.getSchoolTimezone().isBlank()) {
+            throw new SchoolExceptions.InvalidSchoolProfileException("Timezone is required");
+        }
+
         validateTimezone(dto.getSchoolTimezone());
 
         school.setName(dto.getSchoolName());

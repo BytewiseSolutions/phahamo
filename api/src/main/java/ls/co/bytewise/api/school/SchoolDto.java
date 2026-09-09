@@ -2,7 +2,6 @@ package ls.co.bytewise.api.school;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import ls.co.bytewise.api.common.BaseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +25,10 @@ public class SchoolDto extends BaseDto {
     @NotBlank(message = "School contact phone is required")
     private String schoolContactPhone;
 
-    @NotNull(message = "Term structure is required")
     private TermStructure schoolTermStructure;
 
-    @NotNull(message = "Currency is required")
     private Currency schoolCurrency;
 
-    @NotBlank(message = "Timezone is required")
     private String schoolTimezone;
 
     private Long schoolLogoId;

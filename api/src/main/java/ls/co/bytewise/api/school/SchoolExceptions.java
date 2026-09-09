@@ -15,4 +15,10 @@ public final class SchoolExceptions {
             super(message);
         }
     }
+
+    public static class InvalidSchoolProfileException extends RuntimeException {
+        public InvalidSchoolProfileException(String message) {
+            super(message);
+        }
+    }
 }
