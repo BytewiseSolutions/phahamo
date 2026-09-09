@@ -17,6 +17,11 @@ import { Sidebar } from './components/sidebar/sidebar';
 import { Layout } from './components/layout/layout';
 import { Header } from './components/header/header';
 import { SchoolProfile } from './pages/school-profile/school-profile';
+import { AcademicYearList } from './pages/academic-years/academic-year-list/academic-year-list';
+import { AcademicYearForm } from './pages/academic-years/academic-year-form/academic-year-form';
+import { TermList } from './pages/terms/term-list/term-list';
+import { TermForm } from './pages/terms/term-form/term-form';
+import { AcademicYearView } from './pages/academic-years/academic-year-view/academic-year-view';
 
 @NgModule({
   declarations: [
@@ -31,7 +36,12 @@ import { SchoolProfile } from './pages/school-profile/school-profile';
     Sidebar,
     Layout,
     Header,
-    SchoolProfile
+    SchoolProfile,
+    AcademicYearList,
+    AcademicYearForm,
+    TermList,
+    TermForm,
+    AcademicYearView
   ],
   imports: [
     BrowserModule,

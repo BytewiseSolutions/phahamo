@@ -1,0 +1,51 @@
+<div class="academic-year-view">
+
+  <div class="page-header">
+    <div>
+      <button
+        type="button"
+        class="back-button"
+        (click)="onBack()">
+        <i class="fa-solid fa-arrow-left"></i>
+        Academic Years
+      </button>
+
+      <h1>{{ academicYear?.name }}</h1>
+    </div>
+  </div>
+
+  @if (academicYear) {
+    <div class="details-card">
+
+      <div class="detail-item">
+        <span class="detail-label">Start Date</span>
+        <span class="detail-value">
+          {{ academicYear.startDate | date:'dd MMM yyyy' }}
+        </span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">End Date</span>
+        <span class="detail-value">
+          {{ academicYear.endDate | date:'dd MMM yyyy' }}
+        </span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Status</span>
+
+        <span
+          class="status-badge"
+          [class.inactive]="!academicYear.active">
+          {{ academicYear.active ? 'ACTIVE' : 'INACTIVE' }}
+        </span>
+      </div>
+
+    </div>
+
+    <app-term-list
+      [academicYearId]="academicYear.id">
+    </app-term-list>
+  }
+
+</div>

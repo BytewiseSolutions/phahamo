@@ -1,0 +1,76 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Academic Year' : 'Add Academic Year' }}</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="academicYearForm"
+        (ngSubmit)="onSubmit()"
+        class="academic-year-form">
+
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g. 2026 Academic Year"/>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate"/>
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              id="endDate"
+              type="date"
+              formControlName="endDate"/>
+          </div>
+        </div>
+
+        <div class="form-group active-field">
+          <input
+            id="active"
+            type="checkbox"
+            formControlName="active"/>
+
+          <label for="active">Active</label>
+        </div>
+
+        @if (isEditMode && editingAcademicYear?.active) {
+          <p class="field-hint">This is the current active academic year. Activate a different year to change this.</p>
+        }
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="onClose()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button">
+            {{ isEditMode ? 'Save Changes' : 'Create Academic Year' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
