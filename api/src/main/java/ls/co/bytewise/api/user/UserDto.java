@@ -36,6 +36,7 @@ public class UserDto extends BaseDto {
     private String phone;
 
     private Status status;
+
     private Set<UserRole> roles;
 
     @Valid

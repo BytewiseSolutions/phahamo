@@ -5,14 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,8 +20,8 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public User me(@AuthenticationPrincipal User currentUser) {
-        return currentUser;
+    public UserDto me(@AuthenticationPrincipal User currentUser) {
+        return new UserDto(currentUser);
     }
 
     @GetMapping("/admin-only-test")
@@ -38,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<UserDto> createUser(@AuthenticationPrincipal User currentUser,
                                               @Valid @RequestBody UserDto dto) {
         UserDto created = userService.createUser(currentUser, dto);
@@ -46,13 +39,13 @@ public class UserController {
     }
 
     @GetMapping
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public List<UserDto> listUsers() {
         return userService.listUsers();
     }
 
     @PutMapping("/{id}")
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public UserDto updateUser(@AuthenticationPrincipal User currentUser,
                               @PathVariable Long id,
                               @Valid @RequestBody UserDto dto) {
@@ -60,9 +53,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Secured("ROLE_SCHOOL_ADMIN")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
         userService.deactivateUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/activate")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public ResponseEntity<Void> activateUser(@PathVariable Long id) {
+        userService.activateUser(id);
         return ResponseEntity.noContent().build();
     }
 }

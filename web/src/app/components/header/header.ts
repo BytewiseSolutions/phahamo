@@ -34,6 +34,7 @@ export class Header implements OnInit {
     '/schools': 'Schools',
     '/subscriptions': 'Subscriptions',
     '/profile': 'Profile',
+    '/school-profile': 'School Profile',
   };
 
   constructor(private authService: AuthService, private router: Router) {}

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {BackendService} from '../../../util/backend.service';
-import {NewUser, User} from '../../../util/user';
+import { BackendService } from '../../../util/backend.service';
+import { User } from '../../../util/user';
 
 @Component({
   selector: 'app-user-list',
@@ -12,6 +12,7 @@ export class UserList implements OnInit {
   users: User[] = [];
   loading = false;
   showCreateForm = false;
+  editingUser: User | null = null;
   errorMessage = '';
   successMessage = '';
 
@@ -38,12 +39,25 @@ export class UserList implements OnInit {
   }
 
   toggleCreateForm(): void {
+    this.editingUser = null;
     this.showCreateForm = !this.showCreateForm;
     this.errorMessage = '';
     this.successMessage = '';
   }
 
-  onCreateUser(newUser: NewUser): void {
+  onEdit(user: User): void {
+    this.editingUser = user;
+    this.showCreateForm = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  onFormClosed(): void {
+    this.showCreateForm = false;
+    this.editingUser = null;
+  }
+
+  onCreateUser(newUser: any): void {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -61,6 +75,23 @@ export class UserList implements OnInit {
     });
   }
 
+  onUpdateUser(event: { id: number; payload: any }): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.backend.put<User>(`/users/${event.id}`, event.payload).subscribe({
+      next: () => {
+        this.successMessage = 'User updated.';
+        this.showCreateForm = false;
+        this.editingUser = null;
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to update user.';
+      }
+    });
+  }
+
   onDeactivate(userId: number): void {
     if (!confirm('Deactivate this user? They will no longer be able to log in.')) {
       return;
@@ -70,6 +101,18 @@ export class UserList implements OnInit {
       next: () => this.loadUsers(),
       error: () => {
         this.errorMessage = 'Failed to deactivate user.';
+      }
+    });
+  }
+
+  onActivate(userId: number): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.backend.patch<void>(`/users/${userId}/activate`, {}).subscribe({
+      next: () => this.loadUsers(),
+      error: () => {
+        this.errorMessage = 'Failed to activate user.';
       }
     });
   }

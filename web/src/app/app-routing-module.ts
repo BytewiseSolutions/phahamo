@@ -8,6 +8,7 @@ import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
 import { UserList } from './pages/user/user-list/user-list';
 import { Layout } from './components/layout/layout';
+import { SchoolProfile } from './pages/school-profile/school-profile';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -21,6 +22,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
+      { path: 'school-profile', component: SchoolProfile },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

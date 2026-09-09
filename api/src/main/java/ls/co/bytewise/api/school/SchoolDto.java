@@ -25,6 +25,14 @@ public class SchoolDto extends BaseDto {
     @NotBlank(message = "School contact phone is required")
     private String schoolContactPhone;
 
+    private TermStructure schoolTermStructure;
+
+    private Currency schoolCurrency;
+
+    private String schoolTimezone;
+
+    private Long schoolLogoId;
+
     public SchoolDto(School school) {
         super(school);
 
@@ -32,5 +40,12 @@ public class SchoolDto extends BaseDto {
         this.schoolAddress = school.getAddress();
         this.schoolContactEmail = school.getContactEmail();
         this.schoolContactPhone = school.getContactPhone();
+        this.schoolTermStructure = school.getTermStructure();
+        this.schoolCurrency = school.getCurrency();
+        this.schoolTimezone = school.getTimezone();
+
+        if (school.getLogo() != null) {
+            this.schoolLogoId = school.getLogo().getId();
+        }
     }
 }

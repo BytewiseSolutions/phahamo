@@ -43,13 +43,23 @@ public class UserService {
             throw new DataIntegrityViolationException("A user with this email already exists");
         }
 
-        if (dto.getRoles() != null && dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
-            throw new IllegalArgumentException("System Administrator accounts cannot be created this way");
+        if (dto.getRoles() == null || dto.getRoles().isEmpty()) {
+            throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
         }
 
-        Long schoolId = TenantContext.getSchoolId();
-        School school = schoolRepository.findById(schoolId)
-                .orElseThrow(() -> new IllegalStateException("Active school not found"));
+        if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
+            throw new UserExceptions.InvalidRoleAssignmentException(
+                    "System Administrator accounts cannot be created this way");
+        }
+
+        boolean creatorIsSystemAdmin = creator.hasRole(UserRole.SYSTEM_ADMIN);
+
+        School school = null;
+        if (!creatorIsSystemAdmin) {
+            Long schoolId = TenantContext.getSchoolId();
+            school = schoolRepository.findById(schoolId)
+                    .orElseThrow(() -> new IllegalStateException("Active school not found"));
+        }
 
         String temporaryPassword = generateTemporaryPassword();
 
@@ -61,8 +71,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(temporaryPassword));
         user.setMustChangePassword(true);
         user.setStatus(Status.ACTIVE);
-        user.setRoles(dto.getRoles() != null ? dto.getRoles() : Set.of());
-        user.setSchools(Set.of(school));
+        user.setRoles(dto.getRoles());
+        user.setSchools(school != null ? Set.of(school) : Set.of());
         user.setCreatedBy(creator);
         user.setUpdatedBy(creator);
 
@@ -89,8 +99,19 @@ public class UserService {
         user.setPhone(dto.getPhone());
         user.setUpdatedBy(editor);
 
-        if (dto.getRoles() != null && !dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
+        if (dto.getRoles() != null) {
+            if (dto.getRoles().isEmpty()) {
+                throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
+            }
+            if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "System Administrator accounts cannot be created this way");
+            }
             user.setRoles(dto.getRoles());
+        }
+
+        if (dto.getStatus() != null) {
+            user.setStatus(dto.getStatus());
         }
 
         User saved = userRepository.save(user);
@@ -104,17 +125,24 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void activateUser(Long userId) {
+        User user = getUserInCurrentSchool(userId);
+        user.setStatus(Status.ACTIVE);
+        userRepository.save(user);
+    }
+
     private User getUserInCurrentSchool(Long userId) {
         Long schoolId = TenantContext.getSchoolId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException("User not found"));
 
         boolean belongsToSchool = user.getSchools().stream()
                 .anyMatch(school -> school.getId().equals(schoolId));
 
         if (!belongsToSchool) {
-            throw new IllegalArgumentException("User not found");
+            throw new UserExceptions.UserNotFoundException("User not found");
         }
 
         return user;

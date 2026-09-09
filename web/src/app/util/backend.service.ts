@@ -14,6 +14,9 @@ export class BackendService {
   get<T>(path: string, params?: HttpParams): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}${path}`, { params });
   }
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' });
+  }
 
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}${path}`, body);
@@ -25,5 +28,8 @@ export class BackendService {
 
   delete<T>(path: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`);
+  }
+  patch<T>(path: string, body: unknown): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}${path}`, body);
   }
 }
