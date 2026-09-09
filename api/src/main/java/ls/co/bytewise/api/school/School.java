@@ -1,11 +1,8 @@
 package ls.co.bytewise.api.school;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import ls.co.bytewise.api.common.BaseEntity;
+import ls.co.bytewise.api.common.DataFile;
 import ls.co.bytewise.api.common.Status;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,4 +28,19 @@ public class School extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TermStructure termStructure = TermStructure.THREE_TERM;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Currency currency = Currency.LSL;
+
+    @Column(nullable = false)
+    private String timezone = "Africa/Maseru";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "logo_file_id")
+    private DataFile logo;
 }

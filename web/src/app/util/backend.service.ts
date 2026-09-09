@@ -14,6 +14,9 @@ export class BackendService {
   get<T>(path: string, params?: HttpParams): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}${path}`, { params });
   }
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' });
+  }
 
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}${path}`, body);

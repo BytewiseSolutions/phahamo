@@ -1,24 +1,23 @@
 package ls.co.bytewise.api.school;
 
-import ls.co.bytewise.api.common.InvalidPasswordException;
-import ls.co.bytewise.api.common.Status;
-import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.common.*;
 import ls.co.bytewise.api.school.subscription.Subscription;
 import ls.co.bytewise.api.school.subscription.SubscriptionPlan;
 import ls.co.bytewise.api.school.subscription.SubscriptionRepository;
 import ls.co.bytewise.api.school.subscription.SubscriptionStatus;
+import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserDto;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+import java.io.IOException;
+import java.time.*;
 import java.util.Set;
 
 @Service
@@ -28,15 +27,18 @@ public class SchoolService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionRepository subscriptionRepository;
+    private final DataFileRepository dataFileRepository;
 
     public SchoolService(SchoolRepository schoolRepository,
                          UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
-                         SubscriptionRepository subscriptionRepository) {
+                         SubscriptionRepository subscriptionRepository,
+                         DataFileRepository dataFileRepository) {
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subscriptionRepository = subscriptionRepository;
+        this.dataFileRepository = dataFileRepository;
     }
 
     @Transactional
@@ -92,6 +94,72 @@ public class SchoolService {
         return savedSchool;
     }
 
+    public SchoolDto getSchoolProfile(Long id) {
+        School school = findSchoolOrThrow(id);
+        assertTenantAccess(id);
+        return new SchoolDto(school);
+    }
+
+    @Transactional
+    public SchoolDto updateSchoolProfile(Long id, SchoolDto dto) {
+        School school = findSchoolOrThrow(id);
+        assertTenantAccess(id);
+
+        validateTimezone(dto.getSchoolTimezone());
+
+        school.setName(dto.getSchoolName());
+        school.setAddress(dto.getSchoolAddress());
+        school.setContactEmail(dto.getSchoolContactEmail());
+        school.setContactPhone(dto.getSchoolContactPhone());
+        school.setTermStructure(dto.getSchoolTermStructure());
+        school.setCurrency(dto.getSchoolCurrency());
+        school.setTimezone(dto.getSchoolTimezone());
+
+        School saved = schoolRepository.save(school);
+        return new SchoolDto(saved);
+    }
+
+    @Transactional
+    public SchoolDto updateSchoolLogo(Long id, MultipartFile file) throws IOException {
+        School school = findSchoolOrThrow(id);
+        assertTenantAccess(id);
+
+        DataFile logo = DataFile.builder()
+                .name(file.getOriginalFilename())
+                .type(file.getContentType())
+                .contents(file.getBytes())
+                .fileSize(file.getSize())
+                .build();
+        logo = dataFileRepository.save(logo);
+
+        school.setLogo(logo);
+        School saved = schoolRepository.save(school);
+        return new SchoolDto(saved);
+    }
+    public DataFile getSchoolLogoFile(Long id) {
+        School school = findSchoolOrThrow(id);
+        if (school.getLogo() == null) {
+            throw new SchoolExceptions.SchoolNotFoundException("School has no logo uploaded");
+        }
+        return school.getLogo();
+    }
+    private School findSchoolOrThrow(Long id) {
+        return schoolRepository.findById(id)
+                .orElseThrow(() -> new SchoolExceptions.SchoolNotFoundException("School not found with id: " + id));
+    }
+    private void assertTenantAccess(Long schoolId) {
+        Long tenantSchoolId = TenantContext.getSchoolId();
+        if (tenantSchoolId != null && !tenantSchoolId.equals(schoolId)) {
+            throw new AccessDeniedException("You do not have access to this school");
+        }
+    }
+    private void validateTimezone(String timezone) {
+        try {
+            ZoneId.of(timezone);
+        } catch (DateTimeException e) {
+            throw new SchoolExceptions.InvalidTimezoneException("'" + timezone + "' is not a valid timezone");
+        }
+    }
     private void validateRegistration(String email, String schoolContactEmail) {
 
         if (userRepository.existsByEmail(email)) {

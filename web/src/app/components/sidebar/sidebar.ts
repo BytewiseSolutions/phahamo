@@ -21,6 +21,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'School Profile', path: '/school-profile', icon: 'fa-solid fa-school' },
   ],
   PRINCIPAL: [
     { label: 'Students', path: '/students', icon: 'fa-solid fa-user-graduate' },

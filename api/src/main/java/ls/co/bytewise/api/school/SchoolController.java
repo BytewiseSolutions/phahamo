@@ -1,13 +1,16 @@
 package ls.co.bytewise.api.school;
 
 import jakarta.validation.Valid;
+import ls.co.bytewise.api.common.DataFile;
 import ls.co.bytewise.api.user.UserDto;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/schools")
@@ -23,5 +26,32 @@ public class SchoolController {
     public ResponseEntity<SchoolDto> registerSchool(@Valid @RequestBody UserDto admin) {
         School savedSchool = schoolService.registerSchool(admin);
         return ResponseEntity.status(HttpStatus.CREATED).body(new SchoolDto(savedSchool));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN')")
+    public ResponseEntity<SchoolDto> getSchool(@PathVariable Long id) {
+        return ResponseEntity.ok(schoolService.getSchoolProfile(id));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SCHOOL_ADMIN')")
+    public ResponseEntity<SchoolDto> updateSchool(@PathVariable Long id, @Valid @RequestBody SchoolDto dto) {
+        return ResponseEntity.ok(schoolService.updateSchoolProfile(id, dto));
+    }
+
+    @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('SCHOOL_ADMIN')")
+    public ResponseEntity<SchoolDto> uploadLogo(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(schoolService.updateSchoolLogo(id, file));
+    }
+
+    @GetMapping("/{id}/logo")
+    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN')")
+    public ResponseEntity<byte[]> getLogo(@PathVariable Long id) {
+        DataFile logo = schoolService.getSchoolLogoFile(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(logo.getContentType()))
+                .body(logo.getContents());
     }
 }

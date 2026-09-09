@@ -1,0 +1,104 @@
+<div class="school-profile-page">
+
+  @if (loading) {
+    <p>Loading...</p>
+  } @else {
+
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
+    }
+    @if (successMessage) {
+      <div class="success-banner">{{ successMessage }}</div>
+    }
+
+    <div class="card">
+      <h2 class="card-title">School Logo</h2>
+      <div class="logo-section">
+        @if (logoPreviewUrl) {
+          <img [src]="logoPreviewUrl" alt="School logo" class="logo-preview"/>
+        } @else {
+          <div class="logo-placeholder">
+            <i class="fa-solid fa-school"></i>
+          </div>
+        }
+        <div class="logo-actions">
+          <p class="logo-hint">PNG or JPG, max 2MB</p>
+          <input type="file" accept="image/*" class="file-input" (change)="onLogoSelected($event)"/>
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="!selectedLogoFile || uploadingLogo"
+            (click)="uploadLogo()"
+          >
+            {{ uploadingLogo ? 'Uploading...' : 'Upload Logo' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="card">
+        <h2 class="card-title">School Details</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="schoolName">School Name</label>
+            <input id="schoolName" type="text" formControlName="schoolName" placeholder="School name"/>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolAddress">Address</label>
+            <input id="schoolAddress" type="text" formControlName="schoolAddress" placeholder="School address"/>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolContactEmail">Contact Email</label>
+            <input id="schoolContactEmail" type="email" formControlName="schoolContactEmail" placeholder="contact@school.com"/>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolContactPhone">Contact Phone</label>
+            <input id="schoolContactPhone" type="text" formControlName="schoolContactPhone" placeholder="58812345"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Settings</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="schoolTermStructure">Term Structure</label>
+            <select id="schoolTermStructure" formControlName="schoolTermStructure">
+              @for (option of termStructureOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolCurrency">Currency</label>
+            <select id="schoolCurrency" formControlName="schoolCurrency">
+              @for (option of currencyOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolTimezone">Timezone</label>
+            <select id="schoolTimezone" formControlName="schoolTimezone">
+              @for (tz of timezoneOptions; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-button" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

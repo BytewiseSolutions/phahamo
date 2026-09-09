@@ -7,8 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface SchoolRepository extends JpaRepository<School, Long> {
-
-    Optional<School> findByContactEmail(String contactEmail);
-
     boolean existsByContactEmail(String contactEmail);
 }

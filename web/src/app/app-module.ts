@@ -16,6 +16,7 @@ import { UserList } from './pages/user/user-list/user-list';
 import { Sidebar } from './components/sidebar/sidebar';
 import { Layout } from './components/layout/layout';
 import { Header } from './components/header/header';
+import { SchoolProfile } from './pages/school-profile/school-profile';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { Header } from './components/header/header';
     UserList,
     Sidebar,
     Layout,
-    Header
+    Header,
+    SchoolProfile
   ],
   imports: [
     BrowserModule,
