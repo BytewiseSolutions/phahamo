@@ -1,0 +1,82 @@
+<div class="terms-section">
+
+  <div class="section-header">
+    <h2>Terms</h2>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="toggleCreateForm()">
+      {{ showForm ? 'Cancel' : '+ Add Term' }}
+    </button>
+  </div>
+
+  <div class="terms-tabs">
+    <button
+      type="button"
+      class="term-tab active">
+      Terms
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="success-banner">
+      {{ successMessage }}
+    </div>
+  }
+
+  <app-term-form [visible]="showForm" [academicYearId]="academicYearId"
+    [editingTerm]="editingTerm" (closed)="onFormClosed()" (termCreated)="onCreateTerm($event)"
+    (termUpdated)="onUpdateTerm($event)"></app-term-form>
+
+  @if (loading) {
+    <p>Loading terms...</p>
+  } @else if (terms.length === 0) {
+
+    <div class="empty-state">
+      <p>No terms have been added for this academic year.</p>
+    </div>
+
+  } @else {
+
+    <table class="terms-table">
+
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (term of terms; track term.id) {
+          <tr>
+            <td>{{ term.name }}</td>
+
+            <td>
+              {{ term.startDate | date:'dd MMM yyyy' }}
+            </td>
+
+            <td>
+              {{ term.endDate | date:'dd MMM yyyy' }}
+            </td>
+
+            <td class="actions">
+              <button type="button" class="link-button edit" (click)="onEdit(term)">Edit</button>
+              <button type="button" class="link-button delete" (click)="onDelete(term)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+  }
+</div>

@@ -1,0 +1,91 @@
+@if (visible) {
+  <div class="form-overlay" (click)="onOverlayClick($event)">
+
+    <div class="form-card">
+
+      <div class="form-header">
+        <h2>{{ isEditMode ? 'Edit Term' : 'Add Term' }}</h2>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="termForm" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+          <label for="name">Name</label>
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Term 1">
+
+          @if (termForm.get('name')?.touched && termForm.get('name')?.invalid) {
+            <span class="field-error">
+              Name is required.
+            </span>
+          }
+        </div>
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate">
+
+            @if (termForm.get('startDate')?.touched && termForm.get('startDate')?.invalid) {
+              <span class="field-error">
+                Start date is required.
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+
+            <input
+              id="endDate"
+              type="date"
+              formControlName="endDate">
+
+            @if (termForm.get('endDate')?.touched && termForm.get('endDate')?.invalid) {
+              <span class="field-error">
+                End date is required.
+              </span>
+            }
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="onClose()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button">
+            {{ isEditMode ? 'Update Term' : 'Add Term' }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+}

@@ -4,6 +4,7 @@ import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.term.TermRepository;
+import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class AcademicYearService {
     }
 
     @Transactional
-    public AcademicYearDto createAcademicYear(AcademicYearDto dto) {
+    public AcademicYearDto createAcademicYear(User creator, AcademicYearDto dto) {
         Long schoolId = TenantContext.getSchoolId();
         School school = schoolRepository.findById(schoolId)
                 .orElseThrow(() -> new IllegalStateException("Active school not found"));
@@ -35,6 +36,8 @@ public class AcademicYearService {
         academicYear.setStartDate(dto.getStartDate());
         academicYear.setEndDate(dto.getEndDate());
         academicYear.setActive(dto.isActive());
+        academicYear.setCreatedBy(creator);
+        academicYear.setUpdatedBy(creator);
 
         if (dto.isActive()) {
             deactivateCurrentActiveYear(null);
@@ -55,12 +58,18 @@ public class AcademicYearService {
     }
 
     @Transactional
-    public AcademicYearDto updateAcademicYear(Long id, AcademicYearDto dto) {
+    public AcademicYearDto updateAcademicYear(User editor, Long id, AcademicYearDto dto) {
         AcademicYear academicYear = findOrThrow(id);
+
+        if (academicYear.isActive() && !dto.isActive()) {
+            throw new AcademicYearExceptions.InvalidAcademicYearStateException(
+                    "Cannot deactivate the only active academic year. Activate a different academic year instead.");
+        }
 
         academicYear.setName(dto.getName());
         academicYear.setStartDate(dto.getStartDate());
         academicYear.setEndDate(dto.getEndDate());
+        academicYear.setUpdatedBy(editor);
 
         if (dto.isActive() && !academicYear.isActive()) {
             deactivateCurrentActiveYear(academicYear.getId());
@@ -76,9 +85,8 @@ public class AcademicYearService {
         AcademicYear academicYear = findOrThrow(id);
 
         if (termRepository.existsByAcademicYearId(id)) {
-            throw new IllegalStateException(
-                    "Academic year cannot be deleted because it has linked terms"
-            );
+            throw new AcademicYearExceptions.LinkedDataExistsException(
+                    "Academic year cannot be deleted because it has linked terms");
         }
 
         academicYearRepository.delete(academicYear);

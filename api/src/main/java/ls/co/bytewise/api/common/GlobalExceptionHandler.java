@@ -117,8 +117,23 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(AcademicYearExceptions.LinkedDataExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleLinkedDataExists(AcademicYearExceptions.LinkedDataExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(TermExceptions.TermNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleTermNotFound(TermExceptions.TermNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TermExceptions.InvalidTermException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTerm(TermExceptions.InvalidTermException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AcademicYearExceptions.InvalidAcademicYearStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAcademicYearState(AcademicYearExceptions.InvalidAcademicYearStateException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

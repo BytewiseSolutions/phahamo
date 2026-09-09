@@ -9,4 +9,10 @@ public final class TermExceptions {
             super(message);
         }
     }
+
+    public static class InvalidTermException extends RuntimeException {
+        public InvalidTermException(String message) {
+            super(message);
+        }
+    }
 }

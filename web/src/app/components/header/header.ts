@@ -23,6 +23,7 @@ export class Header implements OnInit {
     '/classes': 'Classes',
     '/subjects': 'Subjects',
     '/timetable': 'Timetable',
+    '/academic-years': 'Academic Years',
     '/reports': 'Reports',
     '/attendance': 'Attendance',
     '/grades': 'Grades',

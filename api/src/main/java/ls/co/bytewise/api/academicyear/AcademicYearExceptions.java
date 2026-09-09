@@ -9,4 +9,16 @@ public final class AcademicYearExceptions {
             super(message);
         }
     }
+
+    public static class LinkedDataExistsException extends RuntimeException {
+        public LinkedDataExistsException(String message) {
+            super(message);
+        }
+    }
+
+    public static class InvalidAcademicYearStateException extends RuntimeException {
+        public InvalidAcademicYearStateException(String message) {
+            super(message);
+        }
+    }
 }
