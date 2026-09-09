@@ -1,7 +1,9 @@
 package ls.co.bytewise.api.common;
 
+import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
+import ls.co.bytewise.api.term.TermExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -108,5 +110,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SchoolExceptions.InvalidSchoolProfileException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidSchoolProfile(SchoolExceptions.InvalidSchoolProfileException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AcademicYearExceptions.AcademicYearNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAcademicYearNotFound(AcademicYearExceptions.AcademicYearNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TermExceptions.TermNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTermNotFound(TermExceptions.TermNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }
