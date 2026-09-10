@@ -26,30 +26,35 @@ public class SchoolClassService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
-    public SchoolClassDto createClass(User creator, SchoolClassDto dto) {
-        Long schoolId = TenantContext.getSchoolId();
+ @Transactional
+public SchoolClassDto createClass(User creator, SchoolClassDto dto) {
+    Long schoolId = TenantContext.getSchoolId();
 
-        AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
-                .orElseThrow(() -> new SchoolClassExceptions.InvalidSchoolClassException("Academic year not found"));
+    AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
+            .orElseThrow(() -> new SchoolClassExceptions.InvalidSchoolClassException("Academic year not found"));
 
-        if (!academicYear.getSchool().getId().equals(schoolId)) {
-            throw new SchoolClassExceptions.InvalidSchoolClassException("Academic year does not belong to the active school");
-        }
-
-        SchoolClass schoolClass = new SchoolClass();
-        schoolClass.setSchool(academicYear.getSchool());
-        schoolClass.setAcademicYear(academicYear);
-        schoolClass.setName(dto.getName());
-        schoolClass.setGradeLevel(dto.getGradeLevel());
-        schoolClass.setCreatedBy(creator);
-        schoolClass.setUpdatedBy(creator);
-
-        assignClassTeacher(schoolClass, dto.getClassTeacherId(), schoolId);
-
-        SchoolClass saved = schoolClassRepository.save(schoolClass);
-        return new SchoolClassDto(saved);
+    if (!academicYear.getSchool().getId().equals(schoolId)) {
+        throw new SchoolClassExceptions.InvalidSchoolClassException("Academic year does not belong to the active school");
     }
+
+    if (schoolClassRepository.existsByNameAndAcademicYear_Id(dto.getName(), academicYear.getId())) {
+        throw new SchoolClassExceptions.DuplicateClassNameException(
+                "A class with this name already exists in the selected academic year");
+    }
+
+    SchoolClass schoolClass = new SchoolClass();
+    schoolClass.setSchool(academicYear.getSchool());
+    schoolClass.setAcademicYear(academicYear);
+    schoolClass.setName(dto.getName());
+    schoolClass.setGradeLevel(dto.getGradeLevel());
+    schoolClass.setCreatedBy(creator);
+    schoolClass.setUpdatedBy(creator);
+
+    assignClassTeacher(schoolClass, dto.getClassTeacherId(), schoolId);
+
+    SchoolClass saved = schoolClassRepository.save(schoolClass);
+    return new SchoolClassDto(saved);
+}
 
     public List<SchoolClassDto> listClasses() {
         Long schoolId = TenantContext.getSchoolId();
@@ -62,28 +67,33 @@ public class SchoolClassService {
         return new SchoolClassDto(findOrThrow(id));
     }
 
-    @Transactional
-    public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
-        Long schoolId = TenantContext.getSchoolId();
-        SchoolClass schoolClass = findOrThrow(id);
+ @Transactional
+public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
+    Long schoolId = TenantContext.getSchoolId();
+    SchoolClass schoolClass = findOrThrow(id);
 
-        AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
-                .orElseThrow(() -> new SchoolClassExceptions.InvalidSchoolClassException("Academic year not found"));
+    AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
+            .orElseThrow(() -> new SchoolClassExceptions.InvalidSchoolClassException("Academic year not found"));
 
-        if (!academicYear.getSchool().getId().equals(schoolId)) {
-            throw new SchoolClassExceptions.InvalidSchoolClassException("Academic year does not belong to the active school");
-        }
-
-        schoolClass.setAcademicYear(academicYear);
-        schoolClass.setName(dto.getName());
-        schoolClass.setGradeLevel(dto.getGradeLevel());
-        schoolClass.setUpdatedBy(editor);
-
-        assignClassTeacher(schoolClass, dto.getClassTeacherId(), schoolId);
-
-        SchoolClass saved = schoolClassRepository.save(schoolClass);
-        return new SchoolClassDto(saved);
+    if (!academicYear.getSchool().getId().equals(schoolId)) {
+        throw new SchoolClassExceptions.InvalidSchoolClassException("Academic year does not belong to the active school");
     }
+
+    if (schoolClassRepository.existsByNameAndAcademicYear_IdAndIdNot(dto.getName(), academicYear.getId(), id)) {
+        throw new SchoolClassExceptions.DuplicateClassNameException(
+                "A class with this name already exists in the selected academic year");
+    }
+
+    schoolClass.setAcademicYear(academicYear);
+    schoolClass.setName(dto.getName());
+    schoolClass.setGradeLevel(dto.getGradeLevel());
+    schoolClass.setUpdatedBy(editor);
+
+    assignClassTeacher(schoolClass, dto.getClassTeacherId(), schoolId);
+
+    SchoolClass saved = schoolClassRepository.save(schoolClass);
+    return new SchoolClassDto(saved);
+}
 
     @Transactional
     public void deleteClass(Long id) {

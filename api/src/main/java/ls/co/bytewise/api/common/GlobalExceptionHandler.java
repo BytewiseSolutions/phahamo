@@ -147,4 +147,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidSchoolClass(SchoolClassExceptions.InvalidSchoolClassException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+    @ExceptionHandler(SchoolClassExceptions.DuplicateClassNameException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateClassName(SchoolClassExceptions.DuplicateClassNameException ex) {
+    return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+   }
 }

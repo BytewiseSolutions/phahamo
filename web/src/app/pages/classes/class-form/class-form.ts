@@ -26,6 +26,7 @@ export class ClassForm implements OnInit, OnChanges {
     firstName: string;
     lastName: string;
   }[] = [];
+  loadError = '';
 
   constructor(private fb: FormBuilder, private backend: BackendService) {
     this.classForm = this.fb.group({
@@ -42,7 +43,8 @@ export class ClassForm implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.backend.get<AcademicYear[]>('/academic-years').subscribe({
-      next: (years) => this.academicYears = years
+      next: (years) => this.academicYears = years,
+      error: () => this.loadError = 'Failed to load academic years.'
     });
 
     this.backend.get<{
@@ -50,7 +52,8 @@ export class ClassForm implements OnInit, OnChanges {
       firstName: string;
       lastName: string;
     }[]>('/users/teachers').subscribe({
-      next: (teachers) => this.teachers = teachers
+      next: (teachers) => this.teachers = teachers,
+      error: () => this.loadError = 'Failed to load teachers.'
     });
   }
 

@@ -19,20 +19,16 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserDto extends BaseDto {
 
-    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "Phone number is required")
     private String phone;
 
     private Status status;

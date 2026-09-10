@@ -15,4 +15,10 @@ public final class SchoolClassExceptions {
             super(message);
         }
     }
+
+    public static class DuplicateClassNameException extends RuntimeException {
+        public DuplicateClassNameException(String message) {
+            super(message);
+        }
+    }
 }
