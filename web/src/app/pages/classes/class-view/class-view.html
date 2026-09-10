@@ -1,0 +1,11 @@
+<div class="class-view-page">
+  <button type="button" class="link-button" (click)="onBack()">&larr; Back to classes</button>
+
+  @if (schoolClass) {
+    <h1>{{ schoolClass.name }}</h1>
+
+    <div class="detail-row"><span class="label">Grade Level</span><span>{{ schoolClass.gradeLevel }}</span></div>
+    <div class="detail-row"><span class="label">Academic Year</span><span>{{ schoolClass.academicYearName }}</span></div>
+    <div class="detail-row"><span class="label">Class Teacher</span><span>{{ schoolClass.classTeacherName || '—' }}</span></div>
+  }
+</div>
