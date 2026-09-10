@@ -10,6 +10,7 @@ import { UserList } from './pages/user/user-list/user-list';
 import { Layout } from './components/layout/layout';
 import { SchoolProfile } from './pages/school-profile/school-profile';
 import {AcademicYearList} from './pages/academic-years/academic-year-list/academic-year-list';
+import {ClassList} from './pages/classes/class-list/class-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -25,6 +26,7 @@ const routes: Routes = [
       { path: 'users', component: UserList },
       { path: 'school-profile', component: SchoolProfile },
       { path: 'academic-years', component: AcademicYearList},
+      { path: 'classes', component: ClassList},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

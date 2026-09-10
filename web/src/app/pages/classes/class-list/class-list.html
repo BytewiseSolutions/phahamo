@@ -1,0 +1,74 @@
+<div class="classes-page">
+
+  @if (!showView) {
+
+    <div class="page-header">
+      <h1>Classes</h1>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="toggleCreateForm()">
+        {{ showCreateForm ? 'Cancel' : '+ Add Class' }}
+      </button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="success-banner">{{ successMessage }}</div>
+    }
+
+    <app-class-form
+      [visible]="showCreateForm"
+      [editingClass]="editingClass"
+      (closed)="onFormClosed()"
+      (classCreated)="onCreateClass($event)"
+      (classUpdated)="onUpdateClass($event)">
+    </app-class-form>
+
+    @if (loading) {
+      <p>Loading classes...</p>
+    } @else {
+      <table class="classes-table">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Grade Level</th>
+          <th>Academic Year</th>
+          <th>Class Teacher</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+          @for (schoolClass of classes; track schoolClass.id) {
+            <tr>
+              <td>{{ schoolClass.name }}</td>
+              <td>{{ schoolClass.gradeLevel }}</td>
+              <td>{{ schoolClass.academicYearName }}</td>
+              <td>{{ schoolClass.classTeacherName || '—' }}</td>
+
+              <td>
+                <button type="button" class="link-button" (click)="onView(schoolClass)">View</button>
+                <button type="button" class="link-button" (click)="onEdit(schoolClass)">Edit</button>
+                <button type="button" class="link-button" (click)="onDelete(schoolClass)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  } @else {
+
+    <app-class-view
+      [schoolClass]="selectedClass"
+      (back)="onViewClosed()">
+    </app-class-view>
+
+  }
+
+</div>

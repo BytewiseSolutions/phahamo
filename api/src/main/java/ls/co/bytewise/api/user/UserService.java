@@ -90,13 +90,30 @@ public class UserService {
                 .toList();
     }
 
+    public List<UserDto> listTeachers() {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return userRepository.findAllBySchoolIdAndRole(schoolId, UserRole.TEACHER).stream()
+                .map(UserDto::new)
+                .toList();
+    }
+
     @Transactional
     public UserDto updateUser(User editor, Long userId, UserDto dto) {
         User user = getUserInCurrentSchool(userId);
 
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setPhone(dto.getPhone());
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+
         user.setUpdatedBy(editor);
 
         if (dto.getRoles() != null) {

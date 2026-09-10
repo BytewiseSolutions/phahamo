@@ -2,6 +2,7 @@ package ls.co.bytewise.api.common;
 
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
+import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
 import ls.co.bytewise.api.term.TermExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
@@ -136,4 +137,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidAcademicYearState(AcademicYearExceptions.InvalidAcademicYearStateException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(SchoolClassExceptions.SchoolClassNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSchoolClassNotFound(SchoolClassExceptions.SchoolClassNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(SchoolClassExceptions.InvalidSchoolClassException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidSchoolClass(SchoolClassExceptions.InvalidSchoolClassException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    @ExceptionHandler(SchoolClassExceptions.DuplicateClassNameException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateClassName(SchoolClassExceptions.DuplicateClassNameException ex) {
+    return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+   }
 }

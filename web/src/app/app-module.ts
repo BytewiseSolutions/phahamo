@@ -22,6 +22,9 @@ import { AcademicYearForm } from './pages/academic-years/academic-year-form/acad
 import { TermList } from './pages/terms/term-list/term-list';
 import { TermForm } from './pages/terms/term-form/term-form';
 import { AcademicYearView } from './pages/academic-years/academic-year-view/academic-year-view';
+import { ClassList } from './pages/classes/class-list/class-list';
+import { ClassForm } from './pages/classes/class-form/class-form';
+import { ClassView } from './pages/classes/class-view/class-view';
 
 @NgModule({
   declarations: [
@@ -41,7 +44,10 @@ import { AcademicYearView } from './pages/academic-years/academic-year-view/acad
     AcademicYearForm,
     TermList,
     TermForm,
-    AcademicYearView
+    AcademicYearView,
+    ClassList,
+    ClassForm,
+    ClassView
   ],
   imports: [
     BrowserModule,

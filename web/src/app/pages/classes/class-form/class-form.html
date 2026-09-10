@@ -1,0 +1,63 @@
+@if (visible) {
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Edit Class' : 'Add Class' }}</h2>
+
+      <button type="button" class="close-button" (click)="onClose()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    @if (loadError) {
+    <div class="error-banner">{{ loadError }}</div>
+    }
+
+    <form [formGroup]="classForm" (ngSubmit)="onSubmit()" class="class-form">
+
+      <div class="form-group">
+        <label for="name">Class Name</label>
+        <input id="name" type="text" formControlName="name" placeholder="e.g. Grade 8A" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gradeLevel">Grade Level</label>
+          <input id="gradeLevel" type="number" formControlName="gradeLevel" />
+        </div>
+
+        <div class="form-group">
+          <label for="academicYearId">Academic Year</label>
+          <select id="academicYearId" formControlName="academicYearId">
+            <option [ngValue]="null" disabled>Select academic year</option>
+            @for (year of academicYears; track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="classTeacherId">Class Teacher</label>
+        <select id="classTeacherId" formControlName="classTeacherId">
+          <option [ngValue]="null">No teacher assigned</option>
+          @for (teacher of teachers; track teacher.id) {
+          <option [ngValue]="teacher.id">
+            {{ teacher.firstName }} {{ teacher.lastName }}
+          </option>
+          }
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="submit" class="primary-button">
+          {{ isEditMode ? 'Save Changes' : 'Create Class' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+}
