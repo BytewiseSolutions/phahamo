@@ -1,0 +1,79 @@
+<div class="subjects-page">
+
+  <div class="page-header">
+    <h1>Subjects</h1>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="toggleCreateForm()">
+
+      {{ showCreateForm ? 'Cancel' : '+ Add Subject' }}
+
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="success-banner">
+      {{ successMessage }}
+    </div>
+  }
+
+  <app-subject-form
+    [visible]="showCreateForm"
+    [editingSubject]="editingSubject"
+    (closed)="onFormClosed()"
+    (subjectCreated)="onCreateSubject($event)"
+    (subjectUpdated)="onUpdateSubject($event)">
+  </app-subject-form>
+
+  @if (loading) {
+
+    <p>Loading subjects...</p>
+
+  } @else {
+
+    <table class="subjects-table">
+
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+        @for (subject of subjects; track subject.id; let i = $index) {
+
+          <tr>
+
+            <td>{{ i + 1 }}</td>
+
+            <td>{{ subject.name }}</td>
+
+            <td>{{ subject.code }}</td>
+
+            <td class="actions">
+              <button type="button" class="link-button" (click)="onEdit(subject)">Edit</button>
+              <button type="button" class="link-button" (click)="onDelete(subject)">Delete</button>
+            </td>
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  }
+
+</div>

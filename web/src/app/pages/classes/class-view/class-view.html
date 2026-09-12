@@ -27,6 +27,10 @@
         <span>{{ schoolClass.classTeacherName || '—' }}</span>
       </div>
     </div>
+
+    <app-subject-class-assignment-list
+      [schoolClassId]="schoolClass.id">
+    </app-subject-class-assignment-list>
   }
 
 </div>

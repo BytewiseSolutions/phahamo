@@ -1,0 +1,65 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Student' : 'Add Student' }}</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="student-form">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" formControlName="firstName"/>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" formControlName="lastName"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input id="dateOfBirth" type="date" formControlName="dateOfBirth"/>
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" formControlName="gender">
+              <option value="" disabled>Select gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </select>
+          </div>
+        </div>
+
+        @if (isEditMode) {
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status">
+              <option value="ACTIVE">Active</option>
+              <option value="TRANSFERRED">Transferred</option>
+              <option value="GRADUATED">Graduated</option>
+              <option value="WITHDRAWN">Withdrawn</option>
+            </select>
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button">
+            {{ isEditMode ? 'Save Changes' : 'Register Student' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

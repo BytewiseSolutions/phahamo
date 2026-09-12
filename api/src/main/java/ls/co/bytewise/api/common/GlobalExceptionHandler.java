@@ -4,6 +4,9 @@ import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
+import ls.co.bytewise.api.student.StudentExceptions;
+import ls.co.bytewise.api.subject.SubjectExceptions;
+import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentExceptions;
 import ls.co.bytewise.api.term.TermExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
@@ -147,8 +150,44 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidSchoolClass(SchoolClassExceptions.InvalidSchoolClassException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
     @ExceptionHandler(SchoolClassExceptions.DuplicateClassNameException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateClassName(SchoolClassExceptions.DuplicateClassNameException ex) {
-    return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
-   }
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectExceptions.SubjectNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSubjectNotFound(SubjectExceptions.SubjectNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectExceptions.DuplicateSubjectCodeException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateSubjectCode(SubjectExceptions.DuplicateSubjectCodeException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectClassAssignmentExceptions.AssignmentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAssignmentNotFound(SubjectClassAssignmentExceptions.AssignmentNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectClassAssignmentExceptions.InvalidAssignmentException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAssignment(SubjectClassAssignmentExceptions.InvalidAssignmentException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectClassAssignmentExceptions.DuplicateAssignmentException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateAssignment(SubjectClassAssignmentExceptions.DuplicateAssignmentException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(SubjectExceptions.LinkedDataExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleSubjectLinkedDataExists(SubjectExceptions.LinkedDataExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(StudentExceptions.StudentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleStudentNotFound(StudentExceptions.StudentNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }
