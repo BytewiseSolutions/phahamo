@@ -30,6 +30,10 @@ public class StudentDto extends BaseDto {
 
     private StudentStatus status;
 
+    private Long currentClassId;
+
+    private String currentClassName;
+
     public StudentDto(Student student) {
         super(student);
         this.firstName = student.getFirstName();
@@ -38,5 +42,10 @@ public class StudentDto extends BaseDto {
         this.gender = student.getGender();
         this.admissionNumber = student.getAdmissionNumber();
         this.status = student.getStatus();
+
+        if (student.getCurrentClass() != null) {
+            this.currentClassId = student.getCurrentClass().getId();
+            this.currentClassName = student.getCurrentClass().getName();
+        }
     }
 }

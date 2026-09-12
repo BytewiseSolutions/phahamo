@@ -1,6 +1,9 @@
 package ls.co.bytewise.api.student;
 
 import jakarta.validation.Valid;
+import ls.co.bytewise.api.student.status.AssignClassRequest;
+import ls.co.bytewise.api.student.status.ChangeStatusRequest;
+import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
 import ls.co.bytewise.api.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,5 +56,27 @@ public class StudentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/class")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentDto assignClass(@AuthenticationPrincipal User currentUser,
+                                  @PathVariable Long id,
+                                  @Valid @RequestBody AssignClassRequest request) {
+        return studentService.assignClass(currentUser, id, request.getSchoolClassId());
+    }
+
+    @PutMapping("/{id}/status")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentDto changeStatus(@AuthenticationPrincipal User currentUser,
+                                   @PathVariable Long id,
+                                   @Valid @RequestBody ChangeStatusRequest request) {
+        return studentService.changeStatus(currentUser, id, request.getStatus(), request.getReason());
+    }
+
+    @GetMapping("/{id}/status-history")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<StudentStatusChangeDto> getStatusHistory(@PathVariable Long id) {
+        return studentService.getStatusHistory(id);
     }
 }

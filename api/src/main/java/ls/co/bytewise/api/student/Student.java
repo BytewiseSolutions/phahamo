@@ -4,8 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import ls.co.bytewise.api.common.SchoolScopedEntity;
+import ls.co.bytewise.api.schoolclass.SchoolClass;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,4 +40,8 @@ public class Student extends SchoolScopedEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StudentStatus status = StudentStatus.ACTIVE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_class_id")
+    private SchoolClass currentClass;
 }
