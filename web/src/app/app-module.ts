@@ -25,6 +25,12 @@ import { AcademicYearView } from './pages/academic-years/academic-year-view/acad
 import { ClassList } from './pages/classes/class-list/class-list';
 import { ClassForm } from './pages/classes/class-form/class-form';
 import { ClassView } from './pages/classes/class-view/class-view';
+import { SubjectList } from './pages/subject/subject-list/subject-list';
+import { SubjectForm } from './pages/subject/subject-form/subject-form';
+import { SubjectClassAssignmentList } from './pages/subject-class-assignment/subject-class-assignment-list/subject-class-assignment-list';
+import { SubjectClassAssignmentForm } from './pages/subject-class-assignment/subject-class-assignment-form/subject-class-assignment-form';
+import { StudentList } from './pages/student/student-list/student-list';
+import { StudentForm } from './pages/student/student-form/student-form';
 
 @NgModule({
   declarations: [
@@ -47,7 +53,13 @@ import { ClassView } from './pages/classes/class-view/class-view';
     AcademicYearView,
     ClassList,
     ClassForm,
-    ClassView
+    ClassView,
+    SubjectList,
+    SubjectForm,
+    SubjectClassAssignmentList,
+    SubjectClassAssignmentForm,
+    StudentList,
+    StudentForm
   ],
   imports: [
     BrowserModule,

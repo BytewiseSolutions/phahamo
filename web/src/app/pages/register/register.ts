@@ -88,12 +88,13 @@ export class Register {
       email: formValue.email,
       password: formValue.password,
       phone: formValue.phone,
-      school: {
-        schoolName: formValue.schoolName,
-        schoolAddress: formValue.schoolAddress,
-        schoolContactEmail: formValue.schoolContactEmail,
-        schoolContactPhone: formValue.schoolContactPhone
-      }
+      school: formValue.school,
+      // school: {
+      //   schoolName: formValue.schoolName,
+      //   schoolAddress: formValue.schoolAddress,
+      //   schoolContactEmail: formValue.schoolContactEmail,
+      //   schoolContactPhone: formValue.schoolContactPhone
+      // }
     };
 
     this.backend.post<School>('/schools/register', payload).subscribe({

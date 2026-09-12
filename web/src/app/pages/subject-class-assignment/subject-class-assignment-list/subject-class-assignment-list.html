@@ -1,0 +1,75 @@
+<div class="assignments-section">
+
+  <div class="section-header">
+    <h2>Subjects</h2>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="toggleCreateForm()">
+      {{ showForm ? 'Cancel' : '+ Add Subject' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="success-banner">
+      {{ successMessage }}
+    </div>
+  }
+
+  <app-subject-class-assignment-form
+    [visible]="showForm"
+    [schoolClassId]="schoolClassId"
+    [editingAssignment]="editingAssignment"
+    (closed)="onFormClosed()"
+    (assignmentCreated)="onCreateAssignment($event)"
+    (assignmentUpdated)="onUpdateAssignment($event)">
+  </app-subject-class-assignment-form>
+
+  @if (loading) {
+    <p>Loading subjects...</p>
+  } @else if (assignments.length === 0) {
+
+    <div class="empty-state">
+      <p>No subjects have been assigned to this class.</p>
+    </div>
+
+  } @else {
+
+    <table class="assignments-table">
+
+      <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Academic Year</th>
+        <th>Teacher</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (assignment of assignments; track assignment.id) {
+          <tr>
+            <td>{{ assignment.subjectName }}</td>
+
+            <td>{{ assignment.academicYearName }}</td>
+
+            <td>{{ assignment.teacherName || '—' }}</td>
+
+            <td class="actions">
+              <button type="button" class="link-button edit" (click)="onEdit(assignment)">Edit</button>
+              <button type="button" class="link-button delete" (click)="onDelete(assignment)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+  }
+</div>

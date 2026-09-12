@@ -1,0 +1,66 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Subject' : 'Add Subject' }}</h2>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="onClose()">
+
+          <i class="fa-solid fa-xmark"></i>
+
+        </button>
+      </div>
+
+      <form
+        [formGroup]="subjectForm"
+        (ngSubmit)="onSubmit()"
+        class="subject-form">
+
+        <div class="form-group">
+          <label for="name">Name</label>
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="code">Code</label>
+
+          <input
+            id="code"
+            type="text"
+            formControlName="code"
+          />
+        </div>
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="onClose()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button">
+            {{ isEditMode ? 'Save Changes' : 'Create Subject' }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+}
