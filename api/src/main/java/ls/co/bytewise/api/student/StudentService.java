@@ -55,7 +55,8 @@ public class StudentService {
     }
 
     public List<StudentDto> listStudents() {
-        return studentRepository.findAll().stream()
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findAllBySchoolId(schoolId).stream()
                 .map(StudentDto::new)
                 .toList();
     }
@@ -150,7 +151,8 @@ public class StudentService {
     }
 
     private Student findOrThrow(Long id) {
-        return studentRepository.findById(id)
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
     }
 }

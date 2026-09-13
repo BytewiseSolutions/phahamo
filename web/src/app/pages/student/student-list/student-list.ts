@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { Student, StudentPayload } from '../student';
+import {StudentStatus} from '../student-status';
 
 @Component({
   selector: 'app-student-list',
@@ -16,6 +17,10 @@ export class StudentList implements OnInit {
   editingStudent: Student | null = null;
   errorMessage = '';
   successMessage = '';
+  activePopoverId: number | null = null;
+  popoverStatus = '';
+  popoverReason = '';
+  statusOptions = Object.values(StudentStatus);
 
   constructor(private backend: BackendService) {}
 
@@ -92,6 +97,43 @@ export class StudentList implements OnInit {
         this.errorMessage = err.error?.message || 'Failed to update student.';
       }
     });
+  }
+
+  onStatusBadgeClick(student: Student): void {
+    if (this.activePopoverId === student.id) {
+      this.activePopoverId = null;
+      return;
+    }
+    this.activePopoverId = student.id;
+    this.popoverStatus = student.status;
+    this.popoverReason = '';
+  }
+
+  onChangeStatus(student: Student): void {
+    if (!this.popoverStatus || !this.popoverReason.trim()) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.backend.put<Student>(`/students/${student.id}/status`, {
+      status: this.popoverStatus,
+      reason: this.popoverReason.trim()
+    }).subscribe({
+      next: () => {
+        this.successMessage = 'Student status updated.';
+        this.activePopoverId = null;
+        this.loadStudents();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to update status.';
+        this.activePopoverId = null;
+      }
+    });
+  }
+
+  onPopoverCancel(): void {
+    this.activePopoverId = null;
+    this.popoverReason = '';
   }
 
   onDelete(student: Student): void {

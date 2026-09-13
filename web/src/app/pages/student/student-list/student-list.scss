@@ -89,11 +89,75 @@
   color: var(--success);
   font-size: 12px;
   font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
 
 .status-badge.inactive {
   background: rgb(from var(--error) r g b / 0.12);
   color: var(--error);
+}
+
+.status-cell {
+  position: relative;
+}
+
+.status-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.status-popover select,
+.status-popover textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-sm);
+  font-size: 13px;
+  background: var(--background);
+  resize: none;
+}
+
+.popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.popover-cancel {
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.popover-confirm {
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.popover-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .actions {

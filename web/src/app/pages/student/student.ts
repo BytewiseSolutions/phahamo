@@ -1,4 +1,5 @@
 import {Gender} from './gender';
+import {StudentStatus} from './student-status';
 
 export interface Student {
   id: number;
@@ -7,13 +8,14 @@ export interface Student {
   dateOfBirth: string;
   gender: Gender;
   admissionNumber: string;
-  status: string;
+  status: StudentStatus;
+  currentClassId?: number;
+  currentClassName?: string;
 }
 
 export interface StudentPayload {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender: string;
-  status?: string;
+  gender: Gender;
 }

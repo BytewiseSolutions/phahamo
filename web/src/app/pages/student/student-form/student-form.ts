@@ -24,8 +24,7 @@ export class StudentForm implements OnChanges {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
-      gender: ['', Validators.required],
-      status: ['ACTIVE']
+      gender: ['', Validators.required]
     });
   }
 
@@ -40,8 +39,7 @@ export class StudentForm implements OnChanges {
           firstName: this.editingStudent.firstName,
           lastName: this.editingStudent.lastName,
           dateOfBirth: this.editingStudent.dateOfBirth?.substring(0, 10),
-          gender: this.editingStudent.gender,
-          status: this.editingStudent.status
+          gender: this.editingStudent.gender
         });
       } else {
         this.resetForm();
@@ -61,8 +59,7 @@ export class StudentForm implements OnChanges {
       firstName: formValue.firstName,
       lastName: formValue.lastName,
       dateOfBirth: new Date(formValue.dateOfBirth).toISOString(),
-      gender: formValue.gender,
-      status: formValue.status
+      gender: formValue.gender
     };
 
     if (this.isEditMode && this.editingStudent) {
@@ -90,8 +87,7 @@ export class StudentForm implements OnChanges {
       firstName: '',
       lastName: '',
       dateOfBirth: '',
-      gender: '',
-      status: 'ACTIVE'
+      gender: ''
     });
   }
 }
