@@ -32,6 +32,8 @@ import { SubjectClassAssignmentForm } from './pages/subject-class-assignment/sub
 import { StudentList } from './pages/student/student-list/student-list';
 import { StudentForm } from './pages/student/student-form/student-form';
 import { ClassStudentList } from './pages/class/class-student-list/class-student-list';
+import {NgSelectModule} from '@ng-select/ng-select';
+import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 
 @NgModule({
   declarations: [
@@ -61,14 +63,16 @@ import { ClassStudentList } from './pages/class/class-student-list/class-student
     SubjectClassAssignmentForm,
     StudentList,
     StudentForm,
-    ClassStudentList
+    ClassStudentList,
+    ConfirmDialog
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    NgSelectModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
