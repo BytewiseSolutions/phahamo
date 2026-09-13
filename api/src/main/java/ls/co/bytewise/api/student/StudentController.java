@@ -79,4 +79,10 @@ public class StudentController {
     public List<StudentStatusChangeDto> getStatusHistory(@PathVariable Long id) {
         return studentService.getStatusHistory(id);
     }
+
+    @GetMapping("/class/{schoolClassId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<StudentDto> listByClass(@PathVariable Long schoolClassId) {
+        return studentService.listStudentsByClass(schoolClassId);
+    }
 }

@@ -1,0 +1,83 @@
+<div class="students-section">
+
+  <div class="section-header">
+    <h2>Students</h2>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="toggleAddPicker()">
+      {{ showAddPicker ? 'Cancel' : '+ Add Student' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="success-banner">{{ successMessage }}</div>
+  }
+
+  @if (showAddPicker) {
+    <div class="add-picker">
+      <select [(ngModel)]="selectedStudentId">
+        <option [ngValue]="null" disabled>Select a student</option>
+        @for (student of availableStudents; track student.id) {
+          <option [ngValue]="student.id">
+            {{ student.firstName }} {{ student.lastName }} ({{ student.admissionNumber }})
+          </option>
+        }
+      </select>
+
+      <button
+        type="button"
+        class="primary-button small"
+        [disabled]="!selectedStudentId"
+        (click)="onAddStudent()">
+        Add
+      </button>
+    </div>
+  }
+
+  @if (loading) {
+    <p>Loading students...</p>
+  } @else if (students.length === 0) {
+
+    <div class="empty-state">
+      <p>No students have been assigned to this class.</p>
+    </div>
+
+  } @else {
+
+    <table class="students-table">
+      <thead>
+      <tr>
+        <th>Admission No.</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (student of students; track student.id) {
+          <tr>
+            <td>{{ student.admissionNumber }}</td>
+            <td>{{ student.firstName }} {{ student.lastName }}</td>
+            <td>{{ student.gender }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="student.status !== 'ACTIVE'">
+                {{ student.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <button type="button" class="link-button delete" (click)="onRemove(student)">Remove</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

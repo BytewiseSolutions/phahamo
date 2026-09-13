@@ -50,6 +50,10 @@ public class StudentService {
         student.setCreatedBy(creator);
         student.setUpdatedBy(creator);
 
+        if (dto.getSchoolClassId() != null) {
+            student.setCurrentClass(resolveClass(dto.getSchoolClassId(), schoolId));
+        }
+
         Student saved = studentRepository.save(student);
         return new StudentDto(saved);
     }
@@ -90,14 +94,12 @@ public class StudentService {
         Long schoolId = TenantContext.getSchoolId();
         Student student = findOrThrow(studentId);
 
-        SchoolClass schoolClass = schoolClassRepository.findById(schoolClassId)
-                .orElseThrow(() -> new StudentExceptions.InvalidStudentOperationException("Class not found"));
-
-        if (!schoolClass.getSchool().getId().equals(schoolId)) {
-            throw new StudentExceptions.InvalidStudentOperationException("Class does not belong to the active school");
+        if (schoolClassId == null) {
+            student.setCurrentClass(null);
+        } else {
+            student.setCurrentClass(resolveClass(schoolClassId, schoolId));
         }
 
-        student.setCurrentClass(schoolClass);
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
@@ -137,6 +139,17 @@ public class StudentService {
                 .toList();
     }
 
+    private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {
+        SchoolClass schoolClass = schoolClassRepository.findById(schoolClassId)
+                .orElseThrow(() -> new StudentExceptions.InvalidStudentOperationException("Class not found"));
+
+        if (!schoolClass.getSchool().getId().equals(schoolId)) {
+            throw new StudentExceptions.InvalidStudentOperationException("Class does not belong to the active school");
+        }
+
+        return schoolClass;
+    }
+
     private String generateAdmissionNumber() {
         String yearPrefix = Year.now().getValue() + "-";
         long sequence = studentRepository.countByAdmissionNumberStartingWith(yearPrefix);
@@ -154,5 +167,12 @@ public class StudentService {
         Long schoolId = TenantContext.getSchoolId();
         return studentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
+    }
+
+    public List<StudentDto> listStudentsByClass(Long schoolClassId) {
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClassId).stream()
+                .map(StudentDto::new)
+                .toList();
     }
 }

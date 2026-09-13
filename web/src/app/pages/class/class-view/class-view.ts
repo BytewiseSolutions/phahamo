@@ -11,6 +11,8 @@ export class ClassView {
   @Input() schoolClass: SchoolClass | null = null;
   @Output() back = new EventEmitter<void>();
 
+  activeTab: 'subjects' | 'students' = 'subjects';
+
   onBack(): void {
     this.back.emit();
   }

@@ -1,5 +1,5 @@
-import {Gender} from './gender';
-import {StudentStatus} from './student-status';
+import { Gender } from './gender';
+import { StudentStatus } from './student-status';
 
 export interface Student {
   id: number;
@@ -9,7 +9,7 @@ export interface Student {
   gender: Gender;
   admissionNumber: string;
   status: StudentStatus;
-  currentClassId?: number;
+  schoolClassId?: number;
   currentClassName?: string;
 }
 
@@ -18,4 +18,5 @@ export interface StudentPayload {
   lastName: string;
   dateOfBirth: string;
   gender: Gender;
+  schoolClassId?: number | null;
 }
