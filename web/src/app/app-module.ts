@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
-import {ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule, FormsModule} from '@angular/forms';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {AuthInterceptor} from './util/auth.interceptor';
 import { Dashboard } from './pages/dashboard/dashboard';
@@ -22,15 +22,20 @@ import { AcademicYearForm } from './pages/academic-years/academic-year-form/acad
 import { TermList } from './pages/terms/term-list/term-list';
 import { TermForm } from './pages/terms/term-form/term-form';
 import { AcademicYearView } from './pages/academic-years/academic-year-view/academic-year-view';
-import { ClassList } from './pages/classes/class-list/class-list';
-import { ClassForm } from './pages/classes/class-form/class-form';
-import { ClassView } from './pages/classes/class-view/class-view';
+import { ClassList } from './pages/class/class-list/class-list';
+import { ClassForm } from './pages/class/class-form/class-form';
+import { ClassView } from './pages/class/class-view/class-view';
 import { SubjectList } from './pages/subject/subject-list/subject-list';
 import { SubjectForm } from './pages/subject/subject-form/subject-form';
 import { SubjectClassAssignmentList } from './pages/subject-class-assignment/subject-class-assignment-list/subject-class-assignment-list';
 import { SubjectClassAssignmentForm } from './pages/subject-class-assignment/subject-class-assignment-form/subject-class-assignment-form';
 import { StudentList } from './pages/student/student-list/student-list';
 import { StudentForm } from './pages/student/student-form/student-form';
+import { ClassStudentList } from './pages/class/class-student-list/class-student-list';
+import {NgSelectModule} from '@ng-select/ng-select';
+import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
+import { SuccessDialog } from './components/success-dialog/success-dialog';
+import { TransferStudentForm } from './pages/class/transfer-student-form/transfer-student-form';
 
 @NgModule({
   declarations: [
@@ -59,13 +64,19 @@ import { StudentForm } from './pages/student/student-form/student-form';
     SubjectClassAssignmentList,
     SubjectClassAssignmentForm,
     StudentList,
-    StudentForm
+    StudentForm,
+    ClassStudentList,
+    ConfirmDialog,
+    SuccessDialog,
+    TransferStudentForm
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    HttpClientModule
+    FormsModule,
+    HttpClientModule,
+    NgSelectModule
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

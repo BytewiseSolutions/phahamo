@@ -1,7 +1,12 @@
 package ls.co.bytewise.api.student;
 
 import jakarta.validation.Valid;
+import ls.co.bytewise.api.student.status.AssignClassRequest;
+import ls.co.bytewise.api.student.status.ChangeStatusRequest;
+import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
 import ls.co.bytewise.api.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -29,13 +34,19 @@ public class StudentController {
     }
 
     @GetMapping
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public List<StudentDto> list() {
-        return studentService.listStudents();
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public Page<StudentDto> list(@RequestParam(required = false) String search, Pageable pageable) {
+        return studentService.listStudents(search, pageable);
+    }
+
+    @GetMapping("/class/{schoolClassId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<StudentDto> listByClass(@PathVariable Long schoolClassId) {
+        return studentService.listStudentsByClass(schoolClassId);
     }
 
     @GetMapping("/{id}")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public StudentDto get(@PathVariable Long id) {
         return studentService.getStudent(id);
     }
@@ -53,5 +64,27 @@ public class StudentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/class")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentDto assignClass(@AuthenticationPrincipal User currentUser,
+                                  @PathVariable Long id,
+                                  @Valid @RequestBody AssignClassRequest request) {
+        return studentService.assignClass(currentUser, id, request.getSchoolClassId());
+    }
+
+    @PutMapping("/{id}/status")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentDto changeStatus(@AuthenticationPrincipal User currentUser,
+                                   @PathVariable Long id,
+                                   @Valid @RequestBody ChangeStatusRequest request) {
+        return studentService.changeStatus(currentUser, id, request.getStatus(), request.getReason());
+    }
+
+    @GetMapping("/{id}/status-history")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<StudentStatusChangeDto> getStatusHistory(@PathVariable Long id) {
+        return studentService.getStatusHistory(id);
     }
 }

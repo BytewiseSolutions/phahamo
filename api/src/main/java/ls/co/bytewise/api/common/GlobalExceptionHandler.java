@@ -190,4 +190,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleStudentNotFound(StudentExceptions.StudentNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
+    @ExceptionHandler(StudentExceptions.InvalidStudentOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidStudentOperation(StudentExceptions.InvalidStudentOperationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }

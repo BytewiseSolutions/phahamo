@@ -1,0 +1,117 @@
+<div class="students-section">
+
+  <div class="section-header">
+    <h2>Students</h2>
+
+    <div class="header-actions">
+      @if (selectedForRemoval.length > 0) {
+        <button
+          type="button"
+          class="secondary-button small"
+          (click)="onRemoveSelected()">
+          Remove Selected ({{ selectedForRemoval.length }})
+        </button>
+      }
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="toggleAddPicker()">
+        {{ showAddPicker ? 'Cancel' : '+ Add Student' }}
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (showAddPicker) {
+    <div class="add-picker">
+      <ng-select
+        [items]="availableStudents"
+        bindLabel="fullLabel"
+        bindValue="id"
+        [multiple]="true"
+        [typeahead]="typeahead$"
+        [loading]="searchLoading"
+        placeholder="Search by name or admission number..."
+        [(ngModel)]="selectedStudentIds"
+        class="student-select">
+      </ng-select>
+
+      <button
+        type="button"
+        class="primary-button small"
+        [disabled]="selectedStudentIds.length === 0"
+        (click)="onAddStudents()">
+        Add
+      </button>
+    </div>
+  }
+
+  @if (loading) {
+    <p>Loading students...</p>
+  } @else if (students.length === 0) {
+
+    <div class="empty-state">
+      <p>No students have been assigned to this class.</p>
+    </div>
+
+  } @else {
+
+    <table class="students-table">
+      <thead>
+      <tr>
+        <th class="checkbox-col">
+          <input
+            type="checkbox"
+            [checked]="allSelected"
+            (change)="onToggleSelectAll($event)"/>
+        </th>
+        <th>#</th>
+        <th>Admission No.</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (student of students; track student.id; let i = $index) {
+          <tr>
+            <td class="checkbox-col">
+              <input
+                type="checkbox"
+                [checked]="selectedForRemoval.includes(student.id)"
+                (change)="onToggleSelect(student.id)"/>
+            </td>
+            <td>{{ i + 1 }}</td>
+            <td>{{ student.admissionNumber }}</td>
+            <td>{{ student.firstName }} {{ student.lastName }}</td>
+            <td>{{ student.gender }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="student.status !== 'ACTIVE'">
+                {{ student.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <button type="button" class="link-button" (click)="onTransferClick(student)">Transfer</button>
+              <button type="button" class="link-button delete" (click)="onRemove(student)">Remove</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+  }
+</div>
+
+<app-transfer-student-form
+  [visible]="transferringStudent !== null"
+  [student]="transferringStudent"
+  [classes]="classes"
+  (closed)="onTransferClosed()"
+  (transferred)="onTransferConfirmed($event)">
+</app-transfer-student-form>

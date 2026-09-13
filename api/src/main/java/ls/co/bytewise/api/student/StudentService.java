@@ -2,8 +2,15 @@ package ls.co.bytewise.api.student;
 
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
+import ls.co.bytewise.api.schoolclass.SchoolClass;
+import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.student.status.StudentStatusChange;
+import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
+import ls.co.bytewise.api.student.status.StudentStatusChangeRepository;
 import ls.co.bytewise.api.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +22,17 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final SchoolRepository schoolRepository;
+    private final SchoolClassRepository schoolClassRepository;
+    private final StudentStatusChangeRepository statusChangeRepository;
 
-    public StudentService(StudentRepository studentRepository, SchoolRepository schoolRepository) {
+    public StudentService(StudentRepository studentRepository,
+                          SchoolRepository schoolRepository,
+                          SchoolClassRepository schoolClassRepository,
+                          StudentStatusChangeRepository statusChangeRepository) {
         this.studentRepository = studentRepository;
         this.schoolRepository = schoolRepository;
+        this.schoolClassRepository = schoolClassRepository;
+        this.statusChangeRepository = statusChangeRepository;
     }
 
     @Transactional
@@ -38,12 +52,22 @@ public class StudentService {
         student.setCreatedBy(creator);
         student.setUpdatedBy(creator);
 
+        if (dto.getSchoolClassId() != null) {
+            student.setCurrentClass(resolveClass(dto.getSchoolClassId(), schoolId));
+        }
+
         Student saved = studentRepository.save(student);
         return new StudentDto(saved);
     }
 
-    public List<StudentDto> listStudents() {
-        return studentRepository.findAll().stream()
+    public Page<StudentDto> listStudents(String search, Pageable pageable) {
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.search(schoolId, search, pageable).map(StudentDto::new);
+    }
+
+    public List<StudentDto> listStudentsByClass(Long schoolClassId) {
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClassId).stream()
                 .map(StudentDto::new)
                 .toList();
     }
@@ -62,10 +86,6 @@ public class StudentService {
         student.setGender(dto.getGender());
         student.setUpdatedBy(editor);
 
-        if (dto.getStatus() != null) {
-            student.setStatus(dto.getStatus());
-        }
-
         Student saved = studentRepository.save(student);
         return new StudentDto(saved);
     }
@@ -74,6 +94,67 @@ public class StudentService {
     public void deleteStudent(Long id) {
         Student student = findOrThrow(id);
         studentRepository.delete(student);
+    }
+
+    @Transactional
+    public StudentDto assignClass(User editor, Long studentId, Long schoolClassId) {
+        Long schoolId = TenantContext.getSchoolId();
+        Student student = findOrThrow(studentId);
+
+        if (schoolClassId == null) {
+            student.setCurrentClass(null);
+        } else {
+            student.setCurrentClass(resolveClass(schoolClassId, schoolId));
+        }
+
+        student.setUpdatedBy(editor);
+
+        Student saved = studentRepository.save(student);
+        return new StudentDto(saved);
+    }
+
+    @Transactional
+    public StudentDto changeStatus(User editor, Long studentId, StudentStatus newStatus, String reason) {
+        Student student = findOrThrow(studentId);
+
+        if (student.getStatus() == newStatus) {
+            throw new StudentExceptions.InvalidStudentOperationException(
+                    "Student already has status " + newStatus);
+        }
+
+        StudentStatusChange change = new StudentStatusChange();
+        change.setSchool(student.getSchool());
+        change.setStudent(student);
+        change.setPreviousStatus(student.getStatus());
+        change.setNewStatus(newStatus);
+        change.setReason(reason);
+        change.setCreatedBy(editor);
+        change.setUpdatedBy(editor);
+        statusChangeRepository.save(change);
+
+        student.setStatus(newStatus);
+        student.setUpdatedBy(editor);
+
+        Student saved = studentRepository.save(student);
+        return new StudentDto(saved);
+    }
+
+    public List<StudentStatusChangeDto> getStatusHistory(Long studentId) {
+        findOrThrow(studentId);
+        return statusChangeRepository.findAllByStudentIdOrderByCreatedAtDesc(studentId).stream()
+                .map(StudentStatusChangeDto::new)
+                .toList();
+    }
+
+    private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {
+        SchoolClass schoolClass = schoolClassRepository.findById(schoolClassId)
+                .orElseThrow(() -> new StudentExceptions.InvalidStudentOperationException("Class not found"));
+
+        if (!schoolClass.getSchool().getId().equals(schoolId)) {
+            throw new StudentExceptions.InvalidStudentOperationException("Class does not belong to the active school");
+        }
+
+        return schoolClass;
     }
 
     private String generateAdmissionNumber() {
@@ -90,7 +171,8 @@ public class StudentService {
     }
 
     private Student findOrThrow(Long id) {
-        return studentRepository.findById(id)
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
     }
 }

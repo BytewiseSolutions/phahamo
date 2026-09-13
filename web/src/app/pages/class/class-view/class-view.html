@@ -28,9 +28,32 @@
       </div>
     </div>
 
-    <app-subject-class-assignment-list
-      [schoolClassId]="schoolClass.id">
-    </app-subject-class-assignment-list>
-  }
+    <div class="class-tabs">
+      <button
+        type="button"
+        class="class-tab"
+        [class.active]="activeTab === 'subjects'"
+        (click)="activeTab = 'subjects'">
+        Subjects
+      </button>
 
+      <button
+        type="button"
+        class="class-tab"
+        [class.active]="activeTab === 'students'"
+        (click)="activeTab = 'students'">
+        Students
+      </button>
+    </div>
+
+    @if (activeTab === 'subjects') {
+      <app-subject-class-assignment-list
+        [schoolClassId]="schoolClass.id">
+      </app-subject-class-assignment-list>
+    } @else {
+      <app-class-student-list
+        [schoolClassId]="schoolClass.id">
+      </app-class-student-list>
+    }
+  }
 </div>

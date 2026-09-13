@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { SchoolClass, SchoolClassPayload } from '../class';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-class-list',
@@ -19,7 +20,10 @@ export class ClassList implements OnInit {
   selectedClass: SchoolClass | null = null;
   showView = false;
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadClasses();
@@ -71,12 +75,16 @@ export class ClassList implements OnInit {
         this.loadClasses();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to create class.';
+        this.errorMessage =
+          err.error?.message || 'Failed to create class.';
       }
     });
   }
 
-  onUpdateClass(event: { id: number; payload: SchoolClassPayload }): void {
+  onUpdateClass(event: {
+    id: number;
+    payload: SchoolClassPayload
+  }): void {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -91,26 +99,37 @@ export class ClassList implements OnInit {
         this.loadClasses();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to update class.';
+        this.errorMessage =
+          err.error?.message || 'Failed to update class.';
       }
     });
   }
 
-  onDelete(schoolClass: SchoolClass): void {
-    if (!confirm(`Delete class "${schoolClass.name}"?`)) {
+  async onDelete(schoolClass: SchoolClass): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Class',
+      message: `Delete class "${schoolClass.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.delete<void>(`/classes/${schoolClass.id}`).subscribe({
+    this.backend.delete<void>(
+      `/classes/${schoolClass.id}`
+    ).subscribe({
       next: () => {
         this.successMessage = 'Class deleted.';
         this.loadClasses();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to delete class.';
+        this.errorMessage =
+          err.error?.message || 'Failed to delete class.';
       }
     });
   }

@@ -40,18 +40,6 @@
           </div>
         </div>
 
-        @if (isEditMode) {
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" formControlName="status">
-              <option value="ACTIVE">Active</option>
-              <option value="TRANSFERRED">Transferred</option>
-              <option value="GRADUATED">Graduated</option>
-              <option value="WITHDRAWN">Withdrawn</option>
-            </select>
-          </div>
-        }
-
         <div class="modal-actions">
           <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
           <button type="submit" class="primary-button">

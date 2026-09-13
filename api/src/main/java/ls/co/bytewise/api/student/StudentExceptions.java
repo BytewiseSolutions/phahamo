@@ -9,4 +9,10 @@ public final class StudentExceptions {
             super(message);
         }
     }
+
+    public static class InvalidStudentOperationException extends RuntimeException {
+        public InvalidStudentOperationException(String message) {
+            super(message);
+        }
+    }
 }
