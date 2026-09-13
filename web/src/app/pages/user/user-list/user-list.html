@@ -48,11 +48,24 @@
               </span>
             </td>
             <td>
-              <button type="button" class="link-button" (click)="onEdit(user)">Edit</button>
+              <button type="button" class="link-button" (click)="onEdit(user)">
+                Edit
+              </button>
+
               @if (user.status === 'ACTIVE') {
-                <button type="button" class="link-button" (click)="onDeactivate(user.id)">Deactivate</button>
+                <button
+                  type="button"
+                  class="link-button"
+                  (click)="onDeactivate(user)">
+                  Deactivate
+                </button>
               } @else {
-                <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
+                <button
+                  type="button"
+                  class="link-button"
+                  (click)="onActivate(user.id)">
+                  Activate
+                </button>
               }
             </td>
           </tr>

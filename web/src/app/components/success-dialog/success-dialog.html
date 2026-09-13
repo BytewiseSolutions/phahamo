@@ -1,0 +1,24 @@
+@if (state$ | async; as state) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ state.title }}</h2>
+      </div>
+
+      <div class="modal-body">
+        <p>{{ state.message }}</p>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="primary-button"
+          (click)="onClose()">
+          {{ state.buttonText }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

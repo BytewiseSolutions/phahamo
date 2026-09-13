@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { SubjectClassAssignment, SubjectClassAssignmentPayload } from '../subject-class-assignment';
+import {ConfirmDialogService} from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-subject-class-assignment-list',
@@ -19,7 +20,10 @@ export class SubjectClassAssignmentList implements OnChanges {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['schoolClassId'] && this.schoolClassId) {
@@ -102,10 +106,15 @@ export class SubjectClassAssignmentList implements OnChanges {
     });
   }
 
-  onDelete(assignment: SubjectClassAssignment): void {
-    if (!confirm(`Remove "${assignment.subjectName}" from this class?`)) {
-      return;
-    }
+  async onDelete(assignment: SubjectClassAssignment): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Subject',
+      message: `Delete "${assignment.subjectName}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) return;
 
     this.errorMessage = '';
     this.successMessage = '';

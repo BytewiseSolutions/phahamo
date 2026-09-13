@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { Term, TermPayload } from '../term';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-term-list',
@@ -19,7 +20,10 @@ export class TermList implements OnChanges {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['academicYearId'] && this.academicYearId) {
@@ -81,7 +85,10 @@ export class TermList implements OnChanges {
     });
   }
 
-  onUpdateTerm(event: { id: number; payload: TermPayload }): void {
+  onUpdateTerm(event: {
+    id: number;
+    payload: TermPayload
+  }): void {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -102,8 +109,15 @@ export class TermList implements OnChanges {
     });
   }
 
-  onDelete(term: Term): void {
-    if (!confirm(`Delete term "${term.name}"?`)) {
+  async onDelete(term: Term): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Term',
+      message: `Delete term "${term.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) {
       return;
     }
 

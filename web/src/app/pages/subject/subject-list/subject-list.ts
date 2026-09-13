@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { Subject } from '../subject';
+import {ConfirmDialogService} from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-subject-list',
@@ -19,7 +20,10 @@ export class SubjectList implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadSubjects();
@@ -98,10 +102,15 @@ export class SubjectList implements OnInit {
     });
   }
 
-  onDelete(subject: Subject): void {
-    if (!confirm(`Delete subject "${subject.name}"?`)) {
-      return;
-    }
+  async onDelete(subject: Subject): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Subject',
+      message: `Delete Subject "${subject.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) return;
 
     this.errorMessage = '';
     this.successMessage = '';

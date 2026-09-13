@@ -1,0 +1,41 @@
+@if (visible && student) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>Transfer Student</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="student-name">{{ student.firstName }} {{ student.lastName }}</p>
+        <p class="student-meta">{{ student.admissionNumber }}</p>
+
+        <div class="form-group">
+          <label for="targetClass">Transfer to</label>
+          <select id="targetClass" [(ngModel)]="targetClassId">
+            <option [ngValue]="null" disabled>Select class</option>
+            @for (schoolClass of transferableClasses; track schoolClass.id) {
+              <option [ngValue]="schoolClass.id">{{ schoolClass.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="!targetClassId"
+          (click)="onSubmit()">
+          Transfer
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

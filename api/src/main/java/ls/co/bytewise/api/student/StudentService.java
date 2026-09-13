@@ -9,6 +9,8 @@ import ls.co.bytewise.api.student.status.StudentStatusChange;
 import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
 import ls.co.bytewise.api.student.status.StudentStatusChangeRepository;
 import ls.co.bytewise.api.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,9 +60,14 @@ public class StudentService {
         return new StudentDto(saved);
     }
 
-    public List<StudentDto> listStudents() {
+    public Page<StudentDto> listStudents(String search, Pageable pageable) {
         Long schoolId = TenantContext.getSchoolId();
-        return studentRepository.findAllBySchoolId(schoolId).stream()
+        return studentRepository.search(schoolId, search, pageable).map(StudentDto::new);
+    }
+
+    public List<StudentDto> listStudentsByClass(Long schoolClassId) {
+        Long schoolId = TenantContext.getSchoolId();
+        return studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClassId).stream()
                 .map(StudentDto::new)
                 .toList();
     }
@@ -167,12 +174,5 @@ public class StudentService {
         Long schoolId = TenantContext.getSchoolId();
         return studentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
-    }
-
-    public List<StudentDto> listStudentsByClass(Long schoolClassId) {
-        Long schoolId = TenantContext.getSchoolId();
-        return studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClassId).stream()
-                .map(StudentDto::new)
-                .toList();
     }
 }

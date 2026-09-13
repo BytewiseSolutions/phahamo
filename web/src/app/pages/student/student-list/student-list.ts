@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { Student, StudentPayload } from '../student';
-import {StudentStatus} from '../student-status';
+import { StudentStatus } from '../student-status';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
+import {SuccessDialogService} from '../../../util/success-dialog.service';
 
 @Component({
   selector: 'app-student-list',
@@ -18,11 +20,15 @@ export class StudentList implements OnInit {
   errorMessage = '';
   successMessage = '';
   activePopoverId: number | null = null;
-  popoverStatus = '';
+  popoverStatus: StudentStatus | '' = '';
   popoverReason = '';
   statusOptions = Object.values(StudentStatus);
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService,
+    private successDialog: SuccessDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadStudents();
@@ -68,18 +74,27 @@ export class StudentList implements OnInit {
     this.successMessage = '';
 
     this.backend.post<Student>('/students', payload).subscribe({
-      next: () => {
-        this.successMessage = 'Student registered.';
+      next: async (student) => {
         this.showCreateForm = false;
+
         this.loadStudents();
+
+        await this.successDialog.show({
+          title: 'Student Registered',
+          message: `Student "${student.firstName} ${student.lastName}" has been registered successfully.`
+        });
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to register student.';
+        this.errorMessage =
+          err.error?.message || 'Failed to register student.';
       }
     });
   }
 
-  onUpdateStudent(event: { id: number; payload: StudentPayload }): void {
+  onUpdateStudent(event: {
+    id: number;
+    payload: StudentPayload
+  }): void {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -87,14 +102,19 @@ export class StudentList implements OnInit {
       `/students/${event.id}`,
       event.payload
     ).subscribe({
-      next: () => {
-        this.successMessage = 'Student updated.';
+      next: async (student) => {
         this.showCreateForm = false;
         this.editingStudent = null;
         this.loadStudents();
+
+        await this.successDialog.show({
+          title: 'Student Updated',
+          message: `Student "${student.firstName} ${student.lastName}" has been updated successfully.`
+        });
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to update student.';
+        this.errorMessage =
+          err.error?.message || 'Failed to update student.';
       }
     });
   }
@@ -104,28 +124,35 @@ export class StudentList implements OnInit {
       this.activePopoverId = null;
       return;
     }
+
     this.activePopoverId = student.id;
     this.popoverStatus = student.status;
     this.popoverReason = '';
   }
 
   onChangeStatus(student: Student): void {
-    if (!this.popoverStatus || !this.popoverReason.trim()) return;
+    if (!this.popoverStatus || !this.popoverReason.trim()) {
+      return;
+    }
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.put<Student>(`/students/${student.id}/status`, {
-      status: this.popoverStatus,
-      reason: this.popoverReason.trim()
-    }).subscribe({
+    this.backend.put<Student>(
+      `/students/${student.id}/status`,
+      {
+        status: this.popoverStatus,
+        reason: this.popoverReason.trim()
+      }
+    ).subscribe({
       next: () => {
         this.successMessage = 'Student status updated.';
         this.activePopoverId = null;
         this.loadStudents();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to update status.';
+        this.errorMessage =
+          err.error?.message || 'Failed to update status.';
         this.activePopoverId = null;
       }
     });
@@ -136,21 +163,31 @@ export class StudentList implements OnInit {
     this.popoverReason = '';
   }
 
-  onDelete(student: Student): void {
-    if (!confirm(`Delete student "${student.firstName} ${student.lastName}"?`)) {
+  async onDelete(student: Student): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Student',
+      message: `Delete "${student.firstName} ${student.lastName}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.delete<void>(`/students/${student.id}`).subscribe({
+    this.backend.delete<void>(
+      `/students/${student.id}`
+    ).subscribe({
       next: () => {
         this.successMessage = 'Student deleted.';
         this.loadStudents();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to delete student.';
+        this.errorMessage =
+          err.error?.message || 'Failed to delete student.';
       }
     });
   }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { User } from '../../../util/user';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-user-list',
@@ -16,7 +17,10 @@ export class UserList implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -92,12 +96,20 @@ export class UserList implements OnInit {
     });
   }
 
-  onDeactivate(userId: number): void {
-    if (!confirm('Deactivate this user? They will no longer be able to log in.')) {
-      return;
-    }
+  async onDeactivate(user: User): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Deactivate User',
+      message: `Deactivate "${user.firstName} ${user.lastName}"? They will no longer be able to log in.`,
+      confirmText: 'Deactivate',
+      danger: true
+    });
 
-    this.backend.delete<void>(`/users/${userId}`).subscribe({
+    if (!confirmed) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.backend.delete<void>(`/users/${user.id}`).subscribe({
       next: () => this.loadUsers(),
       error: () => {
         this.errorMessage = 'Failed to deactivate user.';

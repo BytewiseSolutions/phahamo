@@ -26,10 +26,6 @@
     <div class="error-banner">{{ errorMessage }}</div>
   }
 
-  @if (successMessage) {
-    <div class="success-banner">{{ successMessage }}</div>
-  }
-
   @if (showAddPicker) {
     <div class="add-picker">
       <ng-select
@@ -99,6 +95,7 @@
               </span>
             </td>
             <td class="actions">
+              <button type="button" class="link-button" (click)="onTransferClick(student)">Transfer</button>
               <button type="button" class="link-button delete" (click)="onRemove(student)">Remove</button>
             </td>
           </tr>
@@ -108,3 +105,11 @@
 
   }
 </div>
+
+<app-transfer-student-form
+  [visible]="transferringStudent !== null"
+  [student]="transferringStudent"
+  [classes]="classes"
+  (closed)="onTransferClosed()"
+  (transferred)="onTransferConfirmed($event)">
+</app-transfer-student-form>

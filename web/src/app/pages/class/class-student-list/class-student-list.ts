@@ -1,7 +1,10 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { BackendService } from '../../../util/backend.service';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
+import { SuccessDialogService } from '../../../util/success-dialog.service';
 import { Student } from '../../student/student';
+import { SchoolClass } from '../class';
 
 interface StudentOption extends Student {
   fullLabel: string;
@@ -20,14 +23,19 @@ export class ClassStudentList implements OnChanges {
   students: Student[] = [];
   allStudents: Student[] = [];
   availableStudents: StudentOption[] = [];
+  classes: SchoolClass[] = [];
   loading = false;
   showAddPicker = false;
   selectedStudentIds: number[] = [];
   selectedForRemoval: number[] = [];
+  transferringStudent: Student | null = null;
   errorMessage = '';
-  successMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService,
+    private successDialog: SuccessDialogService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['schoolClassId'] && this.schoolClassId) {
@@ -63,14 +71,15 @@ export class ClassStudentList implements OnChanges {
       .filter(s => !assignedIds.has(s.id))
       .map(s => ({
         ...s,
-        fullLabel: `${s.firstName} ${s.lastName} (${s.admissionNumber})`
+        fullLabel: s.schoolClassId
+          ? `${s.firstName} ${s.lastName} (${s.admissionNumber}) — currently in another class`
+          : `${s.firstName} ${s.lastName} (${s.admissionNumber})`
       }));
   }
 
   toggleAddPicker(): void {
     this.showAddPicker = !this.showAddPicker;
     this.errorMessage = '';
-    this.successMessage = '';
     this.selectedStudentIds = [];
 
     if (this.showAddPicker && this.allStudents.length === 0) {
@@ -88,7 +97,6 @@ export class ClassStudentList implements OnChanges {
     if (this.selectedStudentIds.length === 0) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     const requests = this.selectedStudentIds.map(studentId =>
       this.backend.put(`/students/${studentId}/class`, {
@@ -99,10 +107,12 @@ export class ClassStudentList implements OnChanges {
     forkJoin(requests).subscribe({
       next: () => {
         const count = this.selectedStudentIds.length;
-        this.successMessage = `${count} student${count > 1 ? 's' : ''} added to class.`;
         this.showAddPicker = false;
         this.selectedStudentIds = [];
         this.loadStudents();
+        this.successDialog.show({
+          message: `${count} student${count > 1 ? 's' : ''} added to class.`
+        });
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to add one or more students.';
@@ -124,20 +134,68 @@ export class ClassStudentList implements OnChanges {
     this.selectedForRemoval = checked ? this.students.map(s => s.id) : [];
   }
 
-  onRemove(student: Student): void {
-    if (!confirm(`Remove "${student.firstName} ${student.lastName}" from this class?`)) {
-      return;
+  onTransferClick(student: Student): void {
+    this.transferringStudent = student;
+    this.errorMessage = '';
+
+    if (this.classes.length === 0) {
+      this.backend.get<SchoolClass[]>('/classes').subscribe({
+        next: (classes) => this.classes = classes,
+        error: () => this.errorMessage = 'Failed to load classes.'
+      });
     }
+  }
+
+  onTransferClosed(): void {
+    this.transferringStudent = null;
+  }
+
+  async onTransferConfirmed(event: { studentId: number; schoolClassId: number }): Promise<void> {
+    const targetClass = this.classes.find(c => c.id === event.schoolClassId);
+    const student = this.transferringStudent;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Transfer Student',
+      message: `Transfer "${student?.firstName} ${student?.lastName}" to "${targetClass?.name ?? 'the selected class'}"?`,
+      confirmText: 'Transfer'
+    });
+
+    if (!confirmed) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
+
+    this.backend.put(`/students/${event.studentId}/class`, {
+      schoolClassId: event.schoolClassId
+    }).subscribe({
+      next: () => {
+        this.transferringStudent = null;
+        this.loadStudents();
+        this.successDialog.show({ message: 'Student transferred.' });
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to transfer student.';
+      }
+    });
+  }
+
+  async onRemove(student: Student): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Remove Student',
+      message: `Remove "${student.firstName} ${student.lastName}" from this class?`,
+      confirmText: 'Remove',
+      danger: true
+    });
+
+    if (!confirmed) return;
+
+    this.errorMessage = '';
 
     this.backend.put(`/students/${student.id}/class`, {
       schoolClassId: null
     }).subscribe({
       next: () => {
-        this.successMessage = 'Student removed from class.';
         this.loadStudents();
+        this.successDialog.show({ message: 'Student removed from class.' });
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to remove student.';
@@ -145,16 +203,20 @@ export class ClassStudentList implements OnChanges {
     });
   }
 
-  onRemoveSelected(): void {
+  async onRemoveSelected(): Promise<void> {
     const count = this.selectedForRemoval.length;
     if (count === 0) return;
 
-    if (!confirm(`Remove ${count} student${count > 1 ? 's' : ''} from this class?`)) {
-      return;
-    }
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Remove Students',
+      message: `Remove ${count} student${count > 1 ? 's' : ''} from this class?`,
+      confirmText: 'Remove',
+      danger: true
+    });
+
+    if (!confirmed) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     const requests = this.selectedForRemoval.map(studentId =>
       this.backend.put(`/students/${studentId}/class`, {
@@ -164,8 +226,10 @@ export class ClassStudentList implements OnChanges {
 
     forkJoin(requests).subscribe({
       next: () => {
-        this.successMessage = `${count} student${count > 1 ? 's' : ''} removed from class.`;
         this.loadStudents();
+        this.successDialog.show({
+          message: `${count} student${count > 1 ? 's' : ''} removed from class.`
+        });
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to remove one or more students.';

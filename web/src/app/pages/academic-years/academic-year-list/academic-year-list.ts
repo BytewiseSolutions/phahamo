@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
-import {AcademicYear, AcademicYearPayload} from '../academic-year';
+import { AcademicYear, AcademicYearPayload } from '../academic-year';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-academic-year-list',
@@ -19,7 +20,10 @@ export class AcademicYearList implements OnInit {
   selectedAcademicYear: AcademicYear | null = null;
   showView = false;
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadAcademicYears();
@@ -64,19 +68,26 @@ export class AcademicYearList implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.post<AcademicYear>('/academic-years', newAcademicYear).subscribe({
+    this.backend.post<AcademicYear>(
+      '/academic-years',
+      newAcademicYear
+    ).subscribe({
       next: () => {
         this.successMessage = 'Academic year created.';
         this.showCreateForm = false;
         this.loadAcademicYears();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to create academic year.';
+        this.errorMessage =
+          err.error?.message || 'Failed to create academic year.';
       }
     });
   }
 
-  onUpdateAcademicYear(event: { id: number; payload: AcademicYearPayload }): void {
+  onUpdateAcademicYear(event: {
+    id: number;
+    payload: AcademicYearPayload
+  }): void {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -91,36 +102,48 @@ export class AcademicYearList implements OnInit {
         this.loadAcademicYears();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to update academic year.';
+        this.errorMessage =
+          err.error?.message || 'Failed to update academic year.';
       }
     });
   }
 
-  onDelete(academicYear: AcademicYear): void {
-    if (!confirm(`Delete academic year "${academicYear.name}"?`)) {
+  async onDelete(academicYear: AcademicYear): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Academic Year',
+      message: `Delete academic year "${academicYear.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) {
       return;
     }
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.delete<void>(`/academic-years/${academicYear.id}`).subscribe({
+    this.backend.delete<void>(
+      `/academic-years/${academicYear.id}`
+    ).subscribe({
       next: () => {
         this.successMessage = 'Academic year deleted.';
         this.loadAcademicYears();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to delete academic year.';
+        this.errorMessage =
+          err.error?.message || 'Failed to delete academic year.';
       }
     });
   }
+
   onView(academicYear: AcademicYear): void {
     this.selectedAcademicYear = academicYear;
     this.showView = true;
   }
+
   onViewClosed(): void {
     this.showView = false;
     this.selectedAcademicYear = null;
   }
-
 }
