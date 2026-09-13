@@ -42,16 +42,6 @@
   font-size: 13px;
 }
 
-.success-banner {
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  background: rgb(from var(--success) r g b / 0.08);
-  border: 1px solid rgb(from var(--success) r g b / 0.25);
-  border-radius: var(--border-radius-md);
-  color: var(--success);
-  font-size: 13px;
-}
-
 .students-table {
   width: 100%;
   border-collapse: collapse;
@@ -178,4 +168,64 @@
 
 .link-button:hover {
   text-decoration: underline;
+}
+
+.search-bar {
+  margin-bottom: 16px;
+}
+
+.search-bar input {
+  width: 100%;
+  max-width: 400px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.page-button {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.page-button:hover:not(:disabled) {
+  background: var(--border-light);
+}
+
+.page-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.page-size-select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text-primary);
+  margin-left: 8px;
 }

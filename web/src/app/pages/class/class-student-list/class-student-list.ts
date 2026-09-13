@@ -1,8 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { Subject, forkJoin, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { SuccessDialogService } from '../../../util/success-dialog.service';
+import { Page } from '../../../util/page';
 import { Student } from '../../student/student';
 import { SchoolClass } from '../class';
 
@@ -16,13 +19,13 @@ interface StudentOption extends Student {
   templateUrl: './class-student-list.html',
   styleUrl: './class-student-list.scss'
 })
-export class ClassStudentList implements OnChanges {
+export class ClassStudentList implements OnChanges, OnDestroy {
 
   @Input() schoolClassId!: number;
 
   students: Student[] = [];
-  allStudents: Student[] = [];
   availableStudents: StudentOption[] = [];
+  searchLoading = false;
   classes: SchoolClass[] = [];
   loading = false;
   showAddPicker = false;
@@ -31,11 +34,40 @@ export class ClassStudentList implements OnChanges {
   transferringStudent: Student | null = null;
   errorMessage = '';
 
+  typeahead$ = new Subject<string>();
+
   constructor(
     private backend: BackendService,
     private confirmDialog: ConfirmDialogService,
     private successDialog: SuccessDialogService
-  ) {}
+  ) {
+    this.typeahead$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        this.searchLoading = true;
+
+        let params = new HttpParams().set('size', 20);
+        if (term) {
+          params = params.set('search', term);
+        }
+
+        return this.backend.get<Page<Student>>('/students', params).pipe(
+          catchError(() => {
+            this.errorMessage = 'Failed to search students.';
+            return of<Page<Student>>({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } });
+          })
+        );
+      })
+    ).subscribe(result => {
+      this.searchLoading = false;
+      this.recomputeAvailableStudents(result.content);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.typeahead$.complete();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['schoolClassId'] && this.schoolClassId) {
@@ -56,7 +88,6 @@ export class ClassStudentList implements OnChanges {
       next: (students) => {
         this.students = students;
         this.loading = false;
-        this.recomputeAvailableStudents();
       },
       error: () => {
         this.errorMessage = 'Failed to load students.';
@@ -65,9 +96,9 @@ export class ClassStudentList implements OnChanges {
     });
   }
 
-  private recomputeAvailableStudents(): void {
+  private recomputeAvailableStudents(searchResults: Student[]): void {
     const assignedIds = new Set(this.students.map(s => s.id));
-    this.availableStudents = this.allStudents
+    this.availableStudents = searchResults
       .filter(s => !assignedIds.has(s.id))
       .map(s => ({
         ...s,
@@ -82,14 +113,8 @@ export class ClassStudentList implements OnChanges {
     this.errorMessage = '';
     this.selectedStudentIds = [];
 
-    if (this.showAddPicker && this.allStudents.length === 0) {
-      this.backend.get<Student[]>('/students').subscribe({
-        next: (students) => {
-          this.allStudents = students;
-          this.recomputeAvailableStudents();
-        },
-        error: () => this.errorMessage = 'Failed to load students list.'
-      });
+    if (this.showAddPicker) {
+      this.typeahead$.next('');
     }
   }
 

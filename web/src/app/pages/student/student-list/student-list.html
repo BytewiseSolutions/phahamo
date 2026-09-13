@@ -11,12 +11,16 @@
     </button>
   </div>
 
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="Search by name or admission number..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearchChange()"/>
+  </div>
+
   @if (errorMessage) {
     <div class="error-banner">{{ errorMessage }}</div>
-  }
-
-  @if (successMessage) {
-    <div class="success-banner">{{ successMessage }}</div>
   }
 
   <app-student-form
@@ -47,7 +51,7 @@
       <tbody>
         @for (student of students; track student.id; let i = $index) {
           <tr>
-            <td>{{ i + 1 }}</td>
+            <td>{{ (page * size) + i + 1 }}</td>
             <td>{{ student.admissionNumber }}</td>
             <td>{{ student.firstName }} {{ student.lastName }}</td>
             <td>{{ student.dateOfBirth | date:'dd MMM yyyy' }}</td>
@@ -94,6 +98,36 @@
         }
       </tbody>
     </table>
+
+    @if (totalPages > 1 || students.length > 0) {
+      <div class="pagination">
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page === 0"
+          (click)="onPageChange(page - 1)">
+          Previous
+        </button>
+
+        <span class="page-info">
+          Page {{ page + 1 }} of {{ totalPages || 1 }} ({{ totalElements }} students)
+        </span>
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="page >= totalPages - 1"
+          (click)="onPageChange(page + 1)">
+          Next
+        </button>
+
+        <select class="page-size-select" [(ngModel)]="size" (ngModelChange)="onPageSizeChange()">
+          @for (option of pageSizeOptions; track option) {
+            <option [ngValue]="option">{{ option }} / page</option>
+          }
+        </select>
+      </div>
+    }
   }
 
 </div>

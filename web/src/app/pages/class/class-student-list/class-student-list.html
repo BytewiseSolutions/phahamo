@@ -33,6 +33,8 @@
         bindLabel="fullLabel"
         bindValue="id"
         [multiple]="true"
+        [typeahead]="typeahead$"
+        [loading]="searchLoading"
         placeholder="Search by name or admission number..."
         [(ngModel)]="selectedStudentIds"
         class="student-select">
