@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.common;
 
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
+import ls.co.bytewise.api.parent.ParentExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
@@ -194,5 +195,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(StudentExceptions.InvalidStudentOperationException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidStudentOperation(StudentExceptions.InvalidStudentOperationException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ParentExceptions.ParentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleParentNotFound(ParentExceptions.ParentNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }

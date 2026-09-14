@@ -36,6 +36,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 import { SuccessDialog } from './components/success-dialog/success-dialog';
 import { TransferStudentForm } from './pages/class/transfer-student-form/transfer-student-form';
+import { StudentView } from './pages/student/student-view/student-view';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { TransferStudentForm } from './pages/class/transfer-student-form/transfe
     ClassStudentList,
     ConfirmDialog,
     SuccessDialog,
-    TransferStudentForm
+    TransferStudentForm,
+    StudentView
   ],
   imports: [
     BrowserModule,

@@ -1,133 +1,145 @@
 <div class="students-page">
 
-  <div class="page-header">
-    <h1>Students</h1>
+  @if (!showView) {
 
-    <button
-      type="button"
-      class="primary-button"
-      (click)="toggleCreateForm()">
-      {{ showCreateForm ? 'Cancel' : '+ Add Student' }}
-    </button>
-  </div>
+    <div class="page-header">
+      <h1>Students</h1>
 
-  <div class="search-bar">
-    <input
-      type="text"
-      placeholder="Search by name or admission number..."
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearchChange()"/>
-  </div>
+      <button
+        type="button"
+        class="primary-button"
+        (click)="toggleCreateForm()">
+        {{ showCreateForm ? 'Cancel' : '+ Add Student' }}
+      </button>
+    </div>
 
-  @if (errorMessage) {
-    <div class="error-banner">{{ errorMessage }}</div>
-  }
+    <div class="search-bar">
+      <input
+        type="text"
+        placeholder="Search by name or admission number..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"/>
+    </div>
 
-  <app-student-form
-    [visible]="showCreateForm"
-    [editingStudent]="editingStudent"
-    (closed)="onFormClosed()"
-    (studentCreated)="onCreateStudent($event)"
-    (studentUpdated)="onUpdateStudent($event)">
-  </app-student-form>
-
-  @if (loading) {
-    <p>Loading students...</p>
-  } @else {
-    <table class="students-table">
-      <thead>
-      <tr>
-        <th>#</th>
-        <th>Admission No.</th>
-        <th>Name</th>
-        <th>Date of Birth</th>
-        <th>Gender</th>
-        <th>Class</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-      </thead>
-
-      <tbody>
-        @for (student of students; track student.id; let i = $index) {
-          <tr>
-            <td>{{ (page * size) + i + 1 }}</td>
-            <td>{{ student.admissionNumber }}</td>
-            <td>{{ student.firstName }} {{ student.lastName }}</td>
-            <td>{{ student.dateOfBirth | date:'dd MMM yyyy' }}</td>
-            <td>{{ student.gender }}</td>
-            <td>{{ student.currentClassName || '—' }}</td>
-            <td class="status-cell">
-              <span
-                class="status-badge"
-                [class.inactive]="student.status !== 'ACTIVE'"
-                (click)="onStatusBadgeClick(student)">
-                {{ student.status }}
-              </span>
-
-              @if (activePopoverId === student.id) {
-                <div class="status-popover">
-                  <select [(ngModel)]="popoverStatus">
-                    @for (status of statusOptions; track status) {
-                      <option [value]="status">{{ status }}</option>
-                    }
-                  </select>
-                  <textarea
-                    [(ngModel)]="popoverReason"
-                    placeholder="Reason (required)"
-                    rows="2">
-                  </textarea>
-                  <div class="popover-actions">
-                    <button type="button" class="popover-cancel" (click)="onPopoverCancel()">Cancel</button>
-                    <button
-                      type="button"
-                      class="popover-confirm"
-                      [disabled]="!popoverReason.trim() || popoverStatus === student.status"
-                      (click)="onChangeStatus(student)">
-                      Confirm
-                    </button>
-                  </div>
-                </div>
-              }
-            </td>
-            <td class="actions">
-              <button type="button" class="link-button" (click)="onEdit(student)">Edit</button>
-              <button type="button" class="link-button" (click)="onDelete(student)">Delete</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-
-    @if (totalPages > 1 || students.length > 0) {
-      <div class="pagination">
-        <button
-          type="button"
-          class="page-button"
-          [disabled]="page === 0"
-          (click)="onPageChange(page - 1)">
-          Previous
-        </button>
-
-        <span class="page-info">
-          Page {{ page + 1 }} of {{ totalPages || 1 }} ({{ totalElements }} students)
-        </span>
-
-        <button
-          type="button"
-          class="page-button"
-          [disabled]="page >= totalPages - 1"
-          (click)="onPageChange(page + 1)">
-          Next
-        </button>
-
-        <select class="page-size-select" [(ngModel)]="size" (ngModelChange)="onPageSizeChange()">
-          @for (option of pageSizeOptions; track option) {
-            <option [ngValue]="option">{{ option }} / page</option>
-          }
-        </select>
-      </div>
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
     }
+
+    <app-student-form
+      [visible]="showCreateForm"
+      [editingStudent]="editingStudent"
+      (closed)="onFormClosed()"
+      (studentCreated)="onCreateStudent($event)"
+      (studentUpdated)="onUpdateStudent($event)">
+    </app-student-form>
+
+    @if (loading) {
+      <p>Loading students...</p>
+    } @else {
+      <table class="students-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Admission No.</th>
+          <th>Name</th>
+          <th>Date of Birth</th>
+          <th>Gender</th>
+          <th>Class</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+          @for (student of students; track student.id; let i = $index) {
+            <tr>
+              <td>{{ (page * size) + i + 1 }}</td>
+              <td>{{ student.admissionNumber }}</td>
+              <td>{{ student.firstName }} {{ student.lastName }}</td>
+              <td>{{ student.dateOfBirth | date:'dd MMM yyyy' }}</td>
+              <td>{{ student.gender }}</td>
+              <td>{{ student.currentClassName || '—' }}</td>
+              <td class="status-cell">
+                <span
+                  class="status-badge"
+                  [class.inactive]="student.status !== 'ACTIVE'"
+                  (click)="onStatusBadgeClick(student)">
+                  {{ student.status }}
+                </span>
+
+                @if (activePopoverId === student.id) {
+                  <div class="status-popover">
+                    <select [(ngModel)]="popoverStatus">
+                      @for (status of statusOptions; track status) {
+                        <option [value]="status">{{ status }}</option>
+                      }
+                    </select>
+                    <textarea
+                      [(ngModel)]="popoverReason"
+                      placeholder="Reason (required)"
+                      rows="2">
+                    </textarea>
+                    <div class="popover-actions">
+                      <button type="button" class="popover-cancel" (click)="onPopoverCancel()">Cancel</button>
+                      <button
+                        type="button"
+                        class="popover-confirm"
+                        [disabled]="!popoverReason.trim() || popoverStatus === student.status"
+                        (click)="onChangeStatus(student)">
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                }
+              </td>
+              <td class="actions">
+                <button type="button" class="link-button" (click)="onView(student)">View</button>
+                <button type="button" class="link-button" (click)="onEdit(student)">Edit</button>
+                <button type="button" class="link-button" (click)="onDelete(student)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (totalPages > 1 || students.length > 0) {
+        <div class="pagination">
+          <button
+            type="button"
+            class="page-button"
+            [disabled]="page === 0"
+            (click)="onPageChange(page - 1)">
+            Previous
+          </button>
+
+          <span class="page-info">
+            Page {{ page + 1 }} of {{ totalPages || 1 }} ({{ totalElements }} students)
+          </span>
+
+          <button
+            type="button"
+            class="page-button"
+            [disabled]="page >= totalPages - 1"
+            (click)="onPageChange(page + 1)">
+            Next
+          </button>
+
+          <select class="page-size-select" [(ngModel)]="size" (ngModelChange)="onPageSizeChange()">
+            @for (option of pageSizeOptions; track option) {
+              <option [ngValue]="option">{{ option }} / page</option>
+            }
+          </select>
+        </div>
+      }
+    }
+
+  } @else {
+
+    <app-student-view
+      [student]="selectedStudent"
+      (back)="onViewClosed()">
+    </app-student-view>
+
   }
 
 </div>

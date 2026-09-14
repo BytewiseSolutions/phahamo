@@ -1,0 +1,101 @@
+<div class="student-view-page">
+
+  <div class="page-header">
+    @if (student) {
+      <h1>{{ student.firstName }} {{ student.lastName }}</h1>
+    }
+
+    <button type="button" class="link-button" (click)="onBack()">
+      &larr; Back to students
+    </button>
+  </div>
+
+  @if (student) {
+    <div class="student-details">
+      <div class="detail-row">
+        <span class="label">Admission No.:</span>
+        <span>{{ student.admissionNumber }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Gender:</span>
+        <span>{{ student.gender }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Date of Birth:</span>
+        <span>{{ student.dateOfBirth | date:'dd MMM yyyy' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Class:</span>
+        <span>{{ student.currentClassName || '—' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Status:</span>
+        <span class="status-badge" [class.inactive]="student.status !== 'ACTIVE'">
+          {{ student.status }}
+        </span>
+      </div>
+    </div>
+
+    <div class="student-tabs">
+      <button
+        type="button"
+        class="student-tab"
+        [class.active]="activeTab === 'parents'"
+        (click)="onTabChange('parents')">
+        Parents
+      </button>
+
+      <button
+        type="button"
+        class="student-tab"
+        [class.active]="activeTab === 'history'"
+        (click)="onTabChange('history')">
+        Status History
+      </button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    @if (activeTab === 'parents') {
+      <div class="empty-state">
+        <p>Parent linking will be available once Parent-Student Linking is built.</p>
+      </div>
+    } @else {
+      @if (loadingHistory) {
+        <p>Loading status history...</p>
+      } @else if (statusHistory.length === 0) {
+        <div class="empty-state">
+          <p>No status changes recorded for this student.</p>
+        </div>
+      } @else {
+        <table class="history-table">
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Reason</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (change of statusHistory; track change.id) {
+              <tr>
+                <td>{{ change.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+                <td>{{ change.previousStatus }}</td>
+                <td>{{ change.newStatus }}</td>
+                <td>{{ change.reason }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  }
+
+</div>

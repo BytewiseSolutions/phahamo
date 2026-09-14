@@ -28,6 +28,9 @@ export class StudentList implements OnInit {
   searchTerm = '';
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
+  selectedStudent: Student | null = null;
+  showView = false;
+
   page = 0;
   size = 20;
   pageSizeOptions = [20, 40, 60];
@@ -199,5 +202,14 @@ export class StudentList implements OnInit {
         this.errorMessage = err.error?.message || 'Failed to delete student.';
       }
     });
+  }
+  onView(student: Student): void {
+    this.selectedStudent = student;
+    this.showView = true;
+  }
+
+  onViewClosed(): void {
+    this.showView = false;
+    this.selectedStudent = null;
   }
 }
