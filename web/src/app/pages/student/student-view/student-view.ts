@@ -2,14 +2,6 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { BackendService } from '../../../util/backend.service';
 import { Student } from '../student';
 
-interface StatusChange {
-  id: number;
-  previousStatus: string;
-  newStatus: string;
-  reason: string;
-  createdAt: string;
-}
-
 @Component({
   selector: 'app-student-view',
   standalone: false,

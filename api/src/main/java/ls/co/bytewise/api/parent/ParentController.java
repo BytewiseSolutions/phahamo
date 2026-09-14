@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/parents")
 public class ParentController {
 
     private final ParentService parentService;
@@ -20,7 +19,7 @@ public class ParentController {
         this.parentService = parentService;
     }
 
-    @PostMapping
+    @PostMapping("/api/parents")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public ResponseEntity<ParentDto> create(@AuthenticationPrincipal User currentUser,
                                             @Valid @RequestBody ParentDto dto) {
@@ -28,19 +27,19 @@ public class ParentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @GetMapping
+    @GetMapping("/api/parents")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public List<ParentDto> list() {
         return parentService.listParents();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/parents/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public ParentDto get(@PathVariable Long id) {
         return parentService.getParent(id);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/api/parents/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public ParentDto update(@AuthenticationPrincipal User currentUser,
                             @PathVariable Long id,
@@ -48,10 +47,41 @@ public class ParentController {
         return parentService.updateParent(currentUser, id, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/parents/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         parentService.deleteParent(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/students/{studentId}/parents")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<StudentParentDto> listForStudent(@PathVariable Long studentId) {
+        return parentService.listParentsForStudent(studentId);
+    }
+
+    @PostMapping("/api/students/{studentId}/parents")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<StudentParentDto> createAndLink(@AuthenticationPrincipal User currentUser,
+                                                          @PathVariable Long studentId,
+                                                          @Valid @RequestBody ParentDto dto) {
+        StudentParentDto created = parentService.createAndLinkParent(currentUser, studentId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PostMapping("/api/students/{studentId}/parents/{parentId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<StudentParentDto> linkExisting(@AuthenticationPrincipal User currentUser,
+                                                         @PathVariable Long studentId,
+                                                         @PathVariable Long parentId) {
+        StudentParentDto linked = parentService.linkExistingParent(currentUser, studentId, parentId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(linked);
+    }
+
+    @DeleteMapping("/api/students/{studentId}/parents/{parentId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<Void> unlink(@PathVariable Long studentId, @PathVariable Long parentId) {
+        parentService.unlinkParent(studentId, parentId);
         return ResponseEntity.noContent().build();
     }
 }

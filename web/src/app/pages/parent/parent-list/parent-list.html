@@ -1,0 +1,57 @@
+<div class="parents-page">
+
+  <div class="page-header">
+    <h1>Parents</h1>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="toggleCreateForm()">
+      {{ showCreateForm ? 'Cancel' : '+ Add Parent' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <app-parent-form
+    [visible]="showCreateForm"
+    [editingParent]="editingParent"
+    (closed)="onFormClosed()"
+    (parentCreated)="onCreateParent($event)"
+    (parentUpdated)="onUpdateParent($event)">
+  </app-parent-form>
+
+  @if (loading) {
+    <p>Loading parents...</p>
+  } @else {
+    <table class="parents-table">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (parent of parents; track parent.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ parent.firstName }} {{ parent.lastName }}</td>
+            <td>{{ parent.email }}</td>
+            <td>{{ parent.phone }}</td>
+            <td class="actions">
+              <button type="button" class="link-button" (click)="onEdit(parent)">Edit</button>
+              <button type="button" class="link-button" (click)="onDelete(parent)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

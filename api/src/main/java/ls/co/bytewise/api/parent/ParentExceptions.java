@@ -9,4 +9,16 @@ public final class ParentExceptions {
             super(message);
         }
     }
+
+    public static class DuplicateLinkException extends RuntimeException {
+        public DuplicateLinkException(String message) {
+            super(message);
+        }
+    }
+
+    public static class LinkNotFoundException extends RuntimeException {
+        public LinkNotFoundException(String message) {
+            super(message);
+        }
+    }
 }

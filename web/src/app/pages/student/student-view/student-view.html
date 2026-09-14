@@ -63,9 +63,11 @@
     }
 
     @if (activeTab === 'parents') {
-      <div class="empty-state">
-        <p>Parent linking will be available once Parent-Student Linking is built.</p>
-      </div>
+<!--      <div class="empty-state">-->
+<!--        <p>Parent linking will be available once Parent-Student Linking is built.</p>-->
+<!--      </div>-->
+
+      <app-parent-list></app-parent-list>
     } @else {
       @if (loadingHistory) {
         <p>Loading status history...</p>
