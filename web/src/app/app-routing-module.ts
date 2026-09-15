@@ -13,6 +13,7 @@ import {AcademicYearList} from './pages/academic-years/academic-year-list/academ
 import {ClassList} from './pages/class/class-list/class-list';
 import {SubjectList} from './pages/subject/subject-list/subject-list';
 import {StudentList} from './pages/student/student-list/student-list';
+import {ParentList} from './pages/parent/parent-list/parent-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -31,6 +32,7 @@ const routes: Routes = [
       { path: 'classes', component: ClassList},
       { path: 'subjects', component: SubjectList},
       { path: 'students', component: StudentList},
+      {path: 'parents', component: ParentList},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

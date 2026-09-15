@@ -50,6 +50,12 @@ public class UserController {
         return userService.listTeachers();
     }
 
+    @GetMapping("/parents")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<UserDto> listParents() {
+        return userService.listParents();
+    }
+
     @PutMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public UserDto updateUser(@AuthenticationPrincipal User currentUser,

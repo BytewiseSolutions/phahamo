@@ -1,0 +1,49 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Parent' : 'Add Parent' }}</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="parentForm" (ngSubmit)="onSubmit()" class="parent-form">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" formControlName="firstName"/>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" formControlName="lastName"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email"/>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" type="text" formControlName="phone"/>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button">
+            {{ isEditMode ? 'Save Changes' : 'Register Parent' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

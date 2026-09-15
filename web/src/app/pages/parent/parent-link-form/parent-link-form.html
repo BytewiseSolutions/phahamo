@@ -1,0 +1,76 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>Link Existing Parent</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="link-form">
+        <div class="search-mode-toggle">
+          <button
+            type="button"
+            class="mode-button"
+            [class.active]="searchMode === 'email'"
+            (click)="setSearchMode('email')">
+            Search by Email
+          </button>
+          <button
+            type="button"
+            class="mode-button"
+            [class.active]="searchMode === 'phone'"
+            (click)="setSearchMode('phone')">
+            Search by Phone
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>{{ searchMode === 'email' ? 'Email' : 'Phone' }}</label>
+          <ng-select
+            [items]="items"
+            bindLabel="firstName"
+            [loading]="searching"
+            [typeahead]="input$"
+            (change)="onSelect($event)"
+            (clear)="onClear()"
+            placeholder="Start typing a partial {{ searchMode }}...">
+            <ng-template ng-option-tmp let-item="item">
+              <div class="option-row">
+                <span class="option-name">{{ item.firstName }} {{ item.lastName }}</span>
+                <span class="option-detail">{{ item.email }} · {{ item.phone }}</span>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        @if (errorMessage && items.length === 0) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        @if (selectedParent) {
+          <div class="found-parent">
+            <div class="found-parent-info">
+              <span class="found-name">{{ selectedParent.firstName }} {{ selectedParent.lastName }}</span>
+              <span class="found-detail">{{ selectedParent.email }} · {{ selectedParent.phone }}</span>
+            </div>
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!selectedParent"
+            (click)="onConfirmLink()">
+            Link Parent
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

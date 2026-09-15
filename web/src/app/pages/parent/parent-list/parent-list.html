@@ -1,0 +1,56 @@
+<div class="parents-tab">
+  <div class="tab-header">
+    <button type="button" class="secondary-button" (click)="toggleLinkForm()">
+      {{ showLinkForm ? 'Cancel' : 'Link Existing' }}
+    </button>
+    <button type="button" class="primary-button" (click)="toggleCreateForm()">
+      {{ showCreateForm ? 'Cancel' : '+ Add Parent' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <app-parent-link-form
+    [visible]="showLinkForm"
+    (closed)="onLinkFormClosed()"
+    (parentLinked)="onLinkExisting($event)">
+  </app-parent-link-form>
+
+  <app-parent-form
+    [visible]="showCreateForm"
+    [editingParent]="editingParent"
+    (closed)="onFormClosed()"
+    (parentCreated)="onCreateParent($event)"
+    (parentUpdated)="onUpdateParent($event)">
+  </app-parent-form>
+
+  @if (loading) {
+    <p>Loading parents...</p>
+  } @else if (parents.length === 0) {
+    <div class="empty-state">
+      <p>No parents linked to this student yet.</p>
+    </div>
+  } @else {
+    <table class="parents-table">
+      <thead>
+      <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        @for (parent of parents; track parent.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ parent.firstName }} {{ parent.lastName }}</td>
+            <td>{{ parent.email }}</td>
+            <td>{{ parent.phone }}</td>
+            <td class="actions">
+              <button type="button" class="link-button" (click)="onEdit(parent)">Edit</button>
+              <button type="button" class="link-button" (click)="onUnlink(parent)">Unlink</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

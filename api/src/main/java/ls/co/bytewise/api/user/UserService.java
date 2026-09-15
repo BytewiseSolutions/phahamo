@@ -98,6 +98,14 @@ public class UserService {
                 .toList();
     }
 
+    public List<UserDto> listParents() {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return userRepository.findAllBySchoolIdAndRole(schoolId, UserRole.PARENT).stream()
+                .map(UserDto::new)
+                .toList();
+    }
+
     @Transactional
     public UserDto updateUser(User editor, Long userId, UserDto dto) {
         User user = getUserInCurrentSchool(userId);
