@@ -58,4 +58,11 @@ public class ParentController {
         parentService.unlinkParent(studentId, parentId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/api/parents/search")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<StudentParentDto> search(@RequestParam(required = false) String email,
+                                         @RequestParam(required = false) String phone) {
+        return parentService.searchParents(email, phone);
+    }
 }

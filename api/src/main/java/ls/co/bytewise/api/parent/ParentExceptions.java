@@ -21,4 +21,10 @@ public final class ParentExceptions {
             super(message);
         }
     }
+
+    public static class InvalidSearchException extends RuntimeException {
+        public InvalidSearchException(String message) {
+            super(message);
+        }
+    }
 }

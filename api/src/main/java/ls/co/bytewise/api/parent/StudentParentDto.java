@@ -9,14 +9,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class StudentParentDto {
 
-    private Long parentId;
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
 
     public StudentParentDto(Parent parent) {
-        this.parentId = parent.getId();
+        this.id = parent.getId();
         this.firstName = parent.getFirstName();
         this.lastName = parent.getLastName();
         this.email = parent.getEmail();

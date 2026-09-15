@@ -112,3 +112,85 @@
 .secondary-button:hover {
   background: var(--border-light);
 }
+
+.search-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mode-button {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mode-button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.search-row .form-group {
+  flex: 1;
+}
+
+.found-parent {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.found-parent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.found-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.found-detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.primary-button:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0;
+}
+
+.option-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.option-detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

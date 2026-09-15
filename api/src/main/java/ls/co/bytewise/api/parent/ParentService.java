@@ -15,6 +15,7 @@ public class ParentService {
 
     private final ParentRepository parentRepository;
     private final StudentRepository studentRepository;
+    private static final int MAX_SEARCH_RESULTS = 10;
 
     public ParentService(ParentRepository parentRepository,
                          StudentRepository studentRepository) {
@@ -129,5 +130,23 @@ public class ParentService {
         Long schoolId = TenantContext.getSchoolId();
         return parentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new ParentExceptions.ParentNotFoundException("Parent not found"));
+    }
+
+    public List<StudentParentDto> searchParents(String email, String phone) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        boolean hasEmail = email != null && !email.isBlank();
+        boolean hasPhone = phone != null && !phone.isBlank();
+
+        if (hasEmail == hasPhone) {
+            throw new ParentExceptions.InvalidSearchException(
+                    "Provide exactly one of email or phone");
+        }
+
+        List<Parent> results = hasEmail
+                ? parentRepository.searchByEmail(schoolId, email, org.springframework.data.domain.PageRequest.of(0, MAX_SEARCH_RESULTS))
+                : parentRepository.searchByPhone(schoolId, phone, org.springframework.data.domain.PageRequest.of(0, MAX_SEARCH_RESULTS));
+
+        return results.stream().map(StudentParentDto::new).toList();
     }
 }
