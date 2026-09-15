@@ -39,6 +39,7 @@ import { TransferStudentForm } from './pages/class/transfer-student-form/transfe
 import { StudentView } from './pages/student/student-view/student-view';
 import { ParentList } from './pages/parent/parent-list/parent-list';
 import { ParentForm } from './pages/parent/parent-form/parent-form';
+import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form';
 
 @NgModule({
   declarations: [
@@ -74,7 +75,8 @@ import { ParentForm } from './pages/parent/parent-form/parent-form';
     TransferStudentForm,
     StudentView,
     ParentList,
-    ParentForm
+    ParentForm,
+    ParentLinkForm
   ],
   imports: [
     BrowserModule,

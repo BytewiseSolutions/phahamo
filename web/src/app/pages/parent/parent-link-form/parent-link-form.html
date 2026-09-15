@@ -1,0 +1,26 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>Link Existing Parent</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="linkForm" (ngSubmit)="onSubmit()" class="link-form">
+        <div class="form-group">
+          <label for="parentId">Parent ID</label>
+          <input id="parentId" type="number" formControlName="parentId" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button">Link Parent</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+}

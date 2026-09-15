@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { SuccessDialogService } from '../../../util/success-dialog.service';
@@ -10,12 +10,16 @@ import { Parent, ParentPayload } from '../parent';
   templateUrl: './parent-list.html',
   styleUrl: './parent-list.scss'
 })
-export class ParentList implements OnInit {
+export class ParentList implements OnChanges {
+
+  @Input() studentId: number | null = null;
 
   parents: Parent[] = [];
   loading = false;
   showCreateForm = false;
+  showLinkForm = false;
   editingParent: Parent | null = null;
+  linkParentId = '';
   errorMessage = '';
 
   constructor(
@@ -24,15 +28,22 @@ export class ParentList implements OnInit {
     private successDialog: SuccessDialogService
   ) {}
 
-  ngOnInit(): void {
-    this.loadParents();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['studentId'] && this.studentId) {
+      this.showCreateForm = false;
+      this.showLinkForm = false;
+      this.editingParent = null;
+      this.loadParents();
+    }
   }
 
   loadParents(): void {
+    if (!this.studentId) return;
+
     this.loading = true;
     this.errorMessage = '';
 
-    this.backend.get<Parent[]>('/parents').subscribe({
+    this.backend.get<Parent[]>(`/students/${this.studentId}/parents`).subscribe({
       next: (parents) => {
         this.parents = parents;
         this.loading = false;
@@ -46,12 +57,25 @@ export class ParentList implements OnInit {
 
   toggleCreateForm(): void {
     this.editingParent = null;
+    this.showLinkForm = false;
     this.showCreateForm = !this.showCreateForm;
     this.errorMessage = '';
   }
 
+  toggleLinkForm(): void {
+    this.editingParent = null;
+    this.showCreateForm = false;
+    this.showLinkForm = true;
+    this.errorMessage = '';
+  }
+
+  onLinkFormClosed(): void {
+    this.showLinkForm = false;
+  }
+
   onEdit(parent: Parent): void {
     this.editingParent = parent;
+    this.showLinkForm = false;
     this.showCreateForm = true;
     this.errorMessage = '';
   }
@@ -62,25 +86,27 @@ export class ParentList implements OnInit {
   }
 
   onCreateParent(payload: ParentPayload): void {
+    if (!this.studentId) return;
     this.errorMessage = '';
 
-    this.backend.post<Parent>('/parents', payload).subscribe({
+    this.backend.post<Parent>(`/students/${this.studentId}/parents`, payload).subscribe({
       next: () => {
         this.showCreateForm = false;
         this.loadParents();
-        this.successDialog.show({ message: 'Parent registered.' });
+        this.successDialog.show({ message: 'Parent added.' });
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to register parent.';
+        this.errorMessage = err.error?.message || 'Failed to add parent.';
       }
     });
   }
 
   onUpdateParent(event: { id: number; payload: ParentPayload }): void {
+    if (!this.studentId) return;
     this.errorMessage = '';
 
     this.backend.put<Parent>(
-      `/parents/${event.id}`,
+      `/students/${this.studentId}/parents/${event.id}`,
       event.payload
     ).subscribe({
       next: () => {
@@ -95,11 +121,29 @@ export class ParentList implements OnInit {
     });
   }
 
-  async onDelete(parent: Parent): Promise<void> {
+  onLinkExisting(parentId: number): void {
+    if (!this.studentId) return;
+    this.errorMessage = '';
+
+    this.backend.post<Parent>(`/students/${this.studentId}/parents/${parentId}`, {}).subscribe({
+      next: () => {
+        this.showLinkForm = false;
+        this.loadParents();
+        this.successDialog.show({ message: 'Parent linked.' });
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to link parent.';
+      }
+    });
+  }
+
+  async onUnlink(parent: Parent): Promise<void> {
+    if (!this.studentId) return;
+
     const confirmed = await this.confirmDialog.confirm({
-      title: 'Delete Parent',
-      message: `Delete "${parent.firstName} ${parent.lastName}"?`,
-      confirmText: 'Delete',
+      title: 'Unlink Parent',
+      message: `Unlink "${parent.firstName} ${parent.lastName}" from this student?`,
+      confirmText: 'Unlink',
       danger: true
     });
 
@@ -107,13 +151,13 @@ export class ParentList implements OnInit {
 
     this.errorMessage = '';
 
-    this.backend.delete<void>(`/parents/${parent.id}`).subscribe({
+    this.backend.delete<void>(`/students/${this.studentId}/parents/${parent.id}`).subscribe({
       next: () => {
         this.loadParents();
-        this.successDialog.show({ message: 'Parent deleted.' });
+        this.successDialog.show({ message: 'Parent unlinked.' });
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to delete parent.';
+        this.errorMessage = err.error?.message || 'Failed to unlink parent.';
       }
     });
   }

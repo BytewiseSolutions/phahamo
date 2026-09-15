@@ -19,41 +19,6 @@ public class ParentController {
         this.parentService = parentService;
     }
 
-    @PostMapping("/api/parents")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<ParentDto> create(@AuthenticationPrincipal User currentUser,
-                                            @Valid @RequestBody ParentDto dto) {
-        ParentDto created = parentService.createParent(currentUser, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
-
-    @GetMapping("/api/parents")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public List<ParentDto> list() {
-        return parentService.listParents();
-    }
-
-    @GetMapping("/api/parents/{id}")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ParentDto get(@PathVariable Long id) {
-        return parentService.getParent(id);
-    }
-
-    @PutMapping("/api/parents/{id}")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ParentDto update(@AuthenticationPrincipal User currentUser,
-                            @PathVariable Long id,
-                            @Valid @RequestBody ParentDto dto) {
-        return parentService.updateParent(currentUser, id, dto);
-    }
-
-    @DeleteMapping("/api/parents/{id}")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        parentService.deleteParent(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/api/students/{studentId}/parents")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public List<StudentParentDto> listForStudent(@PathVariable Long studentId) {
@@ -76,6 +41,15 @@ public class ParentController {
                                                          @PathVariable Long parentId) {
         StudentParentDto linked = parentService.linkExistingParent(currentUser, studentId, parentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(linked);
+    }
+
+    @PutMapping("/api/students/{studentId}/parents/{parentId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentParentDto update(@AuthenticationPrincipal User currentUser,
+                                   @PathVariable Long studentId,
+                                   @PathVariable Long parentId,
+                                   @Valid @RequestBody ParentDto dto) {
+        return parentService.updateParent(currentUser, studentId, parentId, dto);
     }
 
     @DeleteMapping("/api/students/{studentId}/parents/{parentId}")

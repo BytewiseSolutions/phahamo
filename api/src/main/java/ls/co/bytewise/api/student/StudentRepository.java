@@ -18,27 +18,49 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByIdAndSchoolId(Long id, Long schoolId);
 
-    List<Student> findAllBySchoolId(Long schoolId);
+    boolean existsByIdAndSchoolId(Long id, Long schoolId);
 
     List<Student> findAllBySchoolIdAndCurrentClassId(Long schoolId, Long currentClassId);
 
-    @Query("SELECT s FROM Student s WHERE s.school.id = :schoolId " +
-            "AND (:search IS NULL OR :search = '' " +
-            "OR LOWER(s.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(s.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(s.admissionNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
-    org.springframework.data.domain.Page<Student> search(@Param("schoolId") Long schoolId,
-                                                         @Param("search") String search,
-                                                         org.springframework.data.domain.Pageable pageable);
+    @Query("""
+        SELECT s
+        FROM Student s
+        WHERE s.school.id = :schoolId
+        AND (:search IS NULL OR :search = ''
+            OR LOWER(s.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(s.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(s.admissionNumber) LIKE LOWER(CONCAT('%', :search, '%'))
+        )
+        """)
+    org.springframework.data.domain.Page<Student> search(
+            @Param("schoolId") Long schoolId,
+            @Param("search") String search,
+            org.springframework.data.domain.Pageable pageable
+    );
 
-    @Query("SELECT p FROM Student s JOIN s.parents p WHERE s.id = :studentId")
-    List<Parent> findParentsByStudentId(@Param("studentId") Long studentId);
+    @Query("""
+        SELECT p FROM Student s JOIN s.parents p WHERE s.id = :studentId
+        """)
+    List<Parent> findParentsByStudentId(
+            @Param("studentId") Long studentId
+    );
 
-    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
-            "FROM Student s JOIN s.parents p WHERE s.id = :studentId AND p.id = :parentId")
-    boolean existsParentLink(@Param("studentId") Long studentId, @Param("parentId") Long parentId);
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+        FROM Student s JOIN s.parents p WHERE s.id = :studentId AND p.id = :parentId
+        """)
+    boolean existsParentLink(
+            @Param("studentId") Long studentId,
+            @Param("parentId") Long parentId
+    );
 
-    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
-            "FROM Student s JOIN s.parents p WHERE p.id = :parentId")
-    boolean existsAnyLinkForParent(@Param("parentId") Long parentId);
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+        FROM Student s
+        JOIN s.parents p
+        WHERE p.id = :parentId
+        """)
+    boolean existsAnyLinkForParent(
+            @Param("parentId") Long parentId
+    );
 }
