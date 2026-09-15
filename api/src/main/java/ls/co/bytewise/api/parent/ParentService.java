@@ -108,18 +108,18 @@ public class ParentService {
 
     @Transactional
     public void unlinkParent(Long studentId, Long parentId) {
-        if (!studentRepository.existsParentLink(studentId, parentId)) {
-            throw new ParentExceptions.LinkNotFoundException("Link not found");
-        }
-
         Long schoolId = TenantContext.getSchoolId();
         Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
 
+        if (!studentRepository.existsParentLink(studentId, parentId)) {
+            throw new ParentExceptions.LinkNotFoundException("Link not found");
+        }
+
         Parent parent = findOrThrow(parentId);
 
         student.getParents().remove(parent);
-        studentRepository.save(student);
+        studentRepository.saveAndFlush(student);
 
         if (!studentRepository.existsAnyLinkForParent(parentId)) {
             parentRepository.delete(parent);

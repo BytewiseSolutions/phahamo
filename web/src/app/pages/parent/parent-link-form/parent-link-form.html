@@ -36,7 +36,7 @@
             [typeahead]="input$"
             (change)="onSelect($event)"
             (clear)="onClear()"
-            placeholder="Start typing an exact {{ searchMode }}...">
+            placeholder="Start typing a partial {{ searchMode }}...">
             <ng-template ng-option-tmp let-item="item">
               <div class="option-row">
                 <span class="option-name">{{ item.firstName }} {{ item.lastName }}</span>

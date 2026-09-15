@@ -201,4 +201,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleParentNotFound(ParentExceptions.ParentNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    @ExceptionHandler(ParentExceptions.InvalidSearchException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidSearch(ParentExceptions.InvalidSearchException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ParentExceptions.DuplicateLinkException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateLink(ParentExceptions.DuplicateLinkException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(ParentExceptions.LinkNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleLinkNotFound(ParentExceptions.LinkNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
 }
