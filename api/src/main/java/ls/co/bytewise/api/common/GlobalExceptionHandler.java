@@ -10,6 +10,9 @@ import ls.co.bytewise.api.subject.SubjectExceptions;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentExceptions;
 import ls.co.bytewise.api.teacher.TeacherExceptions;
 import ls.co.bytewise.api.term.TermExceptions;
+import ls.co.bytewise.api.timetable.TimetableExceptions;
+import ls.co.bytewise.api.timetable.lesson.LessonExceptions;
+import ls.co.bytewise.api.timetable.period.PeriodExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -234,5 +237,34 @@ public class GlobalExceptionHandler {
             TeacherExceptions.TeacherAlreadyExistsException ex) {
 
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+    @ExceptionHandler(PeriodExceptions.PeriodNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePeriodNotFound(PeriodExceptions.PeriodNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(PeriodExceptions.InvalidPeriodException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidPeriod(PeriodExceptions.InvalidPeriodException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(TimetableExceptions.TimetableNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTimetableNotFound(TimetableExceptions.TimetableNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TimetableExceptions.TimetableConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleTimetableConflict(TimetableExceptions.TimetableConflictException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(LessonExceptions.LessonNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleLessonNotFound(LessonExceptions.LessonNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(LessonExceptions.InvalidLessonException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidLesson(LessonExceptions.InvalidLessonException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

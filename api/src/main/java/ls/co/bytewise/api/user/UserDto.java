@@ -3,7 +3,6 @@ package ls.co.bytewise.api.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import ls.co.bytewise.api.common.BaseDto;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
@@ -40,7 +39,6 @@ public class UserDto extends BaseDto {
 
     public UserDto(User user) {
         super(user);
-
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.email = user.getEmail();

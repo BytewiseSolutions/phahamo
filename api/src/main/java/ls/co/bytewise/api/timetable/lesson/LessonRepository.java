@@ -1,0 +1,18 @@
+package ls.co.bytewise.api.timetable.lesson;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+public interface LessonRepository extends JpaRepository<Lesson, Long> {
+
+    Optional<Lesson> findByTimetable_IdAndDateAndSchoolId(Long timetableId, LocalDate date, Long schoolId);
+
+    List<Lesson> findAllByTimetable_Assignment_Teacher_IdAndDateAndSchoolId(
+            Long teacherId, LocalDate date, Long schoolId);
+
+    List<Lesson> findAllByTimetable_Assignment_SchoolClass_IdAndDateAndSchoolId(
+            Long schoolClassId, LocalDate date, Long schoolId);
+}
