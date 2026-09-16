@@ -73,19 +73,39 @@ public class SubjectClassAssignmentService {
     }
 
     public List<SubjectClassAssignmentDto> listAssignments() {
-        return assignmentRepository.findAll().stream()
+        Long schoolId = TenantContext.getSchoolId();
+
+        return assignmentRepository.findAllBySchoolId(schoolId).stream()
                 .map(SubjectClassAssignmentDto::new)
                 .toList();
     }
 
     public List<SubjectClassAssignmentDto> listByClass(Long schoolClassId) {
-        return assignmentRepository.findAllBySchoolClassId(schoolClassId).stream()
+        Long schoolId = TenantContext.getSchoolId();
+
+        return assignmentRepository
+                .findAllBySchoolClassIdAndSchoolId(schoolClassId, schoolId)
+                .stream()
                 .map(SubjectClassAssignmentDto::new)
                 .toList();
     }
 
     public List<SubjectClassAssignmentDto> listBySubject(Long subjectId) {
-        return assignmentRepository.findAllBySubjectId(subjectId).stream()
+        Long schoolId = TenantContext.getSchoolId();
+
+        return assignmentRepository
+                .findAllBySubjectIdAndSchoolId(subjectId, schoolId)
+                .stream()
+                .map(SubjectClassAssignmentDto::new)
+                .toList();
+    }
+
+    public List<SubjectClassAssignmentDto> listByTeacher(Long teacherId) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return assignmentRepository
+                .findAllByTeacherIdAndSchoolId(teacherId, schoolId)
+                .stream()
                 .map(SubjectClassAssignmentDto::new)
                 .toList();
     }
@@ -166,15 +186,5 @@ public class SubjectClassAssignmentService {
     private SubjectClassAssignment findOrThrow(Long id) {
         return assignmentRepository.findById(id)
                 .orElseThrow(() -> new SubjectClassAssignmentExceptions.AssignmentNotFoundException("Assignment not found"));
-    }
-
-    public List<SubjectClassAssignmentDto> listByTeacher(Long teacherId) {
-        Long schoolId = TenantContext.getSchoolId();
-
-        return assignmentRepository
-                .findAllByTeacherIdAndSchoolId(teacherId, schoolId)
-                .stream()
-                .map(SubjectClassAssignmentDto::new)
-                .toList();
     }
 }

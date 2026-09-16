@@ -8,9 +8,11 @@ import java.util.List;
 @Repository
 public interface SubjectClassAssignmentRepository extends JpaRepository<SubjectClassAssignment, Long> {
 
-    List<SubjectClassAssignment> findAllBySchoolClassId(Long schoolClassId);
+    List<SubjectClassAssignment> findAllBySchoolId(Long schoolId);
 
-    List<SubjectClassAssignment> findAllBySubjectId(Long subjectId);
+    List<SubjectClassAssignment> findAllBySchoolClassIdAndSchoolId(Long schoolClassId, Long schoolId);
+
+    List<SubjectClassAssignment> findAllBySubjectIdAndSchoolId(Long subjectId, Long schoolId);
 
     List<SubjectClassAssignment> findAllByTeacherIdAndSchoolId(Long teacherId, Long schoolId);
 
