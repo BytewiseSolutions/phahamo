@@ -14,6 +14,7 @@ import {ClassList} from './pages/class/class-list/class-list';
 import {SubjectList} from './pages/subject/subject-list/subject-list';
 import {StudentList} from './pages/student/student-list/student-list';
 import {ParentList} from './pages/parent/parent-list/parent-list';
+import {TeacherList} from './pages/teacher/teacher-list/teacher-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -27,6 +28,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
+      {path: 'teachers', component: TeacherList},
       { path: 'school-profile', component: SchoolProfile },
       { path: 'academic-years', component: AcademicYearList},
       { path: 'classes', component: ClassList},

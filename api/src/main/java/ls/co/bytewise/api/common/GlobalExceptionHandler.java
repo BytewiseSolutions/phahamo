@@ -8,6 +8,7 @@ import ls.co.bytewise.api.security.MissingTenantException;
 import ls.co.bytewise.api.student.StudentExceptions;
 import ls.co.bytewise.api.subject.SubjectExceptions;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentExceptions;
+import ls.co.bytewise.api.teacher.TeacherExceptions;
 import ls.co.bytewise.api.term.TermExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
@@ -34,8 +35,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(
+            DataIntegrityViolationException ex) {
+
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "The requested operation violates a data constraint"
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -216,4 +222,17 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(TeacherExceptions.TeacherNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTeacherNotFound(
+            TeacherExceptions.TeacherNotFoundException ex) {
+
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TeacherExceptions.TeacherAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleTeacherAlreadyExists(
+            TeacherExceptions.TeacherAlreadyExistsException ex) {
+
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 }

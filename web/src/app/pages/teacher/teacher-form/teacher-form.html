@@ -1,0 +1,360 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Teacher' : 'Add Teacher' }}</h2>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="teacherForm"
+        (ngSubmit)="onSubmit()"
+        class="teacher-form">
+
+        @if (userLoadError) {
+          <div class="error-banner">
+            {{ userLoadError }}
+          </div>
+        }
+
+        @if (!isEditMode) {
+          <div class="form-group">
+
+            <label>
+              How would you like to add the teacher?
+            </label>
+
+            <div class="registration-options">
+
+              <label class="registration-option">
+                <input
+                  type="radio"
+                  name="registrationMode"
+                  [checked]="isExistingUserMode"
+                  (change)="setRegistrationMode('EXISTING_USER')" />
+
+                <span>Existing User</span>
+              </label>
+
+              <label class="registration-option">
+                <input
+                  type="radio"
+                  name="registrationMode"
+                  [checked]="isNewUserMode"
+                  (change)="setRegistrationMode('NEW_USER')" />
+
+                <span>New User</span>
+              </label>
+
+            </div>
+
+          </div>
+        }
+
+        @if (isEditMode) {
+          <div class="form-group">
+
+            <label for="employeeNumber">
+              Employee Number
+            </label>
+
+            <input
+              id="employeeNumber"
+              type="text"
+              [value]="editingTeacher?.employeeNumber || ''"
+              readonly />
+
+          </div>
+
+          <div class="section-title">
+            User Details
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="firstName">
+                First Name
+              </label>
+
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName" />
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">
+                Last Name
+              </label>
+
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName" />
+            </div>
+
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="email">
+                Email
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                readonly />
+            </div>
+
+            <div class="form-group">
+              <label for="phone">
+                Phone
+              </label>
+
+              <input
+                id="phone"
+                type="text"
+                formControlName="phone" />
+            </div>
+
+          </div>
+        }
+
+        @if (!isEditMode && isExistingUserMode) {
+          <div class="form-group">
+
+            <label for="userId">
+              User <span class="required">*</span>
+            </label>
+
+            <select
+              id="userId"
+              formControlName="userId">
+
+              <option value="">Select a user</option>
+
+              @for (user of users; track user.id) {
+                <option [value]="user.id">
+                  {{ user.firstName }} {{ user.lastName }}
+                  — {{ user.email }}
+                </option>
+              }
+
+            </select>
+
+            @if (
+              teacherForm.get('userId')?.invalid &&
+              teacherForm.get('userId')?.touched
+              ) {
+              <small class="validation-error">
+                Please select a user.
+              </small>
+            }
+
+            @if (loadingUsers) {
+              <small class="field-hint">
+                Loading users...
+              </small>
+            }
+
+          </div>
+        }
+
+        @if (!isEditMode && isNewUserMode) {
+          <div class="section-title">
+            User Details
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="firstName">
+                First Name <span class="required">*</span>
+              </label>
+
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName"
+                placeholder="Enter first name" />
+
+              @if (
+                teacherForm.get('firstName')?.invalid &&
+                teacherForm.get('firstName')?.touched
+                ) {
+                <small class="validation-error">
+                  First name is required.
+                </small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">
+                Last Name <span class="required">*</span>
+              </label>
+
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName"
+                placeholder="Enter last name" />
+
+              @if (
+                teacherForm.get('lastName')?.invalid &&
+                teacherForm.get('lastName')?.touched
+                ) {
+                <small class="validation-error">
+                  Last name is required.
+                </small>
+              }
+            </div>
+
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="email">
+                Email <span class="required">*</span>
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="Enter email address" />
+
+              @if (
+                teacherForm.get('email')?.invalid &&
+                teacherForm.get('email')?.touched
+                ) {
+                <small class="validation-error">
+                  Please enter a valid email address.
+                </small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="phone">
+                Phone
+              </label>
+
+              <input
+                id="phone"
+                type="text"
+                formControlName="phone"
+                placeholder="Enter phone number" />
+            </div>
+
+          </div>
+        }
+
+        <div class="section-title">
+          Teacher Details
+        </div>
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="qualifications">
+              Qualifications
+            </label>
+
+            <input
+              id="qualifications"
+              type="text"
+              formControlName="qualifications"
+              placeholder="e.g. B.Ed, BSc Mathematics" />
+          </div>
+
+          <div class="form-group">
+            <label for="specialization">
+              Specialization
+            </label>
+
+            <input
+              id="specialization"
+              type="text"
+              formControlName="specialization"
+              placeholder="e.g. Mathematics" />
+          </div>
+
+        </div>
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="dateJoined">
+              Date Joined
+            </label>
+
+            <input
+              id="dateJoined"
+              type="date"
+              formControlName="dateJoined" />
+          </div>
+
+          <div class="form-group">
+            <label for="employmentType">
+              Employment Type <span class="required">*</span>
+            </label>
+
+            <select
+              id="employmentType"
+              formControlName="employmentType">
+
+              @for (type of employmentTypes; track type) {
+                <option [value]="type">
+                  {{ getEmploymentTypeLabel(type) }}
+                </option>
+              }
+
+            </select>
+
+            @if (
+              teacherForm.get('employmentType')?.invalid &&
+              teacherForm.get('employmentType')?.touched
+              ) {
+              <small class="validation-error">
+                Please select an employment type.
+              </small>
+            }
+
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="onClose()">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="loadingUsers">
+            {{ isEditMode ? 'Save Changes' : 'Register Teacher' }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+}

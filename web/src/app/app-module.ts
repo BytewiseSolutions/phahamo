@@ -40,6 +40,9 @@ import { StudentView } from './pages/student/student-view/student-view';
 import { ParentList } from './pages/parent/parent-list/parent-list';
 import { ParentForm } from './pages/parent/parent-form/parent-form';
 import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form';
+import { TeacherList } from './pages/teacher/teacher-list/teacher-list';
+import { TeacherForm } from './pages/teacher/teacher-form/teacher-form';
+import { TeacherView } from './pages/teacher/teacher-view/teacher-view';
 
 @NgModule({
   declarations: [
@@ -76,7 +79,10 @@ import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form
     StudentView,
     ParentList,
     ParentForm,
-    ParentLinkForm
+    ParentLinkForm,
+    TeacherList,
+    TeacherForm,
+    TeacherView
   ],
   imports: [
     BrowserModule,

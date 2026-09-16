@@ -8,13 +8,26 @@ import java.util.List;
 @Repository
 public interface SubjectClassAssignmentRepository extends JpaRepository<SubjectClassAssignment, Long> {
 
-    List<SubjectClassAssignment> findAllBySchoolClassId(Long schoolClassId);
+    List<SubjectClassAssignment> findAllBySchoolId(Long schoolId);
 
-    List<SubjectClassAssignment> findAllBySubjectId(Long subjectId);
+    List<SubjectClassAssignment> findAllBySchoolClassIdAndSchoolId(Long schoolClassId, Long schoolId);
 
-    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearId(Long subjectId, Long schoolClassId, Long academicYearId);
+    List<SubjectClassAssignment> findAllBySubjectIdAndSchoolId(Long subjectId, Long schoolId);
 
-    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearIdAndIdNot(Long subjectId, Long schoolClassId, Long academicYearId, Long excludeId);
+    List<SubjectClassAssignment> findAllByTeacherIdAndSchoolId(Long teacherId, Long schoolId);
+
+    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearId(
+            Long subjectId,
+            Long schoolClassId,
+            Long academicYearId
+    );
+
+    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearIdAndIdNot(
+            Long subjectId,
+            Long schoolClassId,
+            Long academicYearId,
+            Long excludeId
+    );
 
     boolean existsBySubjectId(Long subjectId);
 }
