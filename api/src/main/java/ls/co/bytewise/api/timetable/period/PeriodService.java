@@ -25,11 +25,6 @@ public class PeriodService {
             throw new PeriodExceptions.InvalidPeriodException("End time must be after start time");
         }
 
-        if (periodRepository.existsBySchoolIdAndOrderIndex(schoolId, dto.getOrderIndex())) {
-            throw new PeriodExceptions.InvalidPeriodException(
-                    "A period with this order already exists for your school");
-        }
-
         School school = creator.getSchools().stream()
                 .filter(s -> s.getId().equals(schoolId))
                 .findFirst()
@@ -39,7 +34,6 @@ public class PeriodService {
         period.setName(dto.getName());
         period.setStartTime(dto.getStartTime());
         period.setEndTime(dto.getEndTime());
-        period.setOrderIndex(dto.getOrderIndex());
         period.setSchool(school);
         period.setCreatedBy(creator);
         period.setUpdatedBy(creator);
@@ -50,13 +44,9 @@ public class PeriodService {
 
     public List<PeriodDto> listPeriods() {
         Long schoolId = TenantContext.getSchoolId();
-        return periodRepository.findAllBySchoolIdOrderByOrderIndexAsc(schoolId).stream()
+        return periodRepository.findAllBySchoolIdOrderByStartTimeAsc(schoolId).stream()
                 .map(PeriodDto::new)
                 .toList();
-    }
-
-    public PeriodDto getPeriod(Long id) {
-        return new PeriodDto(getPeriodInCurrentSchool(id));
     }
 
     @Transactional
@@ -80,14 +70,14 @@ public class PeriodService {
             throw new PeriodExceptions.InvalidPeriodException("End time must be after start time");
         }
 
-        if (dto.getOrderIndex() != null) {
-            period.setOrderIndex(dto.getOrderIndex());
-        }
-
         period.setUpdatedBy(editor);
 
         Period saved = periodRepository.save(period);
         return new PeriodDto(saved);
+    }
+
+    public PeriodDto getPeriod(Long id) {
+        return new PeriodDto(getPeriodInCurrentSchool(id));
     }
 
     private Period getPeriodInCurrentSchool(Long id) {

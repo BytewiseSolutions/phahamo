@@ -44,22 +44,22 @@ public class TimetableService {
                     "This subject-class assignment has no teacher assigned yet");
         }
 
-        boolean teacherBooked = timetableRepository
-                .existsByDayOfWeekAndPeriod_IdAndAssignment_Teacher_IdAndSchoolId(
-                        dto.getDayOfWeek(), period.getId(), assignment.getTeacher().getId(), schoolId);
+        boolean teacherBooked = timetableRepository.existsOverlappingForTeacher(
+                schoolId, dto.getDayOfWeek(), assignment.getTeacher().getId(),
+                period.getStartTime(), period.getEndTime(), -1L);
 
         if (teacherBooked) {
             throw new TimetableExceptions.TimetableConflictException(
-                    "This teacher is already booked for this day and period");
+                    "This teacher is already booked for an overlapping time on this day");
         }
 
-        boolean classBooked = timetableRepository
-                .existsByDayOfWeekAndPeriod_IdAndAssignment_SchoolClass_IdAndSchoolId(
-                        dto.getDayOfWeek(), period.getId(), assignment.getSchoolClass().getId(), schoolId);
+        boolean classBooked = timetableRepository.existsOverlappingForClass(
+                schoolId, dto.getDayOfWeek(), assignment.getSchoolClass().getId(),
+                period.getStartTime(), period.getEndTime(), -1L);
 
         if (classBooked) {
             throw new TimetableExceptions.TimetableConflictException(
-                    "This class already has a lesson scheduled for this day and period");
+                    "This class already has an overlapping lesson scheduled on this day");
         }
 
         School school = creator.getSchools().stream()
@@ -103,24 +103,22 @@ public class TimetableService {
                     "This subject-class assignment has no teacher assigned yet");
         }
 
-        boolean teacherBooked = timetableRepository
-                .existsByDayOfWeekAndPeriod_IdAndAssignment_Teacher_IdAndSchoolId(
-                        newDayOfWeek, newPeriod.getId(), newAssignment.getTeacher().getId(), schoolId)
-                && !isSameSlot(timetable, newDayOfWeek, newPeriod, newAssignment);
+        boolean teacherBooked = timetableRepository.existsOverlappingForTeacher(
+                schoolId, newDayOfWeek, newAssignment.getTeacher().getId(),
+                newPeriod.getStartTime(), newPeriod.getEndTime(), timetable.getId());
 
         if (teacherBooked) {
             throw new TimetableExceptions.TimetableConflictException(
-                    "This teacher is already booked for this day and period");
+                    "This teacher is already booked for an overlapping time on this day");
         }
 
-        boolean classBooked = timetableRepository
-                .existsByDayOfWeekAndPeriod_IdAndAssignment_SchoolClass_IdAndSchoolId(
-                        newDayOfWeek, newPeriod.getId(), newAssignment.getSchoolClass().getId(), schoolId)
-                && !isSameSlot(timetable, newDayOfWeek, newPeriod, newAssignment);
+        boolean classBooked = timetableRepository.existsOverlappingForClass(
+                schoolId, newDayOfWeek, newAssignment.getSchoolClass().getId(),
+                newPeriod.getStartTime(), newPeriod.getEndTime(), timetable.getId());
 
         if (classBooked) {
             throw new TimetableExceptions.TimetableConflictException(
-                    "This class already has a lesson scheduled for this day and period");
+                    "This class already has an overlapping lesson scheduled on this day");
         }
 
         timetable.setDayOfWeek(newDayOfWeek);

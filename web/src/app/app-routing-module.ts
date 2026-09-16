@@ -15,6 +15,7 @@ import {SubjectList} from './pages/subject/subject-list/subject-list';
 import {StudentList} from './pages/student/student-list/student-list';
 import {ParentList} from './pages/parent/parent-list/parent-list';
 import {TeacherList} from './pages/teacher/teacher-list/teacher-list';
+import {TimetablePage} from './pages/timetable/timetable-page/timetable-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -28,13 +29,14 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
-      {path: 'teachers', component: TeacherList},
+      {path: 'teachers', component: TeacherList },
       { path: 'school-profile', component: SchoolProfile },
-      { path: 'academic-years', component: AcademicYearList},
-      { path: 'classes', component: ClassList},
-      { path: 'subjects', component: SubjectList},
-      { path: 'students', component: StudentList},
-      {path: 'parents', component: ParentList},
+      { path: 'academic-years', component: AcademicYearList },
+      { path: 'classes', component: ClassList },
+      { path: 'subjects', component: SubjectList },
+      { path: 'students', component: StudentList },
+      { path: 'parents', component: ParentList },
+      { path: 'timetable', component: TimetablePage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

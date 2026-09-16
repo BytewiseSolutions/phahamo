@@ -21,7 +21,4 @@ public class Period extends SchoolScopedEntity {
 
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
-
-    @Column(name = "order_index", nullable = false)
-    private Integer orderIndex;
 }

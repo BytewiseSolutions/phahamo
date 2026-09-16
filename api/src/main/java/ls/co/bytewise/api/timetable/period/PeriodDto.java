@@ -23,14 +23,10 @@ public class PeriodDto extends BaseDto {
     @NotNull
     private LocalTime endTime;
 
-    @NotNull
-    private Integer orderIndex;
-
     public PeriodDto(Period period) {
         super(period);
         this.name = period.getName();
         this.startTime = period.getStartTime();
         this.endTime = period.getEndTime();
-        this.orderIndex = period.getOrderIndex();
     }
 }

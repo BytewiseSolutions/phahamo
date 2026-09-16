@@ -1,0 +1,54 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Period' : 'Add Period' }}</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="periodForm" (ngSubmit)="onSubmit()" class="period-form">
+
+        <div class="form-group">
+          <label for="name">Name <span class="required">*</span></label>
+          <input id="name" type="text" formControlName="name" placeholder="e.g. Period 1" />
+          @if (periodForm.get('name')?.invalid && periodForm.get('name')?.touched) {
+            <small class="validation-error">Name is required.</small>
+          }
+        </div>
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="startTime">Start Time <span class="required">*</span></label>
+            <input id="startTime" type="time" formControlName="startTime" />
+            @if (periodForm.get('startTime')?.invalid && periodForm.get('startTime')?.touched) {
+              <small class="validation-error">Start time is required.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="endTime">End Time <span class="required">*</span></label>
+            <input id="endTime" type="time" formControlName="endTime" />
+            @if (periodForm.get('endTime')?.invalid && periodForm.get('endTime')?.touched) {
+              <small class="validation-error">End time is required.</small>
+            }
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button">
+            {{ isEditMode ? 'Save Changes' : 'Add Period' }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+}

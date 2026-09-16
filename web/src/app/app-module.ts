@@ -43,6 +43,9 @@ import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form
 import { TeacherList } from './pages/teacher/teacher-list/teacher-list';
 import { TeacherForm } from './pages/teacher/teacher-form/teacher-form';
 import { TeacherView } from './pages/teacher/teacher-view/teacher-view';
+import { TimetablePage } from './pages/timetable/timetable-page/timetable-page';
+import { PeriodForm } from './pages/timetable/period-form/period-form';
+import { TimetableForm } from './pages/timetable/timetable-form/timetable-form';
 
 @NgModule({
   declarations: [
@@ -82,7 +85,10 @@ import { TeacherView } from './pages/teacher/teacher-view/teacher-view';
     ParentLinkForm,
     TeacherList,
     TeacherForm,
-    TeacherView
+    TeacherView,
+    TimetablePage,
+    PeriodForm,
+    TimetableForm
   ],
   imports: [
     BrowserModule,
