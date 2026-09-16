@@ -12,9 +12,20 @@ public interface SubjectClassAssignmentRepository extends JpaRepository<SubjectC
 
     List<SubjectClassAssignment> findAllBySubjectId(Long subjectId);
 
-    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearId(Long subjectId, Long schoolClassId, Long academicYearId);
+    List<SubjectClassAssignment> findAllByTeacherIdAndSchoolId(Long teacherId, Long schoolId);
 
-    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearIdAndIdNot(Long subjectId, Long schoolClassId, Long academicYearId, Long excludeId);
+    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearId(
+            Long subjectId,
+            Long schoolClassId,
+            Long academicYearId
+    );
+
+    boolean existsBySubjectIdAndSchoolClassIdAndAcademicYearIdAndIdNot(
+            Long subjectId,
+            Long schoolClassId,
+            Long academicYearId,
+            Long excludeId
+    );
 
     boolean existsBySubjectId(Long subjectId);
 }

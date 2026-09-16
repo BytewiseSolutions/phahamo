@@ -19,6 +19,7 @@ export class Header implements OnInit {
   private pageTitles: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/users': 'Users',
+    '/teachers': 'Teachers',
     '/students': 'Students',
     '/classes': 'Classes',
     '/subjects': 'Subjects',

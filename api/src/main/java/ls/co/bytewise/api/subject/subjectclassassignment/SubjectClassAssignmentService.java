@@ -167,4 +167,14 @@ public class SubjectClassAssignmentService {
         return assignmentRepository.findById(id)
                 .orElseThrow(() -> new SubjectClassAssignmentExceptions.AssignmentNotFoundException("Assignment not found"));
     }
+
+    public List<SubjectClassAssignmentDto> listByTeacher(Long teacherId) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return assignmentRepository
+                .findAllByTeacherIdAndSchoolId(teacherId, schoolId)
+                .stream()
+                .map(SubjectClassAssignmentDto::new)
+                .toList();
+    }
 }

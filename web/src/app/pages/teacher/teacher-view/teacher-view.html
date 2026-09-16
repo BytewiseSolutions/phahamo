@@ -1,0 +1,169 @@
+<div class="teacher-view-page">
+
+  @if (teacher) {
+
+    <div class="profile-header">
+
+      <div class="profile-identity">
+
+        <h1>
+          {{ teacher.user.firstName }} {{ teacher.user.lastName }}
+        </h1>
+
+        <div class="profile-meta">
+
+          <span>
+            {{ teacher.employeeNumber }}
+          </span>
+
+          <span>
+            ({{ teacher.user.phone || '—' }})
+          </span>
+
+          <span
+            class="status-badge"
+            [class.inactive]="teacher.user.status !== 'ACTIVE'">
+            {{ teacher.user.status }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="link-button"
+        (click)="onBack()">
+        &larr; Back
+      </button>
+
+    </div>
+
+    <div class="teacher-summary">
+
+      <div class="teacher-card">
+
+        <div class="detail-item">
+          <span class="label">Email</span>
+          <span class="value">
+            {{ teacher.user.email }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Employment</span>
+          <span class="value">
+            {{ getEmploymentTypeLabel(teacher.employmentType) }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Date Joined</span>
+          <span class="value">
+            {{
+              teacher.dateJoined
+                ? (teacher.dateJoined | date:'dd MMM yyyy')
+                : '—'
+            }}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="teacher-card professional-card">
+
+        <div class="card-heading">
+          <h2>Professional Information</h2>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Qualifications</span>
+          <span class="value">
+            {{ teacher.qualifications || '—' }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Specialization</span>
+          <span class="value">
+            {{ teacher.specialization || '—' }}
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="teacher-tabs">
+
+      <button
+        type="button"
+        class="teacher-tab"
+        [class.active]="activeTab === 'subjects'"
+        (click)="onTabChange('subjects')">
+        Subjects
+      </button>
+
+      <button
+        type="button"
+        class="teacher-tab"
+        [class.active]="activeTab === 'classes'"
+        (click)="onTabChange('classes')">
+        Classes
+      </button>
+
+      <button
+        type="button"
+        class="teacher-tab"
+        [class.active]="activeTab === 'timetable'"
+        (click)="onTabChange('timetable')">
+        Timetable
+      </button>
+
+      <button
+        type="button"
+        class="teacher-tab"
+        [class.active]="activeTab === 'attendance'"
+        (click)="onTabChange('attendance')">
+        Attendance
+      </button>
+
+    </div>
+
+    <div class="tab-content">
+
+      @if (activeTab === 'subjects') {
+
+        <div class="empty-tab">
+          <h3>Subjects</h3>
+          <p>Subjects assigned to this teacher will appear here.</p>
+        </div>
+
+      } @else if (activeTab === 'classes') {
+
+        <div class="empty-tab">
+          <h3>Classes</h3>
+          <p>Classes assigned to this teacher will appear here.</p>
+        </div>
+
+      } @else if (activeTab === 'timetable') {
+
+        <div class="empty-tab">
+          <h3>Timetable</h3>
+          <p>The teacher's timetable will appear here.</p>
+        </div>
+
+      } @else if (activeTab === 'attendance') {
+
+        <div class="empty-tab">
+          <h3>Attendance</h3>
+          <p>Teacher attendance information will appear here.</p>
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>

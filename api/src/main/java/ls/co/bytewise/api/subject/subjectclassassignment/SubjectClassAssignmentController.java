@@ -66,4 +66,10 @@ public class SubjectClassAssignmentController {
         assignmentService.deleteAssignment(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/teacher/{teacherId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<SubjectClassAssignmentDto> listByTeacher(@PathVariable Long teacherId) {
+        return assignmentService.listByTeacher(teacherId);
+    }
 }
