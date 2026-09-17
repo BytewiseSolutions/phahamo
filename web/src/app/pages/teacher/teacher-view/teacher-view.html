@@ -192,12 +192,91 @@
 
       } @else if (activeTab === 'timetable') {
 
-        <div class="empty-tab">
-          <h3>Timetable</h3>
-          <p>The teacher's timetable will appear here.</p>
-        </div>
+    @if (loadingTimetable) {
 
-      } @else if (activeTab === 'attendance') {
+      <div class="empty-tab">
+        <p>Loading timetable...</p>
+      </div>
+
+    } @else if (timetableError) {
+
+      <div class="empty-tab">
+        <p>{{ timetableError }}</p>
+      </div>
+
+    } @else if (timetableSlots.length === 0) {
+
+      <div class="empty-tab">
+        <h3>No Timetable Slots</h3>
+        <p>This teacher has not been scheduled for any lessons yet.</p>
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <table class="teacher-timetable-grid">
+
+          <thead>
+          <tr>
+            <th class="period-col">Period</th>
+            @for (day of days; track day) {
+              <th>{{ getDayLabel(day) }}</th>
+            }
+          </tr>
+          </thead>
+
+          <tbody>
+
+            @for (period of periods; track period.id) {
+
+              <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+
+                <td class="period-col">
+                  <div class="period-name">{{ period.name }}</div>
+                  <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
+                </td>
+
+                @if (period.name === 'Break' || period.name === 'Lunch') {
+
+                  <td [attr.colspan]="days.length" class="break-cell">
+                    {{ period.name }}
+                  </td>
+
+                } @else {
+
+                  @for (day of days; track day) {
+
+                    <td class="slot-cell">
+
+                      @let slot = slotFor(day, period.id);
+
+                      @if (slot) {
+                        <div class="cell-subject">{{ slot.subjectName }}</div>
+                        <div class="cell-class">{{ slot.schoolClassName }}</div>
+                      } @else {
+                        <span class="cell-free">—</span>
+                      }
+
+                    </td>
+
+                  }
+
+                }
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  } @else if (activeTab === 'attendance') {
 
         <div class="empty-tab">
           <h3>Attendance</h3>

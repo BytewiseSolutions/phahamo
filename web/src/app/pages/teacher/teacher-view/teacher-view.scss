@@ -276,3 +276,79 @@
     flex-wrap: wrap;
   }
 }
+.teacher-timetable-grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.teacher-timetable-grid th,
+.teacher-timetable-grid td {
+  border: 1px solid var(--border-light);
+  padding: 10px 12px;
+  font-size: 13px;
+  vertical-align: top;
+}
+
+.teacher-timetable-grid th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.period-col {
+  min-width: 120px;
+  background: var(--background);
+}
+
+.period-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.period-time {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.break-row .break-cell {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  background: repeating-linear-gradient(
+      45deg,
+      var(--background),
+      var(--background) 8px,
+      var(--border-light) 8px,
+      var(--border-light) 16px
+  );
+}
+
+.slot-cell {
+  min-width: 110px;
+}
+
+.cell-subject {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.cell-class {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.cell-free {
+  color: var(--text-secondary);
+  font-size: 12px;
+}

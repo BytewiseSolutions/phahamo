@@ -74,27 +74,55 @@
 
     } @else {
 
-      <div class="day-tabs">
-        @for (day of days; track day) {
+      <div class="schedule-controls">
+
+        <div class="day-tabs">
+          @for (day of days; track day) {
+            <button
+              type="button"
+              class="day-tab"
+              [class.active]="activeDay === day"
+              (click)="onDayChange(day)">
+              {{ getDayLabel(day) }}
+            </button>
+          }
+        </div>
+
+        <div class="view-toggle">
           <button
             type="button"
-            class="day-tab"
-            [class.active]="activeDay === day"
-            (click)="onDayChange(day)">
-            {{ getDayLabel(day) }}
+            class="view-toggle-btn"
+            [class.active]="viewMode === 'class'"
+            (click)="onViewModeChange('class')">
+            By Class
           </button>
-        }
+          <button
+            type="button"
+            class="view-toggle-btn"
+            [class.active]="viewMode === 'teacher'"
+            (click)="onViewModeChange('teacher')">
+            By Teacher
+          </button>
+        </div>
+
       </div>
 
-      @if (loadingPeriods || loadingClasses || loadingTimetable) {
+      @if (loadingPeriods || loadingClasses || loadingTeachers || loadingTimetable) {
 
         <p class="loading-message">Loading schedule...</p>
 
-      } @else if (schoolClasses.length === 0) {
+      } @else if (viewMode === 'class' && schoolClasses.length === 0) {
 
         <div class="empty-state">
           <h3>No classes set up</h3>
           <p>Add a class before building the timetable.</p>
+        </div>
+
+      } @else if (viewMode === 'teacher' && teachers.length === 0) {
+
+        <div class="empty-state">
+          <h3>No teachers registered</h3>
+          <p>Register a teacher before viewing the schedule by teacher.</p>
         </div>
 
       } @else {
@@ -103,72 +131,140 @@
 
           <table class="grid-table">
 
-            <thead>
-            <tr>
-              <th class="period-col">Period</th>
-              @for (schoolClass of schoolClasses; track schoolClass.id) {
-                <th>{{ schoolClass.name }}</th>
-              }
-            </tr>
-            </thead>
+            @if (viewMode === 'class') {
 
-            <tbody>
+              <thead>
+              <tr>
+                <th class="period-col">Period</th>
+                @for (schoolClass of schoolClasses; track schoolClass.id) {
+                  <th>{{ schoolClass.name }}</th>
+                }
+              </tr>
+              </thead>
 
-              @for (period of periods; track period.id) {
+              <tbody>
 
-                <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+                @for (period of periods; track period.id) {
 
-                  <td class="period-col">
-                    <div class="period-name">{{ period.name }}</div>
-                    <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
-                  </td>
+                  <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
 
-                  @if (period.name === 'Break' || period.name === 'Lunch') {
-
-                    <td [attr.colspan]="schoolClasses.length" class="break-cell">
-                      {{ period.name }}
+                    <td class="period-col">
+                      <div class="period-name">{{ period.name }}</div>
+                      <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
                     </td>
 
-                  } @else {
+                    @if (period.name === 'Break' || period.name === 'Lunch') {
 
-                    @for (schoolClass of schoolClasses; track schoolClass.id) {
-
-                      <td class="slot-cell">
-
-                        @let slot = slotFor(activeDay, period.id, schoolClass.name);
-
-                        @if (slot) {
-
-                          <div class="cell-subject">{{ slot.subjectName }}</div>
-                          <div class="cell-teacher">{{ slot.teacherName || '—' }}</div>
-
-                          <div class="cell-actions">
-                            <button type="button" class="link-button" (click)="onEditTimetable(slot)">Edit</button>
-                            <button type="button" class="link-button danger" (click)="onDeleteTimetable(slot)">Delete</button>
-                          </div>
-
-                        } @else {
-
-                          <button
-                            type="button"
-                            class="empty-cell-button"
-                            (click)="onAddSlotForCell(activeDay, period.id)">
-                            +
-                          </button>
-
-                        }
-
+                      <td [attr.colspan]="schoolClasses.length" class="break-cell">
+                        {{ period.name }}
                       </td>
+
+                    } @else {
+
+                      @for (schoolClass of schoolClasses; track schoolClass.id) {
+
+                        <td class="slot-cell">
+
+                          @let slot = slotForClass(activeDay, period.id, schoolClass.name);
+
+                          @if (slot) {
+
+                            <div class="cell-subject">{{ slot.subjectName }}</div>
+                            <div class="cell-teacher">{{ slot.teacherName || '—' }}</div>
+
+                            <div class="cell-actions">
+                              <button type="button" class="link-button" (click)="onEditTimetable(slot)">Edit</button>
+                              <button type="button" class="link-button danger" (click)="onDeleteTimetable(slot)">Delete</button>
+                            </div>
+
+                          } @else {
+
+                            <button
+                              type="button"
+                              class="empty-cell-button"
+                              (click)="onAddSlotForCell(activeDay, period.id)">
+                              +
+                            </button>
+
+                          }
+
+                        </td>
+
+                      }
 
                     }
 
-                  }
+                  </tr>
 
-                </tr>
+                }
 
-              }
+              </tbody>
 
-            </tbody>
+            } @else {
+
+              <thead>
+              <tr>
+                <th class="period-col">Period</th>
+                @for (teacher of teachers; track teacher.id) {
+                  <th>{{ getTeacherFullName(teacher) }}</th>
+                }
+              </tr>
+              </thead>
+
+              <tbody>
+
+                @for (period of periods; track period.id) {
+
+                  <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+
+                    <td class="period-col">
+                      <div class="period-name">{{ period.name }}</div>
+                      <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
+                    </td>
+
+                    @if (period.name === 'Break' || period.name === 'Lunch') {
+
+                      <td [attr.colspan]="teachers.length" class="break-cell">
+                        {{ period.name }}
+                      </td>
+
+                    } @else {
+
+                      @for (teacher of teachers; track teacher.id) {
+
+                        <td class="slot-cell">
+
+                          @let slot = slotForTeacher(activeDay, period.id, getTeacherFullName(teacher));
+
+                          @if (slot) {
+
+                            <div class="cell-subject">{{ slot.subjectName }}</div>
+                            <div class="cell-teacher">{{ slot.schoolClassName }}</div>
+
+                            <div class="cell-actions">
+                              <button type="button" class="link-button" (click)="onEditTimetable(slot)">Edit</button>
+                              <button type="button" class="link-button danger" (click)="onDeleteTimetable(slot)">Delete</button>
+                            </div>
+
+                          } @else {
+
+                            <span class="cell-free">Free</span>
+
+                          }
+
+                        </td>
+
+                      }
+
+                    }
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            }
 
           </table>
 

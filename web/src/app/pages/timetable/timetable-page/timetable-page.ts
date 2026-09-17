@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {DayOfWeek} from '../day-of-week';
 import {Period, PeriodPayload} from '../period';
 import {SchoolClass} from '../../class/class';
+import {Teacher} from '../../teacher/teacher';
 import {Timetable, TimetablePayload} from '../timetable';
 import {BackendService} from '../../../util/backend.service';
 
@@ -18,12 +19,16 @@ export class TimetablePage implements OnInit {
   activeDay: DayOfWeek = DayOfWeek.MONDAY;
   days = Object.values(DayOfWeek);
 
+  viewMode: 'class' | 'teacher' = 'class';
+
   periods: Period[] = [];
   schoolClasses: SchoolClass[] = [];
+  teachers: Teacher[] = [];
   timetableSlots: Timetable[] = [];
 
   loadingPeriods = false;
   loadingClasses = false;
+  loadingTeachers = false;
   loadingTimetable = false;
   errorMessage = '';
 
@@ -40,6 +45,7 @@ export class TimetablePage implements OnInit {
   ngOnInit(): void {
     this.loadPeriods();
     this.loadSchoolClasses();
+    this.loadTeachers();
     this.loadTimetable();
   }
 
@@ -51,9 +57,19 @@ export class TimetablePage implements OnInit {
     this.activeDay = day;
   }
 
+  onViewModeChange(mode: 'class' | 'teacher'): void {
+    this.viewMode = mode;
+  }
+
   getDayLabel(day: DayOfWeek): string {
     return day.charAt(0) + day.slice(1).toLowerCase();
   }
+
+  getTeacherFullName(teacher: Teacher): string {
+    return `${teacher.user.firstName} ${teacher.user.lastName}`;
+  }
+
+  // ----- Periods -----
 
   loadPeriods(): void {
     this.loadingPeriods = true;
@@ -116,6 +132,8 @@ export class TimetablePage implements OnInit {
     });
   }
 
+  // ----- School Classes -----
+
   loadSchoolClasses(): void {
     this.loadingClasses = true;
 
@@ -130,6 +148,25 @@ export class TimetablePage implements OnInit {
       }
     });
   }
+
+  // ----- Teachers -----
+
+  loadTeachers(): void {
+    this.loadingTeachers = true;
+
+    this.backend.get<Teacher[]>('/teachers').subscribe({
+      next: (teachers) => {
+        this.teachers = teachers;
+        this.loadingTeachers = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to load teachers.';
+        this.loadingTeachers = false;
+      }
+    });
+  }
+
+  // ----- Timetable -----
 
   loadTimetable(): void {
     this.loadingTimetable = true;
@@ -146,11 +183,19 @@ export class TimetablePage implements OnInit {
     });
   }
 
-  slotFor(day: DayOfWeek, periodId: number, schoolClassName: string): Timetable | null {
+  slotForClass(day: DayOfWeek, periodId: number, schoolClassName: string): Timetable | null {
     return this.timetableSlots.find(slot =>
       slot.dayOfWeek === day &&
       slot.periodId === periodId &&
       slot.schoolClassName === schoolClassName
+    ) || null;
+  }
+
+  slotForTeacher(day: DayOfWeek, periodId: number, teacherFullName: string): Timetable | null {
+    return this.timetableSlots.find(slot =>
+      slot.dayOfWeek === day &&
+      slot.periodId === periodId &&
+      slot.teacherName === teacherFullName
     ) || null;
   }
 

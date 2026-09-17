@@ -2,7 +2,10 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { BackendService } from '../../../util/backend.service';
 import { Teacher } from '../teacher';
 import { EmploymentType } from '../employment-type';
-import {SubjectClassAssignment} from '../../subject-class-assignment/subject-class-assignment';
+import { SubjectClassAssignment } from '../../subject-class-assignment/subject-class-assignment';
+import { Period } from '../../timetable/period';
+import { Timetable } from '../../timetable/timetable';
+import { DayOfWeek } from '../../timetable/day-of-week';
 
 @Component({
   selector: 'app-teacher-view',
@@ -21,6 +24,14 @@ export class TeacherView implements OnChanges {
   loadingAssignments = false;
   assignmentsError = '';
 
+  periods: Period[] = [];
+  timetableSlots: Timetable[] = [];
+  loadingTimetable = false;
+  timetableError = '';
+  timetableLoaded = false;
+
+  days = Object.values(DayOfWeek);
+
   constructor(
     private backend: BackendService
   ) {}
@@ -28,6 +39,7 @@ export class TeacherView implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['teacher'] && this.teacher) {
       this.loadAssignments();
+      this.timetableLoaded = false;
     }
   }
 
@@ -55,10 +67,59 @@ export class TeacherView implements OnChanges {
     });
   }
 
+  loadTimetable(): void {
+    if (!this.teacher?.user?.id || this.timetableLoaded) {
+      return;
+    }
+
+    this.loadingTimetable = true;
+    this.timetableError = '';
+
+    this.backend.get<Period[]>('/periods').subscribe({
+      next: (periods) => {
+        this.periods = periods;
+
+        this.backend.get<Timetable[]>(
+          `/timetable/teacher/${this.teacher!.user.id}`
+        ).subscribe({
+          next: (slots) => {
+            this.timetableSlots = slots;
+            this.loadingTimetable = false;
+            this.timetableLoaded = true;
+          },
+          error: (err) => {
+            this.timetableError =
+              err.error?.message || 'Failed to load timetable.';
+            this.loadingTimetable = false;
+          }
+        });
+      },
+      error: (err) => {
+        this.timetableError =
+          err.error?.message || 'Failed to load periods.';
+        this.loadingTimetable = false;
+      }
+    });
+  }
+
+  slotFor(day: DayOfWeek, periodId: number): Timetable | null {
+    return this.timetableSlots.find(slot =>
+      slot.dayOfWeek === day && slot.periodId === periodId
+    ) || null;
+  }
+
   onTabChange(
     tab: 'subjects' | 'timetable' | 'attendance'
   ): void {
     this.activeTab = tab;
+
+    if (tab === 'timetable') {
+      this.loadTimetable();
+    }
+  }
+
+  getDayLabel(day: DayOfWeek): string {
+    return day.charAt(0) + day.slice(1).toLowerCase();
   }
 
   onBack(): void {
