@@ -31,10 +31,7 @@ public class LessonService {
                 .filter(t -> t.getDayOfWeek() == date.getDayOfWeek())
                 .toList();
 
-        School school = requester.getSchools().stream()
-                .filter(s -> s.getId().equals(schoolId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Active school not found"));
+        School school = resolveActiveSchool(requester, schoolId);
 
         return slots.stream()
                 .map(slot -> lessonRepository
@@ -53,10 +50,7 @@ public class LessonService {
                 .filter(t -> t.getDayOfWeek() == date.getDayOfWeek())
                 .toList();
 
-        School school = requester.getSchools().stream()
-                .filter(s -> s.getId().equals(schoolId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Active school not found"));
+        School school = resolveActiveSchool(requester, schoolId);
 
         return slots.stream()
                 .map(slot -> lessonRepository
@@ -121,5 +115,12 @@ public class LessonService {
                 .stream()
                 .map(LessonDto::new)
                 .toList();
+    }
+
+    private School resolveActiveSchool(User requester, Long schoolId) {
+        return requester.getSchools().stream()
+                .filter(s -> s.getId().equals(schoolId))
+                .findFirst()
+                .orElseThrow(() -> new LessonExceptions.ActiveSchoolNotFoundException("Active school not found"));
     }
 }

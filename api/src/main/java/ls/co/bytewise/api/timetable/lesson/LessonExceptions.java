@@ -13,4 +13,10 @@ public class LessonExceptions {
             super(message);
         }
     }
+
+    public static class ActiveSchoolNotFoundException extends RuntimeException {
+        public ActiveSchoolNotFoundException(String message) {
+            super(message);
+        }
+    }
 }

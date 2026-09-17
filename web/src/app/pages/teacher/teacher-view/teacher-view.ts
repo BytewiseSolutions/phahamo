@@ -241,12 +241,12 @@ export class TeacherView implements OnChanges {
         return 'Cancelled';
       case LessonStatus.SUBSTITUTED:
         return 'Substituted';
+      case LessonStatus.MISSED:
+        return 'Missed';
       default:
         return status;
     }
   }
-
-  // ----- Tabs -----
 
   onTabChange(
     tab: 'subjects' | 'timetable' | 'lessons' | 'attendance'

@@ -267,4 +267,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidLesson(LessonExceptions.InvalidLessonException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(LessonExceptions.ActiveSchoolNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleActiveSchoolNotFound(LessonExceptions.ActiveSchoolNotFoundException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }
