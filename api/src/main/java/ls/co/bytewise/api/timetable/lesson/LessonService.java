@@ -102,4 +102,24 @@ public class LessonService {
 
         return lesson;
     }
+
+    public List<LessonDto> listForTeacherInRange(Long teacherId, LocalDate startDate, LocalDate endDate) {
+        Long schoolId = TenantContext.getSchoolId();
+        return lessonRepository
+                .findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                        teacherId, startDate, endDate, schoolId)
+                .stream()
+                .map(LessonDto::new)
+                .toList();
+    }
+
+    public List<LessonDto> listForClassInRange(Long schoolClassId, LocalDate startDate, LocalDate endDate) {
+        Long schoolId = TenantContext.getSchoolId();
+        return lessonRepository
+                .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                        schoolClassId, startDate, endDate, schoolId)
+                .stream()
+                .map(LessonDto::new)
+                .toList();
+    }
 }

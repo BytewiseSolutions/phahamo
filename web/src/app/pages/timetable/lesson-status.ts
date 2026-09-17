@@ -1,0 +1,5 @@
+export enum LessonStatus {
+  SCHEDULED = 'SCHEDULED',
+  CANCELLED = 'CANCELLED',
+  SUBSTITUTED = 'SUBSTITUTED'
+}

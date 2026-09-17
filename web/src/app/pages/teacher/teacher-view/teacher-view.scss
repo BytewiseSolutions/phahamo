@@ -265,7 +265,6 @@
 @media (max-width: 480px) {
   .profile-header {
     flex-direction: column;
-    gap: 12px;
   }
 
   .profile-identity {
@@ -276,6 +275,9 @@
     flex-wrap: wrap;
   }
 }
+
+/* Timetable grid */
+
 .teacher-timetable-grid {
   width: 100%;
   border-collapse: collapse;
@@ -315,6 +317,7 @@
 
 .period-time {
   margin-top: 2px;
+  margin-left: 0;
   color: var(--text-secondary);
   font-size: 11px;
 }
@@ -351,4 +354,59 @@
 .cell-free {
   color: var(--text-secondary);
   font-size: 12px;
+}
+
+/* Lessons */
+
+.lessons-controls {
+  margin-bottom: 16px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filter-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.custom-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.custom-range input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+}
+
+.error-banner {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: rgb(from var(--error) r g b / 0.08);
+  border: 1px solid rgb(from var(--error) r g b / 0.25);
+  border-radius: var(--border-radius-md);
+  color: var(--error);
+  font-size: 13px;
 }

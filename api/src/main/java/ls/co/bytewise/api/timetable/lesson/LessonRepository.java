@@ -15,4 +15,10 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     List<Lesson> findAllByTimetable_Assignment_SchoolClass_IdAndDateAndSchoolId(
             Long schoolClassId, LocalDate date, Long schoolId);
+
+    List<Lesson> findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+            Long teacherId, LocalDate startDate, LocalDate endDate, Long schoolId);
+
+    List<Lesson> findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+            Long schoolClassId, LocalDate startDate, LocalDate endDate, Long schoolId);
 }
