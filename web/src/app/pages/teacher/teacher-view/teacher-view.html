@@ -96,27 +96,19 @@
 
     <div class="teacher-tabs">
 
-      <button
-        type="button"
-        class="teacher-tab"
-        [class.active]="activeTab === 'subjects'"
-        (click)="onTabChange('subjects')">
+      <button type="button" class="teacher-tab" [class.active]="activeTab === 'subjects'" (click)="onTabChange('subjects')">
         Subjects
       </button>
 
-      <button
-        type="button"
-        class="teacher-tab"
-        [class.active]="activeTab === 'timetable'"
-        (click)="onTabChange('timetable')">
+      <button type="button" class="teacher-tab" [class.active]="activeTab === 'timetable'" (click)="onTabChange('timetable')">
         Timetable
       </button>
 
-      <button
-        type="button"
-        class="teacher-tab"
-        [class.active]="activeTab === 'attendance'"
-        (click)="onTabChange('attendance')">
+      <button type="button" class="teacher-tab" [class.active]="activeTab === 'lessons'" (click)="onTabChange('lessons')">
+        Lessons
+      </button>
+
+      <button type="button" class="teacher-tab" [class.active]="activeTab === 'attendance'" (click)="onTabChange('attendance')">
         Attendance
       </button>
 
@@ -192,10 +184,173 @@
 
       } @else if (activeTab === 'timetable') {
 
-        <div class="empty-tab">
-          <h3>Timetable</h3>
-          <p>The teacher's timetable will appear here.</p>
+        @if (loadingTimetable) {
+
+          <div class="empty-tab">
+            <p>Loading timetable...</p>
+          </div>
+
+        } @else if (timetableError) {
+
+          <div class="empty-tab">
+            <p>{{ timetableError }}</p>
+          </div>
+
+        } @else if (timetableSlots.length === 0) {
+
+          <div class="empty-tab">
+            <h3>No Timetable Slots</h3>
+            <p>This teacher has not been scheduled for any lessons yet.</p>
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table class="teacher-timetable-grid">
+
+              <thead>
+              <tr>
+                <th class="period-col">Period</th>
+                @for (day of days; track day) {
+                  <th>{{ getDayLabel(day) }}</th>
+                }
+              </tr>
+              </thead>
+
+              <tbody>
+
+                @for (period of periods; track period.id) {
+
+                  <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+
+                    <td class="period-col">
+                      <div class="period-name">{{ period.name }}</div>
+                      <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
+                    </td>
+
+                    @if (period.name === 'Break' || period.name === 'Lunch') {
+
+                      <td [attr.colspan]="days.length" class="break-cell">
+                        {{ period.name }}
+                      </td>
+
+                    } @else {
+
+                      @for (day of days; track day) {
+
+                        <td class="slot-cell">
+
+                          @let slot = slotFor(day, period.id);
+
+                          @if (slot) {
+                            <div class="cell-subject">{{ slot.subjectName }}</div>
+                            <div class="cell-class">{{ slot.schoolClassName }}</div>
+                          } @else {
+                            <span class="cell-free">—</span>
+                          }
+
+                        </td>
+
+                      }
+
+                    }
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      } @else if (activeTab === 'lessons') {
+
+        <div class="lessons-controls">
+
+          <div class="filter-pills">
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'today'" (click)="onLessonFilterChange('today')">Today</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'week'" (click)="onLessonFilterChange('week')">Weekly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'month'" (click)="onLessonFilterChange('month')">Monthly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'quarter'" (click)="onLessonFilterChange('quarter')">Quarterly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'custom'" (click)="onLessonFilterChange('custom')">Custom</button>
+          </div>
+
+          @if (lessonFilter === 'custom') {
+            <div class="custom-range">
+              <input type="date" [(ngModel)]="customStartDate" (ngModelChange)="onCustomDateChange()" />
+              <span>to</span>
+              <input type="date" [(ngModel)]="customEndDate" (ngModelChange)="onCustomDateChange()" />
+            </div>
+          }
+
         </div>
+
+        @if (lessonsError) {
+          <div class="error-banner">
+            {{ lessonsError }}
+          </div>
+        }
+
+        @if (loadingLessons) {
+
+          <div class="empty-tab">
+            <p>Loading lessons...</p>
+          </div>
+
+        } @else if (lessons.length === 0) {
+
+          <div class="empty-tab">
+            <h3>No Lessons</h3>
+            <p>This teacher has no lessons scheduled in this period.</p>
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+
+            <table class="teacher-table">
+
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Period</th>
+                <th>Subject</th>
+                <th>Class</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+
+              <tbody>
+                @for (lesson of lessons; track lesson.id) {
+                  <tr>
+                    <td>{{ lesson.date | date:'dd MMM yyyy' }}</td>
+                    <td>
+                      {{ lesson.periodName }}
+                      <span class="period-time">({{ lesson.periodStartTime }}–{{ lesson.periodEndTime }})</span>
+                    </td>
+                    <td>{{ lesson.subjectName }}</td>
+                    <td>{{ lesson.schoolClassName }}</td>
+                    <td>
+                      <select [ngModel]="lesson.status" (ngModelChange)="onLessonStatusChange(lesson, $event)">
+                        @for (status of lessonStatuses; track status) {
+                          <option [value]="status">{{ getLessonStatusLabel(status) }}</option>
+                        }
+                      </select>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
 
       } @else if (activeTab === 'attendance') {
 
@@ -205,9 +360,6 @@
         </div>
 
       }
-
     </div>
-
   }
-
 </div>

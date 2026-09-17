@@ -1,0 +1,92 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Timetable Slot' : 'Add Timetable Slot' }}</h2>
+
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="timetableForm" (ngSubmit)="onSubmit()" class="timetable-form">
+
+        @if (assignmentLoadError) {
+          <div class="error-banner">
+            {{ assignmentLoadError }}
+          </div>
+        }
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="dayOfWeek">Day <span class="required">*</span></label>
+
+            <select id="dayOfWeek" formControlName="dayOfWeek">
+              <option value="">Select a day</option>
+              @for (day of daysOfWeek; track day) {
+                <option [value]="day">{{ getDayLabel(day) }}</option>
+              }
+            </select>
+
+            @if (timetableForm.get('dayOfWeek')?.invalid && timetableForm.get('dayOfWeek')?.touched) {
+              <small class="validation-error">Please select a day.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="periodId">Period <span class="required">*</span></label>
+
+            <select id="periodId" formControlName="periodId">
+              <option value="">Select a period</option>
+              @for (period of periods; track period.id) {
+                <option [value]="period.id">
+                  {{ period.name }} ({{ period.startTime }}–{{ period.endTime }})
+                </option>
+              }
+            </select>
+
+            @if (timetableForm.get('periodId')?.invalid && timetableForm.get('periodId')?.touched) {
+              <small class="validation-error">Please select a period.</small>
+            }
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <label for="assignmentId">Subject / Class / Teacher <span class="required">*</span></label>
+
+          <select id="assignmentId" formControlName="assignmentId">
+            <option value="">Select an assignment</option>
+            @for (assignment of assignments; track assignment.id) {
+              <option [value]="assignment.id">
+                {{ assignment.subjectName }} — {{ assignment.schoolClassName }}
+                @if (assignment.teacherName) {
+                  ({{ assignment.teacherName }})
+                }
+              </option>
+            }
+          </select>
+
+          @if (timetableForm.get('assignmentId')?.invalid && timetableForm.get('assignmentId')?.touched) {
+            <small class="validation-error">Please select an assignment.</small>
+          }
+
+          @if (loadingAssignments) {
+            <small class="field-hint">Loading assignments...</small>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button" [disabled]="loadingAssignments">
+            {{ isEditMode ? 'Save Changes' : 'Add Slot' }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+}

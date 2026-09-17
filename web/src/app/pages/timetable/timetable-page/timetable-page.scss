@@ -1,0 +1,418 @@
+.timetable-page {
+  padding: 40px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.primary-button {
+  height: 42px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--border-radius-md);
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: var(--primary-dark);
+}
+
+.error-banner {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgb(from var(--error) r g b / 0.08);
+  border: 1px solid rgb(from var(--error) r g b / 0.25);
+  border-radius: var(--border-radius-md);
+  color: var(--error);
+  font-size: 13px;
+}
+
+.timetable-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.timetable-tab {
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.timetable-tab:hover {
+  color: var(--text-primary);
+}
+
+.timetable-tab.active {
+  color: var(--color-primary, var(--primary));
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.loading-message {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.empty-state {
+  padding: 50px 20px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.empty-state h3 {
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Periods table */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.periods-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.periods-table th,
+.periods-table td {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.periods-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.periods-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.periods-table tbody tr:hover {
+  background: var(--background);
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button.danger {
+  color: var(--error);
+}
+
+/* Schedule grid */
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(180px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.day-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-header {
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.day-empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  background: var(--background);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.slot-card {
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.slot-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.slot-time {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.slot-subject {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.slot-meta {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.slot-actions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .timetable-page {
+    padding: 20px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .schedule-grid {
+    grid-template-columns: repeat(7, minmax(160px, 1fr));
+  }
+}
+
+.day-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.day-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.day-tab:hover {
+  background: var(--background);
+}
+
+.day-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.grid-table th,
+.grid-table td {
+  border: 1px solid var(--border-light);
+  padding: 10px 12px;
+  font-size: 13px;
+  vertical-align: top;
+}
+
+.grid-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.period-col {
+  min-width: 130px;
+  background: var(--background);
+}
+
+.period-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.period-time {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.break-row .break-cell {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  background: repeating-linear-gradient(
+      45deg,
+      var(--background),
+      var(--background) 8px,
+      var(--border-light) 8px,
+      var(--border-light) 16px
+  );
+}
+
+.slot-cell {
+  min-width: 140px;
+}
+
+.cell-subject {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.cell-teacher {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.cell-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.empty-cell-button {
+  width: 100%;
+  height: 32px;
+  border: 1px dashed var(--border);
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.empty-cell-button:hover {
+  background: var(--background);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.schedule-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--background);
+  border-radius: var(--border-radius-md);
+}
+
+.view-toggle-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.view-toggle-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.08));
+}
+
+.cell-free {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}

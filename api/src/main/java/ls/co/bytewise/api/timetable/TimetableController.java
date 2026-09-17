@@ -1,0 +1,63 @@
+package ls.co.bytewise.api.timetable;
+
+import jakarta.validation.Valid;
+import ls.co.bytewise.api.user.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/timetable")
+public class TimetableController {
+
+    private final TimetableService timetableService;
+
+    public TimetableController(TimetableService timetableService) {
+        this.timetableService = timetableService;
+    }
+
+    @PostMapping
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public ResponseEntity<TimetableDto> createTimetable(@AuthenticationPrincipal User currentUser,
+                                                        @Valid @RequestBody TimetableDto dto) {
+        TimetableDto created = timetableService.createTimetable(currentUser, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{id}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public TimetableDto updateTimetable(@AuthenticationPrincipal User currentUser,
+                                        @PathVariable Long id,
+                                        @Valid @RequestBody TimetableDto dto) {
+        return timetableService.updateTimetable(currentUser, id, dto);
+    }
+
+    @GetMapping
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<TimetableDto> listAll() {
+        return timetableService.listAll();
+    }
+
+    @GetMapping("/teacher/{id}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<TimetableDto> listByTeacher(@PathVariable Long id) {
+        return timetableService.listByTeacher(id);
+    }
+
+    @GetMapping("/class/{id}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<TimetableDto> listByClass(@PathVariable Long id) {
+        return timetableService.listByClass(id);
+    }
+
+    @DeleteMapping("/{id}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public ResponseEntity<Void> deleteTimetable(@PathVariable Long id) {
+        timetableService.deleteTimetable(id);
+        return ResponseEntity.noContent().build();
+    }
+}
