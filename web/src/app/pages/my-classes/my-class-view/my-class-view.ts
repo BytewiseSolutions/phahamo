@@ -29,7 +29,7 @@ export class MyClassView implements OnInit {
   loadingTimetable = false;
 
   days = Object.values(DayOfWeek);
-  activeDay: DayOfWeek = DayOfWeek.MONDAY;
+  activeDay: DayOfWeek = this.getTodayDayOfWeek();
 
   lessons: Lesson[] = [];
   loadingLessons = false;
@@ -87,6 +87,19 @@ export class MyClassView implements OnInit {
     if (tab === 'lessons' && this.lessons.length === 0) {
       this.loadLessons();
     }
+  }
+
+  private getTodayDayOfWeek(): DayOfWeek {
+    const map: Record<number, DayOfWeek> = {
+      0: DayOfWeek.SUNDAY,
+      1: DayOfWeek.MONDAY,
+      2: DayOfWeek.TUESDAY,
+      3: DayOfWeek.WEDNESDAY,
+      4: DayOfWeek.THURSDAY,
+      5: DayOfWeek.FRIDAY,
+      6: DayOfWeek.SATURDAY
+    };
+    return map[new Date().getDay()];
   }
 
   getDayLabel(day: DayOfWeek): string {
@@ -229,6 +242,10 @@ export class MyClassView implements OnInit {
     });
   }
 
+  onAttendance(lesson: Lesson): void {
+    this.router.navigate(['/my-classes', this.route.snapshot.paramMap.get('assignmentId'), 'attendance', lesson.id]);
+  }
+
   onLessonStatusChange(lesson: Lesson, status: LessonStatus): void {
     this.errorMessage = '';
 
@@ -243,6 +260,7 @@ export class MyClassView implements OnInit {
   getLessonStatusLabel(status: LessonStatus): string {
     switch (status) {
       case LessonStatus.SCHEDULED: return 'Scheduled';
+      case LessonStatus.COMPLETED: return 'Completed';
       case LessonStatus.CANCELLED: return 'Cancelled';
       case LessonStatus.SUBSTITUTED: return 'Substituted';
       case LessonStatus.MISSED: return 'Missed';

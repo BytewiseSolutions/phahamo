@@ -6,11 +6,13 @@ import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
+import ls.co.bytewise.api.timetable.lesson.Lesson;
+import ls.co.bytewise.api.timetable.lesson.LessonRepository;
+import ls.co.bytewise.api.timetable.lesson.LessonStatus;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -19,73 +21,88 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
+    private final LessonRepository lessonRepository;
 
     public AttendanceService(
             AttendanceRepository attendanceRepository,
             StudentRepository studentRepository,
-            SchoolClassRepository schoolClassRepository
+            SchoolClassRepository schoolClassRepository,
+            LessonRepository lessonRepository
     ) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
+        this.lessonRepository = lessonRepository;
     }
 
-    public List<AttendanceDto> getAttendanceForClassAndDate(User requester, Long schoolClassId, LocalDate date) {
+    public List<AttendanceDto> getAttendanceForLesson(User requester, Long lessonId) {
         Long schoolId = TenantContext.getSchoolId();
-        SchoolClass schoolClass = resolveClass(schoolClassId);
-        ensureCanAccessClass(requester, schoolClass);
+        Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureCanMarkLesson(requester, lesson);
 
-        List<Student> students = studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClassId);
-        List<Attendance> existing = attendanceRepository
-                .findAllBySchoolClassIdAndDateAndSchoolId(schoolClassId, date, schoolId);
+        SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
+        List<Student> students = studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, schoolClass.getId());
+        List<Attendance> existing = attendanceRepository.findAllByLessonIdAndSchoolId(lessonId, schoolId);
 
         return students.stream()
                 .map(student -> existing.stream()
                         .filter(a -> a.getStudent().getId().equals(student.getId()))
                         .findFirst()
                         .map(AttendanceDto::new)
-                        .orElseGet(() -> blankDto(student, schoolClass, date)))
+                        .orElseGet(() -> blankDto(student, schoolClass, lesson)))
                 .toList();
     }
 
     @Transactional
-    public List<AttendanceDto> markBulkAttendance(
-            User marker, Long schoolClassId, LocalDate date, List<AttendanceDto> records
+    public List<AttendanceDto> markBulkAttendanceForLesson(
+            User marker, Long lessonId, List<AttendanceDto> records
     ) {
-        SchoolClass schoolClass = resolveClass(schoolClassId);
-        ensureCanAccessClass(marker, schoolClass);
+        Long schoolId = TenantContext.getSchoolId();
+        Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureCanMarkLesson(marker, lesson);
 
-        return records.stream()
-                .map(r -> upsert(marker, schoolClass, r.getStudentId(), date, r.getStatus()))
+        SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
+
+        List<AttendanceDto> result = records.stream()
+                .map(r -> upsert(marker, schoolClass, lesson, r.getStudentId(), r.getStatus()))
                 .map(AttendanceDto::new)
                 .toList();
+
+        lesson.setStatus(LessonStatus.COMPLETED);
+        lesson.setUpdatedBy(marker);
+        lessonRepository.save(lesson);
+
+        return result;
     }
 
     @Transactional
-    public AttendanceDto markSingleAttendance(
-            User marker, Long schoolClassId, Long studentId, LocalDate date, AttendanceStatus status
+    public AttendanceDto markSingleAttendanceForLesson(
+            User marker, Long lessonId, Long studentId, AttendanceStatus status
     ) {
-        SchoolClass schoolClass = resolveClass(schoolClassId);
-        ensureCanAccessClass(marker, schoolClass);
+        Long schoolId = TenantContext.getSchoolId();
+        Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureCanMarkLesson(marker, lesson);
 
-        return new AttendanceDto(upsert(marker, schoolClass, studentId, date, status));
+        SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
+        return new AttendanceDto(upsert(marker, schoolClass, lesson, studentId, status));
     }
 
-    private Attendance upsert(User marker, SchoolClass schoolClass, Long studentId, LocalDate date, AttendanceStatus status) {
+    private Attendance upsert(User marker, SchoolClass schoolClass, Lesson lesson, Long studentId, AttendanceStatus status) {
         Long schoolId = TenantContext.getSchoolId();
 
         Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId)
                 .orElseThrow(() -> new AttendanceExceptions.StudentNotFoundException("Student not found"));
 
         Attendance attendance = attendanceRepository
-                .findByStudentIdAndSchoolClassIdAndDateAndSchoolId(studentId, schoolClass.getId(), date, schoolId)
+                .findByStudentIdAndLessonIdAndSchoolId(studentId, lesson.getId(), schoolId)
                 .orElseGet(Attendance::new);
 
         boolean isNew = attendance.getId() == null;
 
         attendance.setStudent(student);
         attendance.setSchoolClass(schoolClass);
-        attendance.setDate(date);
+        attendance.setLesson(lesson);
+        attendance.setDate(lesson.getDate());
         attendance.setStatus(status);
         attendance.setMarkedBy(marker);
         attendance.setSchool(schoolClass.getSchool());
@@ -97,33 +114,44 @@ public class AttendanceService {
         return attendanceRepository.save(attendance);
     }
 
-    private SchoolClass resolveClass(Long schoolClassId) {
-        return schoolClassRepository.findById(schoolClassId)
-                .orElseThrow(() -> new AttendanceExceptions.SchoolClassNotFoundException("Class not found"));
+    private Lesson resolveLesson(Long lessonId, Long schoolId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new AttendanceExceptions.LessonNotFoundException("Lesson not found"));
+        if (!lesson.getSchool().getId().equals(schoolId)) {
+            throw new AttendanceExceptions.LessonNotFoundException("Lesson not found");
+        }
+        return lesson;
     }
 
-    private void ensureCanAccessClass(User requester, SchoolClass schoolClass) {
+    private void ensureCanMarkLesson(User requester, Lesson lesson) {
         boolean isOverrideRole = requester.hasRole(UserRole.SCHOOL_ADMIN)
                 || requester.hasRole(UserRole.SYSTEM_ADMIN)
                 || requester.hasRole(UserRole.PRINCIPAL);
 
+        if (isOverrideRole) return;
+
+        var assignment = lesson.getTimetable().getAssignment();
+        boolean isSubjectTeacher = assignment.getTeacher() != null
+                && assignment.getTeacher().getId().equals(requester.getId());
+
+        SchoolClass schoolClass = assignment.getSchoolClass();
         boolean isClassTeacher = schoolClass.getClassTeacher() != null
                 && schoolClass.getClassTeacher().getId().equals(requester.getId());
 
-        if (!isOverrideRole && !isClassTeacher) {
-            throw new AttendanceExceptions.NotClassTeacherException(
-                    "You are not the class teacher for this class");
+        if (!isSubjectTeacher && !isClassTeacher) {
+            throw new AttendanceExceptions.NotClassTeacherException("You are not authorised to mark attendance for this lesson");
         }
     }
 
-    private AttendanceDto blankDto(Student student, SchoolClass schoolClass, LocalDate date) {
+    private AttendanceDto blankDto(Student student, SchoolClass schoolClass, Lesson lesson) {
         AttendanceDto dto = new AttendanceDto();
         dto.setStudentId(student.getId());
         dto.setStudentFirstName(student.getFirstName());
         dto.setStudentLastName(student.getLastName());
         dto.setSchoolClassId(schoolClass.getId());
         dto.setSchoolClassName(schoolClass.getName());
-        dto.setDate(date);
+        dto.setLessonId(lesson.getId());
+        dto.setDate(lesson.getDate());
         dto.setStatus(null);
         return dto;
     }

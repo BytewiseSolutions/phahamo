@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
-import { SchoolClass } from '../../class/class';
 import { Attendance } from '../attendance';
 import { AttendanceStatus } from '../attendance-status';
+import { Lesson } from '../../timetable/lesson';
 
 @Component({
   selector: 'app-attendance-page',
@@ -13,84 +13,57 @@ import { AttendanceStatus } from '../attendance-status';
 })
 export class AttendancePage implements OnInit {
 
-  schoolClass: SchoolClass | null = null;
-  loadingClass = true;
-  noHomeroomClass = false;
+  lesson: Lesson | null = null;
+  lessonId: number | null = null;
+  assignmentId: number | null = null;
 
-  selectedDate: string = new Date().toISOString().substring(0, 10);
   students: Attendance[] = [];
-  loadingStudents = false;
-
+  selectedIds = new Set<number>();
+  loading = false;
   errorMessage = '';
 
   showForm = false;
   editingRecord: Attendance | null = null;
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private backend: BackendService
+  ) {}
 
   ngOnInit(): void {
-    this.loadMyClass();
+    this.lessonId = Number(this.route.snapshot.paramMap.get('lessonId'));
+    this.assignmentId = Number(this.route.snapshot.paramMap.get('assignmentId'));
+    this.loadLesson();
   }
 
-  loadMyClass(): void {
-    this.loadingClass = true;
-
-    this.backend.get<SchoolClass>('/classes/my-class').subscribe({
-      next: (schoolClass) => {
-        this.schoolClass = schoolClass;
-        this.loadingClass = false;
+  loadLesson(): void {
+    this.backend.get<Lesson>(`/lessons/${this.lessonId}`).subscribe({
+      next: (lesson) => {
+        this.lesson = lesson;
         this.loadAttendance();
       },
       error: (err) => {
-        if (err.status === 404) {
-          this.noHomeroomClass = true;
-        } else {
-          this.errorMessage = err.error?.message || 'Failed to load your class.';
-        }
-        this.loadingClass = false;
+        this.errorMessage = err.error?.message || 'Failed to load lesson.';
       }
     });
   }
 
   loadAttendance(): void {
-    if (!this.schoolClass) {
-      return;
-    }
-
-    this.loadingStudents = true;
+    this.loading = true;
     this.errorMessage = '';
 
-    const params = new HttpParams().set('date', this.selectedDate);
-
-    this.backend.get<Attendance[]>(`/attendance/class/${this.schoolClass.id}`, params).subscribe({
+    this.backend.get<Attendance[]>(`/attendance/lesson/${this.lessonId}`).subscribe({
       next: (records) => {
         this.students = records;
-        this.loadingStudents = false;
+        this.selectedIds.clear();
+        this.loading = false;
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load attendance.';
-        this.loadingStudents = false;
+        this.loading = false;
       }
     });
-  }
-
-  onDateChange(): void {
-    this.loadAttendance();
-  }
-
-  getStatusLabel(status: AttendanceStatus): string {
-    switch (status) {
-      case AttendanceStatus.PRESENT:
-        return 'Present';
-      case AttendanceStatus.ABSENT:
-        return 'Absent';
-      case AttendanceStatus.LATE:
-        return 'Late';
-      case AttendanceStatus.EXCUSED:
-        return 'Excused';
-      default:
-        return status;
-    }
   }
 
   onEditAttendance(record: Attendance): void {
@@ -105,15 +78,11 @@ export class AttendancePage implements OnInit {
   }
 
   onAttendanceSaved(status: AttendanceStatus): void {
-    if (!this.schoolClass || !this.editingRecord) {
-      return;
-    }
+    if (!this.editingRecord) return;
 
     this.errorMessage = '';
-
     const studentId = this.editingRecord.studentId;
-    const classId = this.schoolClass.id;
-    const url = `/attendance/class/${classId}/student/${studentId}?date=${this.selectedDate}&status=${status}`;
+    const url = `/attendance/lesson/${this.lessonId}/student/${studentId}?status=${status}`;
 
     this.backend.patch<Attendance>(url, {}).subscribe({
       next: () => {
@@ -127,29 +96,65 @@ export class AttendancePage implements OnInit {
     });
   }
 
-  onMarkAllPresent(): void {
-    if (!this.schoolClass) {
-      return;
-    }
+  get allSelected(): boolean {
+    return this.students.length > 0 && this.selectedIds.size === this.students.length;
+  }
 
+  get someSelected(): boolean {
+    return this.selectedIds.size > 0;
+  }
+
+  isSelected(studentId: number): boolean {
+    return this.selectedIds.has(studentId);
+  }
+
+  toggleSelect(studentId: number): void {
+    if (this.selectedIds.has(studentId)) {
+      this.selectedIds.delete(studentId);
+    } else {
+      this.selectedIds.add(studentId);
+    }
+  }
+
+  toggleSelectAll(): void {
+    if (this.allSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.students.forEach(s => this.selectedIds.add(s.studentId));
+    }
+  }
+
+  onMarkSelectedPresent(): void {
     this.errorMessage = '';
 
-    const records: Attendance[] = this.students.map(s => ({
-      studentId: s.studentId,
-      date: this.selectedDate,
-      status: AttendanceStatus.PRESENT
-    }));
+    const records: Attendance[] = this.students
+      .filter(s => this.selectedIds.has(s.studentId))
+      .map(s => ({
+        studentId: s.studentId,
+        lessonId: this.lessonId!,
+        date: this.lesson!.date,
+        status: AttendanceStatus.PRESENT
+      }));
 
-    this.backend.postSilently<Attendance[]>(
-      `/attendance/class/${this.schoolClass.id}?date=${this.selectedDate}`,
-      records
-    ).subscribe({
-      next: () => {
-        this.loadAttendance();
-      },
+    this.backend.postSilently<Attendance[]>(`/attendance/lesson/${this.lessonId}`, records).subscribe({
+      next: () => this.loadAttendance(),
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to mark attendance.';
       }
     });
+  }
+
+  getStatusLabel(status: AttendanceStatus): string {
+    switch (status) {
+      case AttendanceStatus.PRESENT: return 'Present';
+      case AttendanceStatus.ABSENT: return 'Absent';
+      case AttendanceStatus.LATE: return 'Late';
+      case AttendanceStatus.EXCUSED: return 'Excused';
+      default: return status;
+    }
+  }
+
+  onBack(): void {
+    this.router.navigate(['/my-classes', this.assignmentId]);
   }
 }

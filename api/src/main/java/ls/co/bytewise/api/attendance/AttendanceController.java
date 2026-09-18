@@ -2,12 +2,10 @@ package ls.co.bytewise.api.attendance;
 
 import jakarta.validation.Valid;
 import ls.co.bytewise.api.user.User;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,36 +18,33 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    @GetMapping("/class/{classId}")
+    @GetMapping("/lesson/{lessonId}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public List<AttendanceDto> getAttendance(
+    public List<AttendanceDto> getAttendanceForLesson(
             @AuthenticationPrincipal User currentUser,
-            @PathVariable Long classId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @PathVariable Long lessonId
     ) {
-        return attendanceService.getAttendanceForClassAndDate(currentUser, classId, date);
+        return attendanceService.getAttendanceForLesson(currentUser, lessonId);
     }
 
-    @PostMapping("/class/{classId}")
+    @PostMapping("/lesson/{lessonId}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public List<AttendanceDto> markBulk(
+    public List<AttendanceDto> markBulkForLesson(
             @AuthenticationPrincipal User currentUser,
-            @PathVariable Long classId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable Long lessonId,
             @Valid @RequestBody List<AttendanceDto> records
     ) {
-        return attendanceService.markBulkAttendance(currentUser, classId, date, records);
+        return attendanceService.markBulkAttendanceForLesson(currentUser, lessonId, records);
     }
 
-    @PatchMapping("/class/{classId}/student/{studentId}")
+    @PatchMapping("/lesson/{lessonId}/student/{studentId}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public AttendanceDto markSingle(
+    public AttendanceDto markSingleForLesson(
             @AuthenticationPrincipal User currentUser,
-            @PathVariable Long classId,
+            @PathVariable Long lessonId,
             @PathVariable Long studentId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam AttendanceStatus status
     ) {
-        return attendanceService.markSingleAttendance(currentUser, classId, studentId, date, status);
+        return attendanceService.markSingleAttendanceForLesson(currentUser, lessonId, studentId, status);
     }
 }

@@ -40,9 +40,9 @@ const routes: Routes = [
       { path: 'students', component: StudentList },
       { path: 'parents', component: ParentList },
       { path: 'timetable', component: TimetablePage },
-      { path: 'attendance', component: AttendancePage },
       { path: 'my-classes', component: MyClassesPage },
       { path: 'my-classes/:assignmentId', component: MyClassView },
+      { path: 'my-classes/:assignmentId/attendance/:lessonId', component: AttendancePage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

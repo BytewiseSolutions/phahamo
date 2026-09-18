@@ -5,6 +5,7 @@ import {SchoolClass} from '../../class/class';
 import {Teacher} from '../../teacher/teacher';
 import {Timetable, TimetablePayload} from '../timetable';
 import {BackendService} from '../../../util/backend.service';
+import {AuthService} from '../../../util/auth.service';
 
 @Component({
   selector: 'app-timetable-page',
@@ -14,9 +15,10 @@ import {BackendService} from '../../../util/backend.service';
 })
 export class TimetablePage implements OnInit {
 
+  isTeacher = false;
   activeTab: 'schedule' | 'periods' = 'schedule';
 
-  activeDay: DayOfWeek = DayOfWeek.MONDAY;
+  activeDay: DayOfWeek = this.getTodayDayOfWeek();
   days = Object.values(DayOfWeek);
 
   viewMode: 'class' | 'teacher' = 'class';
@@ -40,13 +42,34 @@ export class TimetablePage implements OnInit {
   prefillDayOfWeek: DayOfWeek | null = null;
   prefillPeriodId: number | null = null;
 
-  constructor(private backend: BackendService) {}
+  private userId: number | null = null;
+
+  constructor(private backend: BackendService, private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.isTeacher = this.authService.hasRole('TEACHER');
+    this.userId = this.authService.getUserId();
+
     this.loadPeriods();
-    this.loadSchoolClasses();
-    this.loadTeachers();
     this.loadTimetable();
+
+    if (!this.isTeacher) {
+      this.loadSchoolClasses();
+      this.loadTeachers();
+    }
+  }
+
+  private getTodayDayOfWeek(): DayOfWeek {
+    const map: Record<number, DayOfWeek> = {
+      0: DayOfWeek.SUNDAY,
+      1: DayOfWeek.MONDAY,
+      2: DayOfWeek.TUESDAY,
+      3: DayOfWeek.WEDNESDAY,
+      4: DayOfWeek.THURSDAY,
+      5: DayOfWeek.FRIDAY,
+      6: DayOfWeek.SATURDAY
+    };
+    return map[new Date().getDay()];
   }
 
   onTabChange(tab: 'schedule' | 'periods'): void {
@@ -171,7 +194,11 @@ export class TimetablePage implements OnInit {
   loadTimetable(): void {
     this.loadingTimetable = true;
 
-    this.backend.get<Timetable[]>('/timetable').subscribe({
+    const url = this.isTeacher
+      ? `/timetable/teacher/${this.userId}`
+      : '/timetable';
+
+    this.backend.get<Timetable[]>(url).subscribe({
       next: (slots) => {
         this.timetableSlots = slots;
         this.loadingTimetable = false;
@@ -181,6 +208,12 @@ export class TimetablePage implements OnInit {
         this.loadingTimetable = false;
       }
     });
+  }
+
+  slotForTeacherView(day: DayOfWeek, periodId: number): Timetable | null {
+    return this.timetableSlots.find(slot =>
+      slot.dayOfWeek === day && slot.periodId === periodId
+    ) || null;
   }
 
   slotForClass(day: DayOfWeek, periodId: number, schoolClassName: string): Timetable | null {

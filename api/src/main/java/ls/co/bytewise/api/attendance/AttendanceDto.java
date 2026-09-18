@@ -21,6 +21,8 @@ public class AttendanceDto extends BaseDto {
     private Long schoolClassId;
     private String schoolClassName;
 
+    private Long lessonId;
+
     private LocalDate date;
 
     @NotNull
@@ -33,6 +35,7 @@ public class AttendanceDto extends BaseDto {
         this.studentLastName = attendance.getStudent().getLastName();
         this.schoolClassId = attendance.getSchoolClass().getId();
         this.schoolClassName = attendance.getSchoolClass().getName();
+        this.lessonId = attendance.getLesson().getId();
         this.date = attendance.getDate();
         this.status = attendance.getStatus();
     }

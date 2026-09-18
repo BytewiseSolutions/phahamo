@@ -7,6 +7,7 @@ export interface Attendance {
   studentLastName?: string;
   schoolClassId?: number;
   schoolClassName?: string;
+  lessonId?: number;
   date: string;
   status: AttendanceStatus | null;
 }

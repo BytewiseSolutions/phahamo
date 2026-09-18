@@ -6,6 +6,7 @@ import lombok.Setter;
 import ls.co.bytewise.api.common.SchoolScopedEntity;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.student.Student;
+import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.user.User;
 
 import java.time.LocalDate;
@@ -16,8 +17,8 @@ import java.time.LocalDate;
 @Table(
         name = "attendance",
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_attendance_student_class_date",
-                columnNames = {"student_id", "school_class_id", "date"}
+                name = "uk_attendance_student_lesson",
+                columnNames = {"student_id", "lesson_id"}
         )
 )
 public class Attendance extends SchoolScopedEntity {
@@ -29,6 +30,10 @@ public class Attendance extends SchoolScopedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_class_id", nullable = false)
     private SchoolClass schoolClass;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id", nullable = false)
+    private Lesson lesson;
 
     @Column(nullable = false)
     private LocalDate date;
