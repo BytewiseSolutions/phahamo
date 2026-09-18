@@ -129,4 +129,13 @@ public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
         return schoolClassRepository.findByIdAndSchool_Id(id, schoolId)
                 .orElseThrow(() -> new SchoolClassExceptions.SchoolClassNotFoundException("Class not found"));
     }
+
+    public SchoolClassDto getMyClass(User teacher) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return schoolClassRepository.findByClassTeacher_IdAndSchool_Id(teacher.getId(), schoolId)
+                .map(SchoolClassDto::new)
+                .orElseThrow(() -> new SchoolClassExceptions.SchoolClassNotFoundException(
+                        "You are not assigned as a class teacher"));
+    }
 }

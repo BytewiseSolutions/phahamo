@@ -1,0 +1,101 @@
+<div class="attendance-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Attendance</h1>
+      <p>Record daily attendance for your class.</p>
+    </div>
+
+    @if (schoolClass) {
+      <button type="button" class="primary-button" (click)="onMarkAllPresent()">
+        Mark All Present
+      </button>
+    }
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (loadingClass) {
+
+    <p class="loading-message">Loading your class...</p>
+
+  } @else if (noHomeroomClass) {
+
+    <div class="empty-state">
+      <h3>No Class Assigned</h3>
+      <p>You are not currently assigned as a class teacher.</p>
+    </div>
+
+  } @else {
+
+    <div class="attendance-controls">
+      <div class="class-info">
+        <span class="class-name">{{ schoolClass?.name }}</span>
+        <span class="grade-level">Grade {{ schoolClass?.gradeLevel }}</span>
+      </div>
+
+      <input type="date" [(ngModel)]="selectedDate" (ngModelChange)="onDateChange()" />
+    </div>
+
+    @if (loadingStudents) {
+
+      <p class="loading-message">Loading students...</p>
+
+    } @else if (students.length === 0) {
+
+      <div class="empty-state">
+        <h3>No Students</h3>
+        <p>This class has no students enrolled.</p>
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+        <table class="attendance-table">
+          <thead>
+          <tr>
+            <th>Student</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (record of students; track record.studentId) {
+              <tr>
+                <td>{{ record.studentFirstName }} {{ record.studentLastName }}</td>
+                <td>
+                  @if (record.status) {
+                    <span class="status-badge" [class]="record.status.toLowerCase()">
+                      {{ getStatusLabel(record.status) }}
+                    </span>
+                  } @else {
+                    <span class="status-badge unmarked">Not Marked</span>
+                  }
+                </td>
+                <td>
+                  <button type="button" class="link-button" (click)="onEditAttendance(record)">
+                    {{ record.status ? 'Edit' : 'Mark' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    }
+
+  }
+
+  <app-attendance-form
+    [visible]="showForm"
+    [record]="editingRecord"
+    (closed)="onFormClosed()"
+    (saved)="onAttendanceSaved($event)">
+  </app-attendance-form>
+
+</div>
