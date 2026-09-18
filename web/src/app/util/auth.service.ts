@@ -17,7 +17,7 @@ export class AuthService {
   constructor(private backend: BackendService, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.backend.post<LoginResponse>('/auth/login', credentials).pipe(
+    return this.backend.postSilently<LoginResponse>('/auth/login', credentials).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.token);
         localStorage.setItem(this.userIdKey, String(response.userId));
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.backend.post<void>('/auth/logout', {}).subscribe({
+    this.backend.postSilently<void>('/auth/logout', {}).subscribe({
       next: () => this.completeLogout(),
       error: () => this.completeLogout()
     });

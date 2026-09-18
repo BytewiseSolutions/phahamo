@@ -13,4 +13,6 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
     boolean existsByNameAndAcademicYear_IdAndIdNot(String name, Long academicYearId, Long excludeId);
     boolean existsByNameAndAcademicYear_Id(String name, Long academicYearId);
     Optional<SchoolClass> findByClassTeacher_IdAndSchool_Id(Long classTeacherId, Long schoolId);
+    boolean existsByClassTeacher_IdAndSchool_Id(Long classTeacherId, Long schoolId);
+    boolean existsByClassTeacher_IdAndSchool_IdAndIdNot(Long classTeacherId, Long schoolId, Long excludeId);
 }
