@@ -46,6 +46,10 @@ import { TeacherView } from './pages/teacher/teacher-view/teacher-view';
 import { TimetablePage } from './pages/timetable/timetable-page/timetable-page';
 import { PeriodForm } from './pages/timetable/period-form/period-form';
 import { TimetableForm } from './pages/timetable/timetable-form/timetable-form';
+import { AttendancePage } from './pages/attendance/attendance-page/attendance-page';
+import { AttendanceForm } from './pages/attendance/attendance-form/attendance-form';
+import { MyClassesPage } from './pages/my-classes/my-classes-page/my-classes-page';
+import { MyClassView } from './pages/my-classes/my-class-view/my-class-view';
 
 @NgModule({
   declarations: [
@@ -88,7 +92,11 @@ import { TimetableForm } from './pages/timetable/timetable-form/timetable-form';
     TeacherView,
     TimetablePage,
     PeriodForm,
-    TimetableForm
+    TimetableForm,
+    AttendancePage,
+    AttendanceForm,
+    MyClassesPage,
+    MyClassView
   ],
   imports: [
     BrowserModule,

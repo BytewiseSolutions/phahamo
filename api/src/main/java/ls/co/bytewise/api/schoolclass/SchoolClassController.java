@@ -54,4 +54,10 @@ public class SchoolClassController {
         schoolClassService.deleteClass(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/my-class")
+    @Secured({"ROLE_TEACHER"})
+    public SchoolClassDto getMyClass(@AuthenticationPrincipal User currentUser) {
+        return schoolClassService.getMyClass(currentUser);
+    }
 }

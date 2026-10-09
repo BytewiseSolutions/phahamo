@@ -1,0 +1,26 @@
+@if (visible && record) {
+  <div class="modal-backdrop" (click)="onClose()"></div>
+
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Mark Attendance</h2>
+      <button type="button" class="close-button" (click)="onClose()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="student-name">{{ record.studentFirstName }} {{ record.studentLastName }}</p>
+
+      <label class="field-label">Status</label>
+      <select [(ngModel)]="selectedStatus" name="status">
+        @for (status of statuses; track status) {
+          <option [value]="status">{{ getStatusLabel(status) }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+      <button type="button" class="primary-button" (click)="onSave()">Save</button>
+    </div>
+  </div>
+}

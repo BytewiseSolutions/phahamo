@@ -10,7 +10,6 @@ interface SidebarLink {
 
 const COMMON_LINKS: SidebarLink[] = [
   { label: 'Dashboard', path: '/dashboard', icon: 'fa-solid fa-gauge' },
-  { label: 'Profile', path: '/profile', icon: 'fa-solid fa-user' },
 ];
 
 const ROLE_LINKS: Record<string, SidebarLink[]> = {
@@ -36,9 +35,9 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
   ],
   TEACHER: [
     { label: 'My Classes', path: '/my-classes', icon: 'fa-solid fa-chalkboard-user' },
-    { label: 'Attendance', path: '/attendance', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Grades', path: '/grades', icon: 'fa-solid fa-square-poll-vertical' },
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
+    { label: 'Profile', path: '/profile', icon: 'fa-solid fa-user' },
   ],
   FINANCE_OFFICER: [
     { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },

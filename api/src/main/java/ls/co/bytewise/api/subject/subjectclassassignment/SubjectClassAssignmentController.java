@@ -72,4 +72,10 @@ public class SubjectClassAssignmentController {
     public List<SubjectClassAssignmentDto> listByTeacher(@PathVariable Long teacherId) {
         return assignmentService.listByTeacher(teacherId);
     }
+
+    @GetMapping("/my-assignments")
+    @Secured({"ROLE_TEACHER"})
+    public List<SubjectClassAssignmentDto> getMyAssignments(@AuthenticationPrincipal User currentUser) {
+        return assignmentService.getMyAssignments(currentUser);
+    }
 }

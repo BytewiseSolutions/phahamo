@@ -1,0 +1,163 @@
+<div class="my-class-view">
+
+  @if (loadingAssignment) {
+
+    <p class="loading-message">Loading class...</p>
+
+  } @else if (notFound) {
+
+    <div class="empty-state">
+      <h3>Class Not Found</h3>
+      <p>This class assignment could not be found.</p>
+      <button type="button" class="link-button" (click)="onBack()">&larr; Back to My Classes</button>
+    </div>
+
+  } @else if (assignment) {
+
+    <div class="page-header">
+      <div>
+        <button type="button" class="back-button" (click)="onBack()">&larr; Back</button>
+        <h1>{{ assignment.subjectName }} — {{ assignment.schoolClassName }}</h1>
+        <p>{{ assignment.academicYearName }}</p>
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-banner">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <div class="view-tabs">
+      <button type="button" class="view-tab" [class.active]="activeTab === 'timetable'" (click)="onTabChange('timetable')">
+        Timetable
+      </button>
+      <button type="button" class="view-tab" [class.active]="activeTab === 'lessons'" (click)="onTabChange('lessons')">
+        Lessons
+      </button>
+    </div>
+
+    <div class="tab-content">
+
+      @if (activeTab === 'timetable') {
+
+        @if (loadingTimetable) {
+
+          <p class="loading-message">Loading timetable...</p>
+
+        } @else if (timetableSlots.length === 0) {
+
+          <div class="empty-state">
+            <h3>No Timetable Slots</h3>
+            <p>No timetable slots found for this class and subject.</p>
+          </div>
+
+        } @else {
+
+          <div class="day-tabs">
+            @for (day of days; track day) {
+              <button type="button" class="day-tab" [class.active]="activeDay === day" (click)="onDayChange(day)">
+                {{ getDayLabel(day) }}
+              </button>
+            }
+          </div>
+
+          <div class="table-wrapper">
+            <table class="teacher-table">
+              <thead>
+              <tr>
+                <th>Period</th>
+                <th>Time</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (period of periods; track period.id) {
+                  @let slot = slotFor(activeDay, period.id);
+                  @if (slot) {
+                    <tr>
+                      <td>{{ period.name }}</td>
+                      <td>{{ period.startTime }}–{{ period.endTime }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+        }
+
+      } @else if (activeTab === 'lessons') {
+
+        <div class="lessons-controls">
+          <div class="filter-pills">
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'today'" (click)="onLessonFilterChange('today')">Today</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'week'" (click)="onLessonFilterChange('week')">Weekly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'month'" (click)="onLessonFilterChange('month')">Monthly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'quarter'" (click)="onLessonFilterChange('quarter')">Quarterly</button>
+            <button type="button" class="filter-pill" [class.active]="lessonFilter === 'custom'" (click)="onLessonFilterChange('custom')">Custom</button>
+          </div>
+
+          @if (lessonFilter === 'custom') {
+            <div class="custom-range">
+              <input type="date" [(ngModel)]="customStartDate" (ngModelChange)="onCustomDateChange()" />
+              <span>to</span>
+              <input type="date" [(ngModel)]="customEndDate" (ngModelChange)="onCustomDateChange()" />
+            </div>
+          }
+        </div>
+
+        @if (loadingLessons) {
+
+          <p class="loading-message">Loading lessons...</p>
+
+        } @else if (lessons.length === 0) {
+
+          <div class="empty-state">
+            <h3>No Lessons</h3>
+            <p>No lessons found for this class in this period.</p>
+          </div>
+
+        } @else {
+
+          <div class="table-wrapper">
+            <table class="teacher-table">
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (lesson of lessons; track lesson.id) {
+                  <tr>
+                    <td>{{ lesson.date | date:'dd MMM yyyy' }}</td>
+                    <td>{{ lesson.periodName }} ({{ lesson.periodStartTime }}–{{ lesson.periodEndTime }})</td>
+                    <td>
+                      <select [ngModel]="lesson.status" (ngModelChange)="onLessonStatusChange(lesson, $event)">
+                        @for (status of lessonStatuses; track status) {
+                          <option [value]="status">{{ getLessonStatusLabel(status) }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td>
+                      <button type="button" class="link-button" (click)="onAttendance(lesson)">
+                        Mark Attendance
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+        }
+
+      }
+
+    </div>
+
+  }
+
+</div>

@@ -121,6 +121,15 @@ public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
             throw new SchoolClassExceptions.InvalidSchoolClassException("Assigned user must have the TEACHER role");
         }
 
+        boolean alreadyClassTeacherElsewhere = schoolClass.getId() == null
+                ? schoolClassRepository.existsByClassTeacher_IdAndSchool_Id(classTeacherId, schoolId)
+                : schoolClassRepository.existsByClassTeacher_IdAndSchool_IdAndIdNot(classTeacherId, schoolId, schoolClass.getId());
+
+        if (alreadyClassTeacherElsewhere) {
+            throw new SchoolClassExceptions.InvalidSchoolClassException(
+                    "This teacher is already the class teacher for another class");
+        }
+
         schoolClass.setClassTeacher(teacher);
     }
 
@@ -128,5 +137,14 @@ public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
         Long schoolId = TenantContext.getSchoolId();
         return schoolClassRepository.findByIdAndSchool_Id(id, schoolId)
                 .orElseThrow(() -> new SchoolClassExceptions.SchoolClassNotFoundException("Class not found"));
+    }
+
+    public SchoolClassDto getMyClass(User teacher) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        return schoolClassRepository.findByClassTeacher_IdAndSchool_Id(teacher.getId(), schoolId)
+                .map(SchoolClassDto::new)
+                .orElseThrow(() -> new SchoolClassExceptions.SchoolClassNotFoundException(
+                        "You are not assigned as a class teacher"));
     }
 }

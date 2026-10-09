@@ -1,0 +1,86 @@
+<div class="attendance-page">
+
+  <div class="page-header">
+    <div>
+      <button type="button" class="back-button" (click)="onBack()">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
+      <h1>Attendance</h1>
+      @if (lesson) {
+        <p>{{ lesson.subjectName }} — {{ lesson.schoolClassName }} &bull; {{ lesson.date | date:'dd MMM yyyy' }} &bull; {{ lesson.periodName }} ({{ lesson.periodStartTime }}–{{ lesson.periodEndTime }})</p>
+      }
+    </div>
+
+    @if (someSelected) {
+      <button type="button" class="primary-button" (click)="onMarkSelectedPresent()">
+        Mark Present ({{ selectedIds.size }})
+      </button>
+    }
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+
+    <p class="loading-message">Loading students...</p>
+
+  } @else if (students.length === 0) {
+
+    <div class="empty-state">
+      <h3>No Students</h3>
+      <p>This class has no students enrolled.</p>
+    </div>
+
+  } @else {
+
+    <div class="table-wrapper">
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()" />
+            </th>
+            <th>Student</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of students; track record.studentId) {
+            <tr [class.selected]="isSelected(record.studentId)">
+              <td>
+                <input type="checkbox" [checked]="isSelected(record.studentId)" (change)="toggleSelect(record.studentId)" />
+              </td>
+              <td>{{ record.studentFirstName }} {{ record.studentLastName }}</td>
+              <td>
+                @if (record.status) {
+                  <span class="status-badge" [class]="record.status.toLowerCase()">
+                    {{ getStatusLabel(record.status) }}
+                  </span>
+                } @else {
+                  <span class="status-badge unmarked">Not Marked</span>
+                }
+              </td>
+              <td>
+                <button type="button" class="link-button" (click)="onEditAttendance(record)">
+                  {{ record.status ? 'Edit' : 'Mark' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  }
+
+  <app-attendance-form
+    [visible]="showForm"
+    [record]="editingRecord"
+    (closed)="onFormClosed()"
+    (saved)="onAttendanceSaved($event)">
+  </app-attendance-form>
+
+</div>

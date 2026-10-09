@@ -1,0 +1,278 @@
+.my-class-view {
+  padding: 40px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  color: var(--primary);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-header p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.error-banner {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: rgb(from var(--error) r g b / 0.08);
+  border: 1px solid rgb(from var(--error) r g b / 0.25);
+  border-radius: var(--border-radius-md);
+  color: var(--error);
+  font-size: 13px;
+}
+
+.loading-message {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.empty-state h3 {
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.empty-state .link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.empty-state .link-button:hover {
+  text-decoration: underline;
+}
+
+/* Tabs */
+
+.view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.view-tab {
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.view-tab:hover {
+  color: var(--text-primary);
+}
+
+.view-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.tab-content {
+  padding-top: 4px;
+}
+
+/* Day tabs (timetable) */
+
+.day-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.day-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.day-tab:hover {
+  background: var(--background);
+}
+
+.day-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Tables */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.teacher-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.teacher-table th,
+.teacher-table td {
+  padding: 11px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+
+.teacher-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.teacher-table td {
+  color: var(--text-primary);
+}
+
+.teacher-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-table tbody tr:hover {
+  background: var(--background);
+}
+
+.teacher-table select {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-sm);
+  font-size: 13px;
+}
+
+.teacher-table .link-button {
+  padding: 6px 12px;
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+}
+
+.teacher-table .link-button:hover {
+  opacity: 0.85;
+}
+
+/* Lessons controls */
+
+.lessons-controls {
+  margin-bottom: 16px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filter-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.custom-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.custom-range input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .my-class-view {
+    padding: 20px;
+  }
+
+  .view-tabs {
+    overflow-x: auto;
+  }
+
+  .view-tab {
+    flex-shrink: 0;
+  }
+}

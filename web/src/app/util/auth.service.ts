@@ -12,13 +12,15 @@ export class AuthService {
   private schoolIdKey = 'sms_school_id';
   private fullNameKey = 'sms_full_name';
   private schoolNameKey = 'sms_school_name';
+  private userIdKey = 'sms_user_id';
 
   constructor(private backend: BackendService, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.backend.post<LoginResponse>('/auth/login', credentials).pipe(
+    return this.backend.postSilently<LoginResponse>('/auth/login', credentials).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.token);
+        localStorage.setItem(this.userIdKey, String(response.userId));
         localStorage.setItem(this.fullNameKey, response.fullName);
         localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
 
@@ -30,7 +32,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.backend.post<void>('/auth/logout', {}).subscribe({
+    this.backend.postSilently<void>('/auth/logout', {}).subscribe({
       next: () => this.completeLogout(),
       error: () => this.completeLogout()
     });
@@ -38,6 +40,7 @@ export class AuthService {
 
   private completeLogout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userIdKey);
     localStorage.removeItem(this.schoolIdKey);
     localStorage.removeItem(this.fullNameKey);
     localStorage.removeItem(this.schoolNameKey);
@@ -74,6 +77,11 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  getUserId(): number | null {
+    const id = localStorage.getItem(this.userIdKey);
+    return id ? Number(id) : null;
   }
 
   getFullName(): string {
