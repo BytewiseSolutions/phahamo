@@ -16,10 +16,8 @@ public class StudentDto extends BaseDto {
 
     private Long userId;
 
-    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
     private String lastName;
 
     private String email;

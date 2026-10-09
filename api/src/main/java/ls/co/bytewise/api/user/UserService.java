@@ -13,6 +13,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
@@ -221,6 +222,7 @@ public class UserService {
         return password.toString();
     }
 
+    @Async
     private void sendWelcomeEmail(String toEmail, String firstName, String temporaryPassword) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

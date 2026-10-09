@@ -28,8 +28,7 @@ export class UserForm implements OnChanges, OnDestroy {
 
   constructor(private fb: FormBuilder) {
     this.userForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      fullName: ['', [Validators.required, Validators.pattern(/^\S+\s+\S+.*$/)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required],
       role: ['', Validators.required],
@@ -37,11 +36,9 @@ export class UserForm implements OnChanges, OnDestroy {
 
       studentDateOfBirth: [''],
       studentGender: [''],
-      studentAdmissionNumber: [''],
 
       parentRelationship: [''],
 
-      teacherEmployeeNumber: [''],
       teacherQualifications: [''],
       teacherSpecialization: [''],
       teacherDateJoined: [''],
@@ -61,8 +58,7 @@ export class UserForm implements OnChanges, OnDestroy {
     if (changes['editingUser']) {
       if (this.editingUser) {
         this.userForm.patchValue({
-          firstName: this.editingUser.firstName,
-          lastName: this.editingUser.lastName,
+          fullName: `${this.editingUser.firstName} ${this.editingUser.lastName}`.trim(),
           email: this.editingUser.email,
           phone: this.editingUser.phone,
           role: this.editingUser.roles[0] ?? '',
@@ -114,6 +110,20 @@ export class UserForm implements OnChanges, OnDestroy {
       .forEach(name => this.userForm.get(name)?.updateValueAndValidity());
   }
 
+  private splitFullName(fullName: string): { firstName: string; lastName: string } {
+    const trimmed = fullName.trim();
+    const firstSpaceIndex = trimmed.indexOf(' ');
+
+    if (firstSpaceIndex === -1) {
+      return { firstName: trimmed, lastName: '' };
+    }
+
+    return {
+      firstName: trimmed.substring(0, firstSpaceIndex),
+      lastName: trimmed.substring(firstSpaceIndex + 1).trim()
+    };
+  }
+
   onSubmit(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
@@ -121,13 +131,14 @@ export class UserForm implements OnChanges, OnDestroy {
     }
 
     const formValue = this.userForm.getRawValue();
+    const { firstName, lastName } = this.splitFullName(formValue.fullName);
 
     if (this.isEditMode && this.editingUser) {
       this.userUpdated.emit({
         id: this.editingUser.id,
         payload: {
-          firstName: formValue.firstName,
-          lastName: formValue.lastName,
+          firstName,
+          lastName,
           phone: formValue.phone,
           roles: [formValue.role],
           status: formValue.status
@@ -139,8 +150,8 @@ export class UserForm implements OnChanges, OnDestroy {
     }
 
     const payload: any = {
-      firstName: formValue.firstName,
-      lastName: formValue.lastName,
+      firstName,
+      lastName,
       email: formValue.email,
       phone: formValue.phone,
       roles: [formValue.role]

@@ -64,12 +64,11 @@ export class UserList implements OnInit {
   onCreateUser(newUser: any): void {
     this.errorMessage = '';
     this.successMessage = '';
+    this.showCreateForm = false;
 
-    this.backend.post<User>('/users', newUser).subscribe({
-      next: () => {
-        this.successMessage = 'User created. A welcome email with login details has been sent.';
-        this.showCreateForm = false;
-        this.loadUsers();
+    this.backend.postSilently<User>('/users', newUser).subscribe({
+      next: (created) => {
+        this.users = [created, ...this.users];
       },
       error: (err) => {
         this.errorMessage = err.status === 409
@@ -83,7 +82,7 @@ export class UserList implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.put<User>(`/users/${event.id}`, event.payload).subscribe({
+    this.backend.putSilently<User>(`/users/${event.id}`, event.payload).subscribe({
       next: () => {
         this.successMessage = 'User updated.';
         this.showCreateForm = false;
