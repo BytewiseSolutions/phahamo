@@ -56,6 +56,10 @@ public class AuthenticationService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
+        return issueLoginResponse(user);
+    }
+
+    public LoginResponse issueLoginResponse(User user) {
         String token = jwtService.generateToken(user);
 
         String schoolName = user.getSchools().stream()

@@ -18,19 +18,49 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.backend.postSilently<LoginResponse>('/auth/login', credentials).pipe(
-      tap((response) => {
-        localStorage.setItem(this.tokenKey, response.token);
-        localStorage.setItem(this.userIdKey, String(response.userId));
-        localStorage.setItem(this.fullNameKey, response.fullName);
-        localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
-
-        if (response.schoolIds && response.schoolIds.length > 0) {
-          localStorage.setItem(this.schoolIdKey, String(response.schoolIds[0]));
-        }
-      })
+      tap((response) => this.persistSession(response))
     );
   }
 
+  private persistSession(response: LoginResponse): void {
+    localStorage.setItem(this.tokenKey, response.token);
+    localStorage.setItem(this.userIdKey, String(response.userId));
+    localStorage.setItem(this.fullNameKey, response.fullName);
+    localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
+    if (response.schoolIds && response.schoolIds.length > 0) {
+      localStorage.setItem(this.schoolIdKey, String(response.schoolIds[0]));
+    }
+  }
+
+  loginWithGoogle(): void {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  }
+
+  acceptToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+
+    const payload = this.decodeToken(token) as any;
+    if (payload?.sub) localStorage.setItem(this.userIdKey, String(payload.sub));
+    if (payload?.fullName) localStorage.setItem(this.fullNameKey, payload.fullName);
+  }
+
+  hydrateProfile(): Observable<any> {
+    return this.backend.get<any>('/auth/me').pipe(
+      tap((me) => {
+        if (me.fullName)  localStorage.setItem(this.fullNameKey, me.fullName);
+        if (me.schoolName) localStorage.setItem(this.schoolNameKey, me.schoolName);
+        if (me.schoolIds?.length) localStorage.setItem(this.schoolIdKey, String(me.schoolIds[0]));
+      })
+    );
+  }
+  forceLogout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userIdKey);
+    localStorage.removeItem(this.schoolIdKey);
+    localStorage.removeItem(this.fullNameKey);
+    localStorage.removeItem(this.schoolNameKey);
+    this.router.navigate(['/login']);
+  }
   logout(): void {
     this.backend.postSilently<void>('/auth/logout', {}).subscribe({
       next: () => this.completeLogout(),

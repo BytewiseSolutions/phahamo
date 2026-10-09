@@ -19,12 +19,14 @@ import {TimetablePage} from './pages/timetable/timetable-page/timetable-page';
 import {AttendancePage} from './pages/attendance/attendance-page/attendance-page';
 import {MyClassesPage} from './pages/my-classes/my-classes-page/my-classes-page';
 import {MyClassView} from './pages/my-classes/my-class-view/my-class-view';
+import {AuthCallback} from './pages/auth-callback/auth-callback';
 
 const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'reset-password', component: ResetPassword },
+  { path: 'auth/callback', component: AuthCallback },
   {
     path: '',
     component: Layout,

@@ -16,10 +16,27 @@ import java.io.IOException;
 @Component
 public class TenantFilter extends OncePerRequestFilter {
 
+    private static final String[] TENANT_EXEMPT_PREFIXES = {
+            "/api/auth/",
+            "/api/schools/register",
+            "/oauth2/",
+            "/login/oauth2/",
+            "/error"
+    };
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        for (String prefix : TENANT_EXEMPT_PREFIXES) {
+            if (path.startsWith(prefix)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
 
         Object principal = SecurityContextHolder.getContext().getAuthentication() != null
                 ? SecurityContextHolder.getContext().getAuthentication().getPrincipal()
