@@ -40,19 +40,13 @@ export class AuthService {
     localStorage.setItem(this.tokenKey, token);
 
     const payload = this.decodeToken(token) as any;
-    if (payload?.sub) localStorage.setItem(this.userIdKey, String(payload.sub));
+    if (payload?.userId) localStorage.setItem(this.userIdKey, String(payload.userId));
     if (payload?.fullName) localStorage.setItem(this.fullNameKey, payload.fullName);
+    if (payload?.schoolName) localStorage.setItem(this.schoolNameKey, payload.schoolName);
+    if (payload?.schoolIds?.length) localStorage.setItem(this.schoolIdKey, String(payload.schoolIds[0]));
   }
 
-  hydrateProfile(): Observable<any> {
-    return this.backend.get<any>('/auth/me').pipe(
-      tap((me) => {
-        if (me.fullName)  localStorage.setItem(this.fullNameKey, me.fullName);
-        if (me.schoolName) localStorage.setItem(this.schoolNameKey, me.schoolName);
-        if (me.schoolIds?.length) localStorage.setItem(this.schoolIdKey, String(me.schoolIds[0]));
-      })
-    );
-  }
+
   forceLogout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userIdKey);
