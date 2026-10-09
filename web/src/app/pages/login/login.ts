@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import {AuthService} from '../../util/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../util/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -9,7 +9,7 @@ import {AuthService} from '../../util/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class Login {
+export class Login implements OnInit {
   loginForm: FormGroup;
   submitted = false;
   errorMessage = '';
@@ -17,13 +17,29 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
       rememberMe: [false]
     });
+  }
+
+  ngOnInit(): void {
+    const err = this.route.snapshot.queryParamMap.get('error');
+    if (err === 'no_account') {
+      this.errorMessage = 'No account exists for that Google email. Please contact your administrator.';
+    } else if (err === 'inactive') {
+      this.errorMessage = 'Your account is not active.';
+    } else if (err === 'oauth_failed') {
+      this.errorMessage = 'Google sign-in failed. Please try again.';
+    }
+  }
+
+  onGoogleLogin(): void {
+    this.authService.loginWithGoogle();
   }
 
   onSubmit(): void {

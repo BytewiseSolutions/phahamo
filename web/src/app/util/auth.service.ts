@@ -18,19 +18,43 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.backend.postSilently<LoginResponse>('/auth/login', credentials).pipe(
-      tap((response) => {
-        localStorage.setItem(this.tokenKey, response.token);
-        localStorage.setItem(this.userIdKey, String(response.userId));
-        localStorage.setItem(this.fullNameKey, response.fullName);
-        localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
-
-        if (response.schoolIds && response.schoolIds.length > 0) {
-          localStorage.setItem(this.schoolIdKey, String(response.schoolIds[0]));
-        }
-      })
+      tap((response) => this.persistSession(response))
     );
   }
 
+  private persistSession(response: LoginResponse): void {
+    localStorage.setItem(this.tokenKey, response.token);
+    localStorage.setItem(this.userIdKey, String(response.userId));
+    localStorage.setItem(this.fullNameKey, response.fullName);
+    localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
+    if (response.schoolIds && response.schoolIds.length > 0) {
+      localStorage.setItem(this.schoolIdKey, String(response.schoolIds[0]));
+    }
+  }
+
+  loginWithGoogle(): void {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  }
+
+  acceptToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+
+    const payload = this.decodeToken(token) as any;
+    if (payload?.userId) localStorage.setItem(this.userIdKey, String(payload.userId));
+    if (payload?.fullName) localStorage.setItem(this.fullNameKey, payload.fullName);
+    if (payload?.schoolName) localStorage.setItem(this.schoolNameKey, payload.schoolName);
+    if (payload?.schoolIds?.length) localStorage.setItem(this.schoolIdKey, String(payload.schoolIds[0]));
+  }
+
+
+  forceLogout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userIdKey);
+    localStorage.removeItem(this.schoolIdKey);
+    localStorage.removeItem(this.fullNameKey);
+    localStorage.removeItem(this.schoolNameKey);
+    this.router.navigate(['/login']);
+  }
   logout(): void {
     this.backend.postSilently<void>('/auth/logout', {}).subscribe({
       next: () => this.completeLogout(),

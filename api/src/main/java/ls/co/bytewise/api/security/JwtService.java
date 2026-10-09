@@ -32,11 +32,18 @@ public class JwtService {
                 .map(School -> School.getId())
                 .collect(Collectors.toList());
 
+        String schoolName = user.getSchools().stream()
+                .findFirst()
+                .map(school -> school.getName())
+                .orElse("");
+
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("roles", roleNames)
                 .claim("schoolIds", schoolIds)
+                .claim("fullName", user.getFullName())
+                .claim("schoolName", schoolName)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)
