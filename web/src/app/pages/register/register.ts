@@ -88,16 +88,15 @@ export class Register {
       email: formValue.email,
       password: formValue.password,
       phone: formValue.phone,
-      school: formValue.school,
-      // school: {
-      //   schoolName: formValue.schoolName,
-      //   schoolAddress: formValue.schoolAddress,
-      //   schoolContactEmail: formValue.schoolContactEmail,
-      //   schoolContactPhone: formValue.schoolContactPhone
-      // }
+      school: {
+        schoolName: formValue.schoolName,
+        schoolAddress: formValue.schoolAddress,
+        schoolContactEmail: formValue.schoolContactEmail,
+        schoolContactPhone: formValue.schoolContactPhone
+      }
     };
 
-    this.backend.post<School>('/schools/register', payload).subscribe({
+    this.backend.postSilently<School>('/schools/register', payload).subscribe({
       next: () => {
         this.successMessage = 'School registered successfully! Redirecting to login...';
         setTimeout(() => this.router.navigate(['/login']), 2000);

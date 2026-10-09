@@ -18,7 +18,7 @@ export interface SchoolRegistration {
   email: string;
   password: string;
   phone: string;
-  school: School,
+  school: Pick<School, 'schoolName' | 'schoolAddress' | 'schoolContactEmail' | 'schoolContactPhone'>;
 }
 
 export interface SchoolProfileUpdateRequest {
