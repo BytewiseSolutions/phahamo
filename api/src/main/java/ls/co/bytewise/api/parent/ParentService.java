@@ -5,6 +5,8 @@ import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentExceptions;
 import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.user.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,25 +26,21 @@ public class ParentService {
     }
 
     @Transactional
-    public StudentParentDto createAndLinkParent(User creator, Long studentId, ParentDto dto) {
+    public ParentDto createProfileFor(User creator, User user, ParentDto dto) {
         Long schoolId = TenantContext.getSchoolId();
-        Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId)
-                .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
 
         Parent parent = new Parent();
-        parent.setSchool(student.getSchool());
-        parent.setFirstName(dto.getFirstName());
-        parent.setLastName(dto.getLastName());
-        parent.setEmail(dto.getEmail());
-        parent.setPhone(dto.getPhone());
+        parent.setUser(user);
+        parent.setSchool(user.getSchools().stream()
+                .filter(s -> s.getId().equals(schoolId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("User is not attached to active school")));
+        parent.setRelationship(dto.getRelationship());
         parent.setCreatedBy(creator);
         parent.setUpdatedBy(creator);
-        Parent savedParent = parentRepository.save(parent);
 
-        student.getParents().add(savedParent);
-        studentRepository.save(student);
-
-        return new StudentParentDto(savedParent);
+        Parent saved = parentRepository.save(parent);
+        return new ParentDto(saved);
     }
 
     @Transactional
@@ -75,35 +73,14 @@ public class ParentService {
     }
 
     @Transactional
-    public StudentParentDto updateParent(
-            User editor,
-            Long studentId,
-            Long parentId,
-            ParentDto dto
-    ) {
-        Long schoolId = TenantContext.getSchoolId();
-
-        Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId)
-                .orElseThrow(() ->
-                        new StudentExceptions.StudentNotFoundException("Student not found"));
-
+    public ParentDto updateParent(User editor, Long parentId, ParentDto dto) {
         Parent parent = findOrThrow(parentId);
 
-        if (!studentRepository.existsParentLink(studentId, parentId)) {
-            throw new ParentExceptions.LinkNotFoundException(
-                    "This parent is not linked to this student"
-            );
-        }
-
-        parent.setFirstName(dto.getFirstName());
-        parent.setLastName(dto.getLastName());
-        parent.setEmail(dto.getEmail());
-        parent.setPhone(dto.getPhone());
+        parent.setRelationship(dto.getRelationship());
         parent.setUpdatedBy(editor);
 
         Parent saved = parentRepository.save(parent);
-
-        return new StudentParentDto(saved);
+        return new ParentDto(saved);
     }
 
     @Transactional
@@ -149,4 +126,5 @@ public class ParentService {
 
         return results.stream().map(StudentParentDto::new).toList();
     }
+
 }

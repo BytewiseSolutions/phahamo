@@ -15,8 +15,6 @@ const COMMON_LINKS: SidebarLink[] = [
 const ROLE_LINKS: Record<string, SidebarLink[]> = {
   SCHOOL_ADMIN: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
-    { label: 'Teachers', path: '/teachers', icon: 'fa-solid fa-chalkboard-user' },
-    { label: 'Students', path: '/students', icon: 'fa-solid fa-user-graduate' },
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },
@@ -25,8 +23,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'School Profile', path: '/school-profile', icon: 'fa-solid fa-school' },
   ],
   PRINCIPAL: [
-    { label: 'Teachers', path: '/teachers', icon: 'fa-solid fa-chalkboard-user' },
-    { label: 'Students', path: '/students', icon: 'fa-solid fa-user-graduate' },
+    { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },

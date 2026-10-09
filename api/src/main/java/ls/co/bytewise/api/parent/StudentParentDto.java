@@ -17,9 +17,9 @@ public class StudentParentDto {
 
     public StudentParentDto(Parent parent) {
         this.id = parent.getId();
-        this.firstName = parent.getFirstName();
-        this.lastName = parent.getLastName();
-        this.email = parent.getEmail();
-        this.phone = parent.getPhone();
+        this.firstName = parent.getUser().getFirstName();
+        this.lastName = parent.getUser().getLastName();
+        this.email = parent.getUser().getEmail();
+        this.phone = parent.getUser().getPhone();
     }
 }

@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { User } from '../../../util/user';
 
 @Component({
@@ -8,7 +9,7 @@ import { User } from '../../../util/user';
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss'
 })
-export class UserForm implements OnChanges {
+export class UserForm implements OnChanges, OnDestroy {
   @Input() visible = false;
   @Input() editingUser: User | null = null;
   @Output() closed = new EventEmitter<void>();
@@ -16,8 +17,14 @@ export class UserForm implements OnChanges {
   @Output() userUpdated = new EventEmitter<{ id: number; payload: any }>();
 
   userForm: FormGroup;
+  selectedRole = '';
   availableRoles = ['PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'PARENT', 'STUDENT'];
   availableStatuses = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
+  availableGenders = ['MALE', 'FEMALE'];
+  availableEmploymentTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT'];
+  availableRelationships = ['FATHER', 'MOTHER', 'GUARDIAN', 'OTHER'];
+
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder) {
     this.userForm = this.fb.group({
@@ -26,8 +33,24 @@ export class UserForm implements OnChanges {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required],
       role: ['', Validators.required],
-      status: ['ACTIVE']
+      status: ['ACTIVE'],
+
+      studentDateOfBirth: [''],
+      studentGender: [''],
+      studentAdmissionNumber: [''],
+
+      parentRelationship: [''],
+
+      teacherEmployeeNumber: [''],
+      teacherQualifications: [''],
+      teacherSpecialization: [''],
+      teacherDateJoined: [''],
+      teacherEmploymentType: ['']
     });
+
+    this.userForm.get('role')!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((role) => this.onRoleChanged(role));
   }
 
   get isEditMode(): boolean {
@@ -46,11 +69,49 @@ export class UserForm implements OnChanges {
           status: this.editingUser.status
         });
         this.userForm.get('email')?.disable();
+        this.selectedRole = this.editingUser.roles[0] ?? '';
       } else {
         this.userForm.get('email')?.enable();
         this.userForm.reset({ status: 'ACTIVE' });
+        this.selectedRole = '';
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private onRoleChanged(role: string): void {
+    this.selectedRole = role;
+
+    const studentControls = ['studentDateOfBirth', 'studentGender'];
+    const parentControls = ['parentRelationship'];
+    const teacherControls = ['teacherQualifications', 'teacherEmploymentType'];
+
+    [...studentControls, ...parentControls, ...teacherControls]
+      .forEach(name => {
+        this.userForm.get(name)?.clearValidators();
+        this.userForm.get(name)?.updateValueAndValidity();
+      });
+
+    if (role === 'STUDENT') {
+      this.userForm.get('studentDateOfBirth')?.setValidators(Validators.required);
+      this.userForm.get('studentGender')?.setValidators(Validators.required);
+    }
+
+    if (role === 'PARENT') {
+      this.userForm.get('parentRelationship')?.setValidators(Validators.required);
+    }
+
+    if (role === 'TEACHER') {
+      this.userForm.get('teacherQualifications')?.setValidators(Validators.required);
+      this.userForm.get('teacherEmploymentType')?.setValidators(Validators.required);
+    }
+
+    [...studentControls, ...parentControls, ...teacherControls]
+      .forEach(name => this.userForm.get(name)?.updateValueAndValidity());
   }
 
   onSubmit(): void {
@@ -72,21 +133,52 @@ export class UserForm implements OnChanges {
           status: formValue.status
         }
       });
-    } else {
-      this.userCreated.emit({
-        firstName: formValue.firstName,
-        lastName: formValue.lastName,
-        email: formValue.email,
-        phone: formValue.phone,
-        roles: [formValue.role]
-      });
+      this.userForm.reset({ status: 'ACTIVE' });
+      this.selectedRole = '';
+      return;
     }
 
+    const payload: any = {
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      email: formValue.email,
+      phone: formValue.phone,
+      roles: [formValue.role]
+    };
+
+    if (formValue.role === 'STUDENT') {
+      payload.student = {
+        dateOfBirth: formValue.studentDateOfBirth
+          ? new Date(formValue.studentDateOfBirth).toISOString()
+          : null,
+        gender: formValue.studentGender
+      };
+    }
+
+    if (formValue.role === 'PARENT') {
+      payload.parent = {
+        relationship: formValue.parentRelationship
+      };
+    }
+
+    if (formValue.role === 'TEACHER') {
+      payload.teacher = {
+        qualifications: formValue.teacherQualifications,
+        specialization: formValue.teacherSpecialization || null,
+        dateJoined: formValue.teacherDateJoined || null,
+        employmentType: formValue.teacherEmploymentType
+      };
+    }
+
+    this.userCreated.emit(payload);
+
     this.userForm.reset({ status: 'ACTIVE' });
+    this.selectedRole = '';
   }
 
   onClose(): void {
     this.userForm.reset({ status: 'ACTIVE' });
+    this.selectedRole = '';
     this.closed.emit();
   }
 

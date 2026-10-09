@@ -7,7 +7,6 @@ import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
 import ls.co.bytewise.api.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,14 +22,6 @@ public class StudentController {
 
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
-    }
-
-    @PostMapping
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<StudentDto> create(@AuthenticationPrincipal User currentUser,
-                                             @Valid @RequestBody StudentDto dto) {
-        StudentDto created = studentService.createStudent(currentUser, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping

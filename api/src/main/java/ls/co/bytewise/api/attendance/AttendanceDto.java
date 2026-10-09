@@ -31,8 +31,8 @@ public class AttendanceDto extends BaseDto {
     public AttendanceDto(Attendance attendance) {
         super(attendance);
         this.studentId = attendance.getStudent().getId();
-        this.studentFirstName = attendance.getStudent().getFirstName();
-        this.studentLastName = attendance.getStudent().getLastName();
+        this.studentFirstName = attendance.getStudent().getUser().getFirstName();
+        this.studentLastName = attendance.getStudent().getUser().getLastName();
         this.schoolClassId = attendance.getSchoolClass().getId();
         this.schoolClassName = attendance.getSchoolClass().getName();
         this.lessonId = attendance.getLesson().getId();

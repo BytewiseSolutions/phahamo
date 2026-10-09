@@ -9,6 +9,7 @@
       </div>
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="create-user-form">
+
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name</label>
@@ -41,6 +42,64 @@
           </select>
         </div>
 
+        @if (!isEditMode && selectedRole === 'STUDENT') {
+          <div class="form-row">
+            <div class="form-group">
+              <label for="studentDateOfBirth">Date of Birth</label>
+              <input id="studentDateOfBirth" type="date" formControlName="studentDateOfBirth"/>
+            </div>
+            <div class="form-group">
+              <label for="studentGender">Gender</label>
+              <select id="studentGender" formControlName="studentGender">
+                <option value="" disabled>Select gender</option>
+                @for (g of availableGenders; track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        @if (!isEditMode && selectedRole === 'PARENT') {
+          <div class="form-group">
+            <label for="parentRelationship">Relationship</label>
+            <select id="parentRelationship" formControlName="parentRelationship">
+              <option value="" disabled>Select relationship</option>
+              @for (r of availableRelationships; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (!isEditMode && selectedRole === 'TEACHER') {
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherQualifications">Qualifications</label>
+              <input id="teacherQualifications" type="text" formControlName="teacherQualifications"/>
+            </div>
+            <div class="form-group">
+              <label for="teacherSpecialization">Specialization</label>
+              <input id="teacherSpecialization" type="text" formControlName="teacherSpecialization"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherDateJoined">Date Joined</label>
+              <input id="teacherDateJoined" type="date" formControlName="teacherDateJoined"/>
+            </div>
+            <div class="form-group">
+              <label for="teacherEmploymentType">Employment Type</label>
+              <select id="teacherEmploymentType" formControlName="teacherEmploymentType">
+                <option value="" disabled>Select type</option>
+                @for (t of availableEmploymentTypes; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
         @if (isEditMode) {
           <div class="form-group">
             <label for="status">Status</label>
@@ -56,6 +115,7 @@
           <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
           <button type="submit" class="primary-button">{{ isEditMode ? 'Save Changes' : 'Create User' }}</button>
         </div>
+
       </form>
     </div>
   </div>

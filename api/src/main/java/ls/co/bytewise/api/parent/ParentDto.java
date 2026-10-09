@@ -12,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ParentDto extends BaseDto {
 
+    private Long userId;
+
     @NotBlank(message = "First name is required")
     private String firstName;
 
@@ -25,11 +27,19 @@ public class ParentDto extends BaseDto {
     @NotBlank(message = "Phone number is required")
     private String phone;
 
+    private ParentRelationship relationship;
+
     public ParentDto(Parent parent) {
         super(parent);
-        this.firstName = parent.getFirstName();
-        this.lastName = parent.getLastName();
-        this.email = parent.getEmail();
-        this.phone = parent.getPhone();
+
+        if (parent.getUser() != null) {
+            this.userId = parent.getUser().getId();
+            this.firstName = parent.getUser().getFirstName();
+            this.lastName = parent.getUser().getLastName();
+            this.email = parent.getUser().getEmail();
+            this.phone = parent.getUser().getPhone();
+        }
+
+        this.relationship = parent.getRelationship();
     }
 }

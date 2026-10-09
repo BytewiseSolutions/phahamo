@@ -1,13 +1,11 @@
 package ls.co.bytewise.api.student;
 
-import ls.co.bytewise.api.school.School;
-import ls.co.bytewise.api.school.SchoolRepository;
-import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.status.StudentStatusChange;
 import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
 import ls.co.bytewise.api.student.status.StudentStatusChangeRepository;
+import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,30 +19,27 @@ import java.util.List;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final SchoolRepository schoolRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final StudentStatusChangeRepository statusChangeRepository;
 
     public StudentService(StudentRepository studentRepository,
-                          SchoolRepository schoolRepository,
                           SchoolClassRepository schoolClassRepository,
                           StudentStatusChangeRepository statusChangeRepository) {
         this.studentRepository = studentRepository;
-        this.schoolRepository = schoolRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.statusChangeRepository = statusChangeRepository;
     }
 
     @Transactional
-    public StudentDto createStudent(User creator, StudentDto dto) {
+    public StudentDto createProfileFor(User creator, User user, StudentDto dto) {
         Long schoolId = TenantContext.getSchoolId();
-        School school = schoolRepository.findById(schoolId)
-                .orElseThrow(() -> new IllegalStateException("Active school not found"));
 
         Student student = new Student();
-        student.setSchool(school);
-        student.setFirstName(dto.getFirstName());
-        student.setLastName(dto.getLastName());
+        student.setUser(user);
+        student.setSchool(user.getSchools().stream()
+                .filter(s -> s.getId().equals(schoolId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("User is not attached to active school")));
         student.setDateOfBirth(dto.getDateOfBirth());
         student.setGender(dto.getGender());
         student.setAdmissionNumber(generateAdmissionNumber());
@@ -80,8 +75,6 @@ public class StudentService {
     public StudentDto updateStudent(User editor, Long id, StudentDto dto) {
         Student student = findOrThrow(id);
 
-        student.setFirstName(dto.getFirstName());
-        student.setLastName(dto.getLastName());
         student.setDateOfBirth(dto.getDateOfBirth());
         student.setGender(dto.getGender());
         student.setUpdatedBy(editor);

@@ -17,7 +17,7 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
     @Query("""
         SELECT p FROM Parent p
         WHERE p.school.id = :schoolId
-        AND LOWER(p.email) LIKE LOWER(CONCAT('%', :email, '%'))
+        AND LOWER(p.user.email) LIKE LOWER(CONCAT('%', :email, '%'))
         """)
     List<Parent> searchByEmail(
             @Param("schoolId") Long schoolId,
@@ -28,7 +28,7 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
     @Query("""
         SELECT p FROM Parent p
         WHERE p.school.id = :schoolId
-        AND p.phone LIKE CONCAT('%', :phone, '%')
+        AND p.user.phone LIKE CONCAT('%', :phone, '%')
         """)
     List<Parent> searchByPhone(
             @Param("schoolId") Long schoolId,

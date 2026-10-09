@@ -2,9 +2,12 @@ package ls.co.bytewise.api.user;
 
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.parent.ParentService;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.student.StudentService;
+import ls.co.bytewise.api.teacher.TeacherService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,15 +29,25 @@ public class UserService {
     private final SchoolRepository schoolRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+    private final StudentService studentService;
+    private final ParentService parentService;
+    private final TeacherService teacherService;
 
     public UserService(UserRepository userRepository,
                        SchoolRepository schoolRepository,
                        PasswordEncoder passwordEncoder,
-                       JavaMailSender mailSender) {
+                       JavaMailSender mailSender,
+                       StudentService studentService,
+                       ParentService parentService,
+                       TeacherService teacherService
+                       ) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
+        this.studentService = studentService;
+        this.parentService = parentService;
+        this.teacherService = teacherService;
     }
 
     @Transactional
@@ -77,6 +90,30 @@ public class UserService {
         user.setUpdatedBy(creator);
 
         User saved = userRepository.save(user);
+
+        if (dto.getRoles().contains(UserRole.STUDENT)) {
+            if (dto.getStudent() == null) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "Student details are required when assigning the STUDENT role");
+            }
+            studentService.createProfileFor(creator, saved, dto.getStudent());
+        }
+
+        if (dto.getRoles().contains(UserRole.PARENT)) {
+            if (dto.getParent() == null) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "Parent details are required when assigning the PARENT role");
+            }
+            parentService.createProfileFor(creator, saved, dto.getParent());
+        }
+
+        if (dto.getRoles().contains(UserRole.TEACHER)) {
+            if (dto.getTeacher() == null) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "Teacher details are required when assigning the TEACHER role");
+            }
+            teacherService.createProfileFor(creator, saved, dto.getTeacher());
+        }
 
         sendWelcomeEmail(saved.getEmail(), saved.getFirstName(), temporaryPassword);
 
