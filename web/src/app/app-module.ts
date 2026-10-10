@@ -50,6 +50,7 @@ import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-time
 import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
 import { StudentParentList } from './pages/student/student-parent-list/student-parent-list';
 import { StudentParentForm } from './pages/student/student-parent-form/student-parent-form';
+import { SubscriptionList } from './pages/subscription/subscription-list/subscription-list';
 
 @NgModule({
   declarations: [
@@ -95,7 +96,8 @@ import { StudentParentForm } from './pages/student/student-parent-form/student-p
     TeacherTimetable,
     TeacherLessons,
     StudentParentList,
-    StudentParentForm
+    StudentParentForm,
+    SubscriptionList
   ],
   imports: [
     BrowserModule,

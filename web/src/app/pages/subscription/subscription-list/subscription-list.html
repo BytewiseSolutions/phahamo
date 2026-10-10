@@ -1,0 +1,168 @@
+<div class="subscriptions-page">
+
+  <div class="page-header">
+    <h1>Subscriptions</h1>
+  </div>
+
+  @if (errorMessage && !showExtendForm && !showChangePlanForm) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading subscriptions...</div>
+  } @else if (subscriptions.length === 0) {
+    <div class="empty-state">
+      <h3>No Subscriptions</h3>
+      <p>No schools have subscriptions yet.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="subscriptions-table">
+        <thead>
+        <tr>
+          <th>School</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Started</th>
+          <th>Expires</th>
+          <th>Days Left</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (sub of subscriptions; track sub.id) {
+            <tr>
+              <td>{{ sub.schoolName }}</td>
+              <td>{{ formatEnum(sub.plan) }}</td>
+              <td>
+                <span class="status-badge" [class.inactive]="sub.status !== 'ACTIVE' && sub.status !== 'TRIAL'">
+                  {{ formatEnum(sub.status) }}
+                </span>
+              </td>
+              <td>{{ formatDate(sub.startedAt) }}</td>
+              <td>{{ sub.endsAt ? formatDate(sub.endsAt) : 'Lifetime' }}</td>
+              <td>
+                <span class="days-badge"
+                      [class.warn]="daysRemainingTone(sub) === 'warn'"
+                      [class.danger]="daysRemainingTone(sub) === 'danger'">
+                  {{ daysRemainingLabel(sub) }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openExtend(sub)">Extend</button>
+                <button type="button" class="link-button" (click)="openChangePlan(sub)">Change Plan</button>
+                <button type="button" class="link-button danger" (click)="onCancel(sub)">Cancel</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showExtendForm && selectedSubscription) {
+    <div class="modal-overlay" (click)="closeExtend()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>Extend — {{ selectedSubscription.schoolName }}</h2>
+          <button type="button" class="close-button" (click)="closeExtend()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+
+          <div class="form-group">
+            <label>Months to add</label>
+            <input type="number" min="1" [(ngModel)]="extendMonths" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+
+          <div class="quick-picks">
+            <button type="button" class="quick-pick" (click)="extendMonths = 1">1</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 3">3</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 6">6</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 12">12</button>
+          </div>
+
+          <p class="hint">
+            Current expiry:
+            <strong>{{ selectedSubscription.endsAt ? formatDate(selectedSubscription.endsAt) : 'Lifetime' }}</strong>
+          </p>
+          <p class="hint">
+            New expiry will be: <strong>{{ projectedExtendDate }}</strong>
+          </p>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeExtend()">Cancel</button>
+          <button type="button" class="primary-button" [disabled]="saving || extendMonths < 1" (click)="submitExtend()">
+            {{ saving ? 'Saving...' : 'Extend' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  @if (showChangePlanForm && selectedSubscription) {
+    <div class="modal-overlay" (click)="closeChangePlan()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>Change Plan — {{ selectedSubscription.schoolName }}</h2>
+          <button type="button" class="close-button" (click)="closeChangePlan()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+
+          <div class="form-group">
+            <label>Plan</label>
+            <div class="plan-options">
+              @for (p of plans; track p) {
+                <button type="button"
+                        class="plan-option"
+                        [class.active]="selectedPlan === p"
+                        (click)="onPlanChange(p)">
+                  {{ formatEnum(p) }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (selectedPlan !== 'ONE_OFF') {
+            <div class="form-group">
+              <label>Duration (months)</label>
+              <input type="number" min="1" [(ngModel)]="selectedMonths" [ngModelOptions]="{ standalone: true }"/>
+            </div>
+          }
+
+          @if (selectedPlan === 'ONE_OFF') {
+            <p class="hint">Lifetime access. No expiry.</p>
+          }
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeChangePlan()">Cancel</button>
+          <button type="button" class="primary-button" [disabled]="saving" (click)="submitChangePlan()">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

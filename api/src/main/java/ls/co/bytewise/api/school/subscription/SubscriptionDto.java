@@ -20,6 +20,7 @@ public class SubscriptionDto {
     private Instant startedAt;
     private Instant endsAt;
     private long daysRemaining;
+    private Integer months;
 
     public SubscriptionDto(Subscription subscription) {
         this.id = subscription.getId();

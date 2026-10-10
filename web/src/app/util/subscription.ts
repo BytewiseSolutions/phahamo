@@ -10,4 +10,5 @@ export interface Subscription {
   startedAt: string;
   endsAt: string | null;
   daysRemaining: number;
+  months?: number;
 }
