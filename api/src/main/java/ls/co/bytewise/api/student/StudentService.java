@@ -2,9 +2,6 @@ package ls.co.bytewise.api.student;
 
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
-import ls.co.bytewise.api.student.status.StudentStatusChange;
-import ls.co.bytewise.api.student.status.StudentStatusChangeDto;
-import ls.co.bytewise.api.student.status.StudentStatusChangeRepository;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.user.User;
 import org.springframework.data.domain.Page;
@@ -20,14 +17,11 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
-    private final StudentStatusChangeRepository statusChangeRepository;
 
     public StudentService(StudentRepository studentRepository,
-                          SchoolClassRepository schoolClassRepository,
-                          StudentStatusChangeRepository statusChangeRepository) {
+                          SchoolClassRepository schoolClassRepository) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
-        this.statusChangeRepository = statusChangeRepository;
     }
 
     @Transactional
@@ -104,39 +98,6 @@ public class StudentService {
 
         Student saved = studentRepository.save(student);
         return new StudentDto(saved);
-    }
-
-    @Transactional
-    public StudentDto changeStatus(User editor, Long studentId, StudentStatus newStatus, String reason) {
-        Student student = findOrThrow(studentId);
-
-        if (student.getStatus() == newStatus) {
-            throw new StudentExceptions.InvalidStudentOperationException(
-                    "Student already has status " + newStatus);
-        }
-
-        StudentStatusChange change = new StudentStatusChange();
-        change.setSchool(student.getSchool());
-        change.setStudent(student);
-        change.setPreviousStatus(student.getStatus());
-        change.setNewStatus(newStatus);
-        change.setReason(reason);
-        change.setCreatedBy(editor);
-        change.setUpdatedBy(editor);
-        statusChangeRepository.save(change);
-
-        student.setStatus(newStatus);
-        student.setUpdatedBy(editor);
-
-        Student saved = studentRepository.save(student);
-        return new StudentDto(saved);
-    }
-
-    public List<StudentStatusChangeDto> getStatusHistory(Long studentId) {
-        findOrThrow(studentId);
-        return statusChangeRepository.findAllByStudentIdOrderByCreatedAtDesc(studentId).stream()
-                .map(StudentStatusChangeDto::new)
-                .toList();
     }
 
     private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {
