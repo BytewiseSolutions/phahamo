@@ -23,7 +23,7 @@
           <div class="user-meta">
             <span class="role-badge">{{ roleLabel }}</span>
             <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
-              {{ user.status }}
+              {{ formatEnum(user.status) }}
             </span>
           </div>
         </div>
@@ -54,7 +54,7 @@
           </div>
           <div class="meta-item">
             <span class="label">Gender:</span>
-            <span class="value">{{ user.student.gender }}</span>
+            <span class="value">{{ formatEnum(user.student.gender) }}</span>
           </div>
           <div class="meta-item">
             <span class="label">Current Class:</span>
@@ -62,7 +62,7 @@
           </div>
           <div class="meta-item">
             <span class="label">Academic Status:</span>
-            <span class="value">{{ user.student.status }}</span>
+            <span class="value">{{ formatEnum(user.student.status) }}</span>
           </div>
         }
 
@@ -73,7 +73,7 @@
           </div>
           <div class="meta-item">
             <span class="label">Employment Type:</span>
-            <span class="value">{{ user.teacher.employmentType.replace('_', ' ') }}</span>
+            <span class="value">{{ formatEnum(user.teacher.employmentType) }}</span>
           </div>
           <div class="meta-item">
             <span class="label">Qualifications:</span>
@@ -90,6 +90,93 @@
         }
       </div>
     </section>
+
+    @if (tabs.length > 0) {
+      <div class="tabs">
+        @for (tab of tabs; track tab.key) {
+          <button
+            type="button"
+            class="tab"
+            [class.active]="activeTab === tab.key"
+            (click)="setTab(tab.key)">
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+
+      <section class="tab-content">
+        @switch (activeTab) {
+
+          @case ('subjects') {
+            @if (loadingAssignments) {
+              <div class="empty-tab">
+                <p>Loading subjects...</p>
+              </div>
+            } @else if (assignmentsError) {
+              <div class="empty-tab">
+                <p>{{ assignmentsError }}</p>
+              </div>
+            } @else if (assignments.length === 0) {
+              <div class="empty-tab">
+                <h3>No Subjects Assigned</h3>
+                <p>This teacher has not been assigned any subjects.</p>
+              </div>
+            } @else {
+              <div class="tab-section">
+                <div class="section-header">
+                  <div>
+                    <h3>Subjects</h3>
+                    <p>Subjects assigned to this teacher.</p>
+                  </div>
+                </div>
+
+                <div class="table-wrapper">
+                  <table class="teacher-table">
+                    <thead>
+                    <tr>
+                      <th>Subject</th>
+                      <th>Academic Year</th>
+                      <th>Class</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (assignment of assignments; track assignment.id) {
+                        <tr>
+                          <td>{{ assignment.subjectName }}</td>
+                          <td>{{ assignment.academicYearName }}</td>
+                          <td>{{ assignment.schoolClassName }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          }
+
+          @case ('timetable') {
+            <p class="tab-placeholder">Timetable content — coming soon.</p>
+          }
+
+          @case ('lessons') {
+            <p class="tab-placeholder">Lessons content — coming soon.</p>
+          }
+
+          @case ('attendance') {
+            <p class="tab-placeholder">Attendance content — coming soon.</p>
+          }
+
+          @case ('parents') {
+            <p class="tab-placeholder">Parents content — coming soon.</p>
+          }
+
+          @case ('status-history') {
+            <p class="tab-placeholder">Status history content — coming soon.</p>
+          }
+
+        }
+      </section>
+    }
 
   }
 </div>
