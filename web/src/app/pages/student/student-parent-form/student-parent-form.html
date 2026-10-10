@@ -1,0 +1,59 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Parent</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="parentForm" (ngSubmit)="onSubmit()" class="create-user-form">
+
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <div class="input-icon">
+            <i class="fa-solid fa-user"></i>
+            <input id="fullName" type="text" formControlName="fullName" placeholder="John Doe"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input id="email" type="email" formControlName="email"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <div class="input-icon">
+              <i class="fa-solid fa-phone"></i>
+              <input id="phone" type="text" formControlName="phone"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="relationship">Relationship</label>
+          <div class="input-icon">
+            <i class="fa-solid fa-people-roof"></i>
+            <select id="relationship" formControlName="relationship">
+              <option value="" disabled>Select relationship</option>
+              <option value="FATHER">Father</option>
+              <option value="MOTHER">Mother</option>
+              <option value="GUARDIAN">Guardian</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+          <button type="submit" class="primary-button">Add Parent</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -4,8 +4,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 17, 20, 0.5);
+  background: rgba(2, 17, 20, 0.45);
   z-index: 1000;
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -22,13 +23,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-light);
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -37,68 +38,101 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
+  width: 28px;
+  height: 28px;
   border-radius: var(--border-radius-sm);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+  font-size: 13px;
 }
 
 .close-button:hover {
   background: var(--border-light);
 }
 
-.parent-form {
-  padding: 24px;
+.create-user-form {
+  padding: 16px 20px 20px;
 }
 
 .form-row {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
 .form-group {
   flex: 1;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
-  height: 42px;
-  padding: 0 12px;
+  height: 36px;
+  padding: 0 10px 0 32px;
   border: 1px solid var(--border);
   border-radius: var(--border-radius-md);
-  font-size: 14px;
-  box-sizing: border-box;
+  font-size: 13px;
+  background: var(--background);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(29, 73, 82, 0.08);
+  background: var(--surface);
+  outline: none;
+}
+
+.form-group > input,
+.form-group > select {
+  padding: 0 10px;
+}
+
+.input-icon {
+  position: relative;
+}
+
+.input-icon i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 11px;
+  pointer-events: none;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
 }
 
 .primary-button {
-  height: 42px;
-  padding: 0 20px;
-  border: none;
+  height: 34px;
+  padding: 0 16px;
   border-radius: var(--border-radius-md);
   background: var(--primary);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
 .primary-button:hover {
@@ -106,15 +140,16 @@
 }
 
 .secondary-button {
-  height: 42px;
-  padding: 0 20px;
-  border: 1px solid var(--border);
+  height: 34px;
+  padding: 0 16px;
   border-radius: var(--border-radius-md);
   background: transparent;
+  border: 1px solid var(--border);
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
 .secondary-button:hover {

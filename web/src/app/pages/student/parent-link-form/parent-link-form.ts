@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { BackendService } from '../../../util/backend.service';
-import { Parent } from '../parent';
+import { Parent } from '../../parent/parent';
 
 @Component({
   selector: 'app-parent-link-form',

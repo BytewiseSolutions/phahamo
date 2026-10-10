@@ -55,4 +55,14 @@ public class ParentController {
                                          @RequestParam(required = false) String phone) {
         return parentService.searchParents(email, phone);
     }
+
+    @PostMapping("/api/students/{studentId}/parents")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<StudentParentDto> createAndLink(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long studentId,
+            @Valid @RequestBody ParentDto dto) {
+        StudentParentDto created = parentService.createAndLinkParent(currentUser, studentId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
 }

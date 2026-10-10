@@ -120,11 +120,7 @@
           }
 
           @case ('parents') {
-            <p class="tab-placeholder">Parents content — coming soon.</p>
-          }
-
-          @case ('status-history') {
-            <p class="tab-placeholder">Status history content — coming soon.</p>
+            <app-student-parent-list [studentId]="user.student!.id" />
           }
 
         }

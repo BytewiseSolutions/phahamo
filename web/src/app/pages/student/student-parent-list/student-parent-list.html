@@ -1,0 +1,54 @@
+<div class="section-header">
+  <h3>Parents</h3>
+  <div class="header-actions">
+    <button type="button" class="secondary-button" (click)="onLinkExisting()">Link Existing</button>
+    <button type="button" class="primary-button" (click)="onAddParent()">+ Add Parent</button>
+  </div>
+</div>
+
+@if (errorMessage) {
+  <div class="error-banner">{{ errorMessage }}</div>
+}
+<app-parent-link-form
+  [visible]="showLinkForm"
+  (closed)="onLinkFormClosed()"
+  (parentLinked)="onParentLinked($event)">
+</app-parent-link-form>
+
+<app-student-parent-form
+  [visible]="showCreateForm"
+  (closed)="onFormClosed()"
+  (parentCreated)="onParentCreated($event)">
+</app-student-parent-form>
+
+@if (loading) {
+  <div class="empty-state">
+    <p>Loading parents...</p>
+  </div>
+} @else if (parents.length === 0) {
+  <div class="empty-state">
+    <h3>No Parents Linked</h3>
+    <p>This student has no parents or guardians linked yet.</p>
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table class="parents-table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (parent of parents; track parent.id) {
+          <tr>
+            <td>{{ parent.firstName }} {{ parent.lastName }}</td>
+            <td>{{ parent.email }}</td>
+            <td>{{ parent.phone }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

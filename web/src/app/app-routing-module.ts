@@ -12,7 +12,6 @@ import { SchoolProfile } from './pages/school-profile/school-profile';
 import {AcademicYearList} from './pages/academic-years/academic-year-list/academic-year-list';
 import {ClassList} from './pages/class/class-list/class-list';
 import {SubjectList} from './pages/subject/subject-list/subject-list';
-import {ParentList} from './pages/parent/parent-list/parent-list';
 import {TimetablePage} from './pages/timetable/timetable-page/timetable-page';
 import {AttendancePage} from './pages/attendance/attendance-page/attendance-page';
 import {MyClassesPage} from './pages/my-classes/my-classes-page/my-classes-page';
@@ -38,7 +37,6 @@ const routes: Routes = [
       { path: 'academic-years', component: AcademicYearList },
       { path: 'classes', component: ClassList },
       { path: 'subjects', component: SubjectList },
-      { path: 'parents', component: ParentList },
       { path: 'timetable', component: TimetablePage },
       { path: 'my-classes', component: MyClassesPage },
       { path: 'my-classes/:assignmentId', component: MyClassView },

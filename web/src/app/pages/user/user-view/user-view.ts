@@ -76,8 +76,7 @@ export class UserView implements OnInit {
 
     if (this.user.student) {
       return [
-        { key: 'parents',         label: 'Parents' },
-        { key: 'status-history',  label: 'Status History' }
+        { key: 'parents',         label: 'Parents' }
       ];
     }
 

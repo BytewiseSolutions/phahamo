@@ -34,9 +34,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 import { SuccessDialog } from './components/success-dialog/success-dialog';
 import { TransferStudentForm } from './pages/class/transfer-student-form/transfer-student-form';
-import { ParentList } from './pages/parent/parent-list/parent-list';
-import { ParentForm } from './pages/parent/parent-form/parent-form';
-import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form';
+import { ParentLinkForm } from './pages/student/parent-link-form/parent-link-form';
 import { TimetablePage } from './pages/timetable/timetable-page/timetable-page';
 import { PeriodForm } from './pages/timetable/period-form/period-form';
 import { TimetableForm } from './pages/timetable/timetable-form/timetable-form';
@@ -50,6 +48,8 @@ import { UserView } from './pages/user/user-view/user-view';
 import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
 import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-timetable';
 import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
+import { StudentParentList } from './pages/student/student-parent-list/student-parent-list';
+import { StudentParentForm } from './pages/student/student-parent-form/student-parent-form';
 
 @NgModule({
   declarations: [
@@ -81,8 +81,6 @@ import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons'
     ConfirmDialog,
     SuccessDialog,
     TransferStudentForm,
-    ParentList,
-    ParentForm,
     ParentLinkForm,
     TimetablePage,
     PeriodForm,
@@ -95,7 +93,9 @@ import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons'
     UserView,
     TeacherSubjectList,
     TeacherTimetable,
-    TeacherLessons
+    TeacherLessons,
+    StudentParentList,
+    StudentParentForm
   ],
   imports: [
     BrowserModule,
