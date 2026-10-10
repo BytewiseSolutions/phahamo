@@ -63,4 +63,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsAnyLinkForParent(
             @Param("parentId") Long parentId
     );
+
+    Optional<Student> findByUserId(Long userId);
 }

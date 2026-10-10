@@ -20,6 +20,7 @@ import {AttendancePage} from './pages/attendance/attendance-page/attendance-page
 import {MyClassesPage} from './pages/my-classes/my-classes-page/my-classes-page';
 import {MyClassView} from './pages/my-classes/my-class-view/my-class-view';
 import {AuthCallback} from './pages/auth-callback/auth-callback';
+import {UserView} from './pages/user/user-view/user-view';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -34,6 +35,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
+      { path: 'users/:id', component: UserView },
       { path: 'teachers', component: TeacherList },
       { path: 'school-profile', component: SchoolProfile },
       { path: 'academic-years', component: AcademicYearList },

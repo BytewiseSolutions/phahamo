@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { User } from '../../../util/user';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-user-list',
@@ -15,12 +16,58 @@ export class UserList implements OnInit {
   showCreateForm = false;
   editingUser: User | null = null;
   errorMessage = '';
-  successMessage = '';
+  activeTab = 'ALL';
+  searchTerm = '';
+  statusFilter = 'ALL';
 
   constructor(
     private backend: BackendService,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private router: Router
   ) {}
+
+  tabs = [
+    { role: 'ALL', label: 'All' },
+    { role: 'SCHOOL_ADMIN', label: 'Admins' },
+    { role: 'PRINCIPAL', label: 'Principals' },
+    { role: 'TEACHER', label: 'Teachers' },
+    { role: 'STUDENT', label: 'Students' },
+    { role: 'FINANCE_OFFICER', label: 'Finance' },
+  ];
+
+  get filteredUsers(): User[] {
+    let list = this.users;
+
+    if (this.activeTab !== 'ALL') {
+      list = list.filter(u => u.roles.includes(this.activeTab));
+    }
+
+    if (this.statusFilter !== 'ALL') {
+      list = list.filter(u => u.status === this.statusFilter);
+    }
+
+    const q = this.searchTerm.trim().toLowerCase();
+    if (q) {
+      list = list.filter(u =>
+        u.firstName.toLowerCase().includes(q) ||
+        u.lastName.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.phone.toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }
+
+  countByRole(role: string): number {
+    if (role === 'ALL') return this.users.length;
+    return this.users.filter(u => u.roles.includes(role)).length;
+  }
+
+  setTab(role: string): void {
+    this.activeTab = role;
+    this.errorMessage = '';
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -46,29 +93,39 @@ export class UserList implements OnInit {
     this.editingUser = null;
     this.showCreateForm = !this.showCreateForm;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onEdit(user: User): void {
     this.editingUser = user;
     this.showCreateForm = true;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onFormClosed(): void {
     this.showCreateForm = false;
     this.editingUser = null;
   }
+  get hasActiveFilters(): boolean {
+    return this.searchTerm.trim().length > 0 || this.statusFilter !== 'ALL';
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = 'ALL';
+  }
 
   onCreateUser(newUser: any): void {
     this.errorMessage = '';
-    this.successMessage = '';
     this.showCreateForm = false;
 
     this.backend.postSilently<User>('/users', newUser).subscribe({
       next: (created) => {
         this.users = [created, ...this.users];
+
+        const createdRole = created.roles?.[0];
+        if (createdRole && this.tabs.some(t => t.role === createdRole)) {
+          this.activeTab = createdRole;
+        }
       },
       error: (err) => {
         this.errorMessage = err.status === 409
@@ -80,17 +137,15 @@ export class UserList implements OnInit {
 
   onUpdateUser(event: { id: number; payload: any }): void {
     this.errorMessage = '';
-    this.successMessage = '';
+    this.showCreateForm = false;
+    this.editingUser = null;
 
     this.backend.putSilently<User>(`/users/${event.id}`, event.payload).subscribe({
-      next: () => {
-        this.successMessage = 'User updated.';
-        this.showCreateForm = false;
-        this.editingUser = null;
-        this.loadUsers();
+      next: (updated) => {
+        this.users = this.users.map(u => u.id === event.id ? updated : u);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to update user.';
+        this.errorMessage = err.error?.message || err.error?.errors?.[0]?.defaultMessage || 'Failed to update user.';
       }
     });
   }
@@ -106,7 +161,6 @@ export class UserList implements OnInit {
     if (!confirmed) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.delete<void>(`/users/${user.id}`).subscribe({
       next: () => this.loadUsers(),
@@ -118,7 +172,6 @@ export class UserList implements OnInit {
 
   onActivate(userId: number): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.patch<void>(`/users/${userId}/activate`, {}).subscribe({
       next: () => this.loadUsers(),
@@ -126,5 +179,9 @@ export class UserList implements OnInit {
         this.errorMessage = 'Failed to activate user.';
       }
     });
+  }
+
+  onView(user: User): void {
+    this.router.navigate(['/users', user.id]);
   }
 }

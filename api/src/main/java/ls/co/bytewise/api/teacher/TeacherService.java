@@ -108,4 +108,10 @@ public class TeacherService {
         long currentNumber = Long.parseLong(employeeNumber.substring(2));
         return String.format("T-%04d", currentNumber + 1);
     }
+
+    public TeacherDto getByUserId(Long userId) {
+        return teacherRepository.findByUserId(userId)
+                .map(TeacherDto::new)
+                .orElse(null);
+    }
 }

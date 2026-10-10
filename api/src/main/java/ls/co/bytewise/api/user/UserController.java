@@ -60,7 +60,7 @@ public class UserController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public UserDto updateUser(@AuthenticationPrincipal User currentUser,
                               @PathVariable Long id,
-                              @Valid @RequestBody UserDto dto) {
+                              @RequestBody UserDto dto) {
         return userService.updateUser(currentUser, id, dto);
     }
 
@@ -76,5 +76,11 @@ public class UserController {
     public ResponseEntity<Void> activateUser(@PathVariable Long id) {
         userService.activateUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public UserDto getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 }

@@ -66,18 +66,6 @@
           </div>
         }
 
-        @if (!isEditMode && selectedRole === 'PARENT') {
-          <div class="form-group">
-            <label for="parentRelationship">Relationship</label>
-            <select id="parentRelationship" formControlName="parentRelationship">
-              <option value="" disabled>Select relationship</option>
-              @for (r of availableRelationships; track r) {
-                <option [value]="r">{{ r }}</option>
-              }
-            </select>
-          </div>
-        }
-
         @if (!isEditMode && selectedRole === 'TEACHER') {
           <div class="form-row">
             <div class="form-group">

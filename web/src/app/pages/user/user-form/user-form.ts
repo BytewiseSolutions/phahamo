@@ -18,11 +18,10 @@ export class UserForm implements OnChanges, OnDestroy {
 
   userForm: FormGroup;
   selectedRole = '';
-  availableRoles = ['PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'PARENT', 'STUDENT'];
+  availableRoles = ['PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'STUDENT'];
   availableStatuses = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
   availableGenders = ['MALE', 'FEMALE'];
   availableEmploymentTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT'];
-  availableRelationships = ['FATHER', 'MOTHER', 'GUARDIAN', 'OTHER'];
 
   private destroy$ = new Subject<void>();
 
@@ -36,8 +35,6 @@ export class UserForm implements OnChanges, OnDestroy {
 
       studentDateOfBirth: [''],
       studentGender: [''],
-
-      parentRelationship: [''],
 
       teacherQualifications: [''],
       teacherSpecialization: [''],
@@ -81,24 +78,19 @@ export class UserForm implements OnChanges, OnDestroy {
 
   private onRoleChanged(role: string): void {
     this.selectedRole = role;
+    if (this.isEditMode) return;
 
     const studentControls = ['studentDateOfBirth', 'studentGender'];
-    const parentControls = ['parentRelationship'];
     const teacherControls = ['teacherQualifications', 'teacherEmploymentType'];
 
-    [...studentControls, ...parentControls, ...teacherControls]
-      .forEach(name => {
-        this.userForm.get(name)?.clearValidators();
-        this.userForm.get(name)?.updateValueAndValidity();
-      });
+    [...studentControls, ...teacherControls].forEach(name => {
+      this.userForm.get(name)?.clearValidators();
+      this.userForm.get(name)?.updateValueAndValidity();
+    });
 
     if (role === 'STUDENT') {
       this.userForm.get('studentDateOfBirth')?.setValidators(Validators.required);
       this.userForm.get('studentGender')?.setValidators(Validators.required);
-    }
-
-    if (role === 'PARENT') {
-      this.userForm.get('parentRelationship')?.setValidators(Validators.required);
     }
 
     if (role === 'TEACHER') {
@@ -106,18 +98,15 @@ export class UserForm implements OnChanges, OnDestroy {
       this.userForm.get('teacherEmploymentType')?.setValidators(Validators.required);
     }
 
-    [...studentControls, ...parentControls, ...teacherControls]
-      .forEach(name => this.userForm.get(name)?.updateValueAndValidity());
+    [...studentControls, ...teacherControls].forEach(name =>
+      this.userForm.get(name)?.updateValueAndValidity()
+    );
   }
 
   private splitFullName(fullName: string): { firstName: string; lastName: string } {
     const trimmed = fullName.trim();
     const firstSpaceIndex = trimmed.indexOf(' ');
-
-    if (firstSpaceIndex === -1) {
-      return { firstName: trimmed, lastName: '' };
-    }
-
+    if (firstSpaceIndex === -1) return { firstName: trimmed, lastName: '' };
     return {
       firstName: trimmed.substring(0, firstSpaceIndex),
       lastName: trimmed.substring(firstSpaceIndex + 1).trim()
@@ -136,39 +125,19 @@ export class UserForm implements OnChanges, OnDestroy {
     if (this.isEditMode && this.editingUser) {
       this.userUpdated.emit({
         id: this.editingUser.id,
-        payload: {
-          firstName,
-          lastName,
-          phone: formValue.phone,
-          roles: [formValue.role],
-          status: formValue.status
-        }
+        payload: { firstName, lastName, phone: formValue.phone, roles: [formValue.role], status: formValue.status }
       });
       this.userForm.reset({ status: 'ACTIVE' });
       this.selectedRole = '';
       return;
     }
 
-    const payload: any = {
-      firstName,
-      lastName,
-      email: formValue.email,
-      phone: formValue.phone,
-      roles: [formValue.role]
-    };
+    const payload: any = { firstName, lastName, email: formValue.email, phone: formValue.phone, roles: [formValue.role] };
 
     if (formValue.role === 'STUDENT') {
       payload.student = {
-        dateOfBirth: formValue.studentDateOfBirth
-          ? new Date(formValue.studentDateOfBirth).toISOString()
-          : null,
+        dateOfBirth: formValue.studentDateOfBirth ? new Date(formValue.studentDateOfBirth).toISOString() : null,
         gender: formValue.studentGender
-      };
-    }
-
-    if (formValue.role === 'PARENT') {
-      payload.parent = {
-        relationship: formValue.parentRelationship
       };
     }
 
@@ -182,7 +151,6 @@ export class UserForm implements OnChanges, OnDestroy {
     }
 
     this.userCreated.emit(payload);
-
     this.userForm.reset({ status: 'ACTIVE' });
     this.selectedRole = '';
   }
@@ -194,8 +162,6 @@ export class UserForm implements OnChanges, OnDestroy {
   }
 
   onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.onClose();
-    }
+    if (event.target === event.currentTarget) this.onClose();
   }
 }

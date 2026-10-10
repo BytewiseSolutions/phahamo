@@ -168,4 +168,10 @@ public class StudentService {
         return studentRepository.findByIdAndSchoolId(id, schoolId)
                 .orElseThrow(() -> new StudentExceptions.StudentNotFoundException("Student not found"));
     }
+
+    public StudentDto getByUserId(Long userId) {
+        return studentRepository.findByUserId(userId)
+                .map(StudentDto::new)
+                .orElse(null);
+    }
 }

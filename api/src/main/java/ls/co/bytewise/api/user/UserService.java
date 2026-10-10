@@ -2,11 +2,14 @@ package ls.co.bytewise.api.user;
 
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.parent.ParentDto;
 import ls.co.bytewise.api.parent.ParentService;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.student.StudentDto;
 import ls.co.bytewise.api.student.StudentService;
+import ls.co.bytewise.api.teacher.TeacherDto;
 import ls.co.bytewise.api.teacher.TeacherService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.SimpleMailMessage;
@@ -237,5 +240,24 @@ public class UserService {
         );
 
         mailSender.send(message);
+    }
+
+    public UserDto getUser(Long userId) {
+        User user = getUserInCurrentSchool(userId);
+        UserDto dto = new UserDto(user);
+
+        if (user.hasRole(UserRole.STUDENT)) {
+            dto.setStudent(studentService.getByUserId(userId));
+        }
+
+        if (user.hasRole(UserRole.PARENT)) {
+            dto.setParent(parentService.getByUserId(userId));
+        }
+
+        if (user.hasRole(UserRole.TEACHER)) {
+            dto.setTeacher(teacherService.getByUserId(userId));
+        }
+
+        return dto;
     }
 }

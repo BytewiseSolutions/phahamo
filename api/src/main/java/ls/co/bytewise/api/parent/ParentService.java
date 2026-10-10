@@ -127,4 +127,9 @@ public class ParentService {
         return results.stream().map(StudentParentDto::new).toList();
     }
 
+    public ParentDto getByUserId(Long userId) {
+        return parentRepository.findByUserId(userId)
+                .map(ParentDto::new)
+                .orElse(null);
+    }
 }

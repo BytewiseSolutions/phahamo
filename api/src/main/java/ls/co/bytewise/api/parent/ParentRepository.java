@@ -35,4 +35,6 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
             @Param("phone") String phone,
             Pageable pageable
     );
+
+    Optional<Parent> findByUserId(Long userId);
 }
