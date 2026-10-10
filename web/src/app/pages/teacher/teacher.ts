@@ -1,11 +1,15 @@
 import { EmploymentType } from './employment-type';
-import { User } from '../../util/user';
 
 export interface Teacher {
   id: number;
   createdAt: string;
   updatedAt: string;
-  user: User;
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  status: string;
   qualifications: string;
   employeeNumber: string;
   dateJoined: string;
@@ -14,13 +18,6 @@ export interface Teacher {
 }
 
 export interface TeacherPayload {
-  user?: {
-    id?: number;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-  };
   qualifications?: string;
   dateJoined?: string;
   specialization?: string;

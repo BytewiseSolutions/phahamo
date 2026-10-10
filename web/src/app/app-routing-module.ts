@@ -12,9 +12,7 @@ import { SchoolProfile } from './pages/school-profile/school-profile';
 import {AcademicYearList} from './pages/academic-years/academic-year-list/academic-year-list';
 import {ClassList} from './pages/class/class-list/class-list';
 import {SubjectList} from './pages/subject/subject-list/subject-list';
-import {StudentList} from './pages/student/student-list/student-list';
 import {ParentList} from './pages/parent/parent-list/parent-list';
-import {TeacherList} from './pages/teacher/teacher-list/teacher-list';
 import {TimetablePage} from './pages/timetable/timetable-page/timetable-page';
 import {AttendancePage} from './pages/attendance/attendance-page/attendance-page';
 import {MyClassesPage} from './pages/my-classes/my-classes-page/my-classes-page';
@@ -36,12 +34,10 @@ const routes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
       { path: 'users/:id', component: UserView },
-      { path: 'teachers', component: TeacherList },
       { path: 'school-profile', component: SchoolProfile },
       { path: 'academic-years', component: AcademicYearList },
       { path: 'classes', component: ClassList },
       { path: 'subjects', component: SubjectList },
-      { path: 'students', component: StudentList },
       { path: 'parents', component: ParentList },
       { path: 'timetable', component: TimetablePage },
       { path: 'my-classes', component: MyClassesPage },

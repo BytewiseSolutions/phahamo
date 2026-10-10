@@ -1,39 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
-
-interface UserDetail {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  status: string;
-  roles: string[];
-  createdAt?: string;
-  updatedAt?: string;
-  student?: {
-    id: number;
-    admissionNumber: string;
-    dateOfBirth: string;
-    gender: string;
-    status: string;
-    currentClassName?: string;
-    schoolClassId?: number;
-  } | null;
-  parent?: {
-    id: number;
-    relationship: string;
-  } | null;
-  teacher?: {
-    id: number;
-    employeeNumber: string;
-    qualifications: string;
-    specialization: string;
-    dateJoined: string;
-    employmentType: string;
-  } | null;
-}
+import { UserDetail } from '../../../util/user-detail';
 
 @Component({
   selector: 'app-user-view',
@@ -83,34 +51,13 @@ export class UserView implements OnInit {
     this.router.navigate(['/users']);
   }
 
-  onEdit(): void {
-    if (this.user) {
-      this.router.navigate(['/users'], { queryParams: { edit: this.user.id } });
-    }
-  }
-
   formatDate(value?: string): string {
     if (!value) return '—';
     try {
-      return new Date(value).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return value;
-    }
-  }
-
-  formatInstant(value?: string): string {
-    if (!value) return '—';
-    try {
-      return new Date(value).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
+      return new Date(value).toLocaleDateString('en-GB', {
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        month: 'long',
+        year: 'numeric'
       });
     } catch {
       return value;
@@ -120,7 +67,12 @@ export class UserView implements OnInit {
   get roleLabel(): string {
     if (!this.user || this.user.roles.length === 0) return '—';
     return this.user.roles
-      .map(r => r.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()))
+      .map(r => this.formatEnum(r))
       .join(', ');
+  }
+
+  formatEnum(value?: string): string {
+    if (!value) return '—';
+    return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   }
 }
