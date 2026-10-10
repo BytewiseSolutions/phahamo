@@ -14,11 +14,15 @@ import java.time.Instant;
 @NoArgsConstructor
 public class StudentDto extends BaseDto {
 
-    @NotBlank(message = "First name is required")
+    private Long userId;
+
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
     private String lastName;
+
+    private String email;
+
+    private String phone;
 
     @NotNull(message = "Date of birth is required")
     private Instant dateOfBirth;
@@ -36,8 +40,15 @@ public class StudentDto extends BaseDto {
 
     public StudentDto(Student student) {
         super(student);
-        this.firstName = student.getFirstName();
-        this.lastName = student.getLastName();
+
+        if (student.getUser() != null) {
+            this.userId = student.getUser().getId();
+            this.firstName = student.getUser().getFirstName();
+            this.lastName = student.getUser().getLastName();
+            this.email = student.getUser().getEmail();
+            this.phone = student.getUser().getPhone();
+        }
+
         this.dateOfBirth = student.getDateOfBirth();
         this.gender = student.getGender();
         this.admissionNumber = student.getAdmissionNumber();

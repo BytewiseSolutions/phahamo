@@ -1,0 +1,131 @@
+<div class="user-view-page">
+
+  <div class="page-header">
+    <button type="button" class="back-button" (click)="goBack()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Users</span>
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Loading user...</div>
+  } @else if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  } @else if (user) {
+
+    <section class="detail-section">
+      <div class="user-header">
+        <div class="avatar">
+          {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+        </div>
+        <div class="user-header-info">
+          <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+          <div class="user-meta">
+            <span class="role-badge">{{ roleLabel }}</span>
+            <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
+              {{ formatEnum(user.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-list">
+        <div class="meta-item">
+          <span class="label">Email:</span>
+          <span class="value">{{ user.email }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Phone:</span>
+          <span class="value">{{ user.phone }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Created At:</span>
+          <span class="value">{{ formatDate(user.createdAt) }}</span>
+        </div>
+
+        @if (user.student) {
+          <div class="meta-item">
+            <span class="label">Admission Number:</span>
+            <span class="value">{{ user.student.admissionNumber }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Date of Birth:</span>
+            <span class="value">{{ formatDate(user.student.dateOfBirth) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Gender:</span>
+            <span class="value">{{ formatEnum(user.student.gender) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Current Class:</span>
+            <span class="value">{{ user.student.currentClassName || '—' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Academic Status:</span>
+            <span class="value">{{ formatEnum(user.student.status) }}</span>
+          </div>
+        }
+
+        @if (user.teacher) {
+          <div class="meta-item">
+            <span class="label">Employee Number:</span>
+            <span class="value">{{ user.teacher.employeeNumber }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Employment Type:</span>
+            <span class="value">{{ formatEnum(user.teacher.employmentType) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Qualifications:</span>
+            <span class="value">{{ user.teacher.qualifications || '—' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Specialization:</span>
+            <span class="value">{{ user.teacher.specialization || '—' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Date Joined:</span>
+            <span class="value">{{ formatDate(user.teacher.dateJoined) }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (tabs.length > 0) {
+      <div class="tabs">
+        @for (tab of tabs; track tab.key) {
+          <button
+            type="button"
+            class="tab"
+            [class.active]="activeTab === tab.key"
+            (click)="setTab(tab.key)">
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+
+      <section class="tab-content">
+        @switch (activeTab) {
+
+          @case ('subjects') {
+            <app-teacher-subject-list [teacherUserId]="user.teacher!.userId" />
+          }
+
+          @case ('timetable') {
+            <app-teacher-timetable [teacherUserId]="user.teacher!.userId" />
+          }
+
+          @case ('lessons') {
+            <app-teacher-lessons [teacherUserId]="user.teacher!.userId" />
+          }
+
+          @case ('parents') {
+            <app-student-parent-list [studentId]="user.student!.id" />
+          }
+
+        }
+      </section>
+    }
+
+  }
+</div>

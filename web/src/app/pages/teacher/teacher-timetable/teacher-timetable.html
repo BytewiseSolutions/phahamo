@@ -1,0 +1,53 @@
+@if (loading) {
+  <div class="empty-state">
+    <p>Loading timetable...</p>
+  </div>
+} @else if (errorMessage) {
+  <div class="error-banner">{{ errorMessage }}</div>
+} @else if (periods.length === 0) {
+  <div class="empty-state">
+    <h3>No Periods Set Up</h3>
+    <p>Periods must be configured before a timetable can be displayed.</p>
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table class="timetable-grid">
+      <thead>
+      <tr>
+        <th class="period-col">Period</th>
+        @for (day of days; track day) {
+          <th>{{ getDayLabel(day) }}</th>
+        }
+      </tr>
+      </thead>
+      <tbody>
+        @for (period of periods; track period.id) {
+          <tr [class.break-row]="isBreak(period)">
+            <td class="period-col">
+              <div class="period-name">{{ period.name }}</div>
+              <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
+            </td>
+
+            @if (isBreak(period)) {
+              <td [attr.colspan]="days.length" class="break-cell">
+                {{ period.name }}
+              </td>
+            } @else {
+              @for (day of days; track day) {
+                <td class="slot-cell">
+                  @let slot = slotFor(day, period.id);
+                  @if (slot) {
+                    <div class="cell-subject">{{ slot.subjectName }}</div>
+                    <div class="cell-class">{{ slot.schoolClassName }}</div>
+                  } @else {
+                    <span class="cell-free">—</span>
+                  }
+                </td>
+              }
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

@@ -9,37 +9,90 @@
       </div>
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="create-user-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input id="firstName" type="text" formControlName="firstName"/>
-          </div>
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input id="lastName" type="text" formControlName="lastName"/>
+
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <div class="input-icon">
+            <i class="fa-solid fa-user"></i>
+            <input id="fullName" type="text" formControlName="fullName" placeholder="Lebohang Monamane"/>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="email">Email</label>
-            <input id="email" type="email" formControlName="email"/>
+            <div class="input-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input id="email" type="email" formControlName="email"/>
+            </div>
           </div>
           <div class="form-group">
             <label for="phone">Phone</label>
-            <input id="phone" type="text" formControlName="phone"/>
+            <div class="input-icon">
+              <i class="fa-solid fa-phone"></i>
+              <input id="phone" type="text" formControlName="phone"/>
+            </div>
           </div>
         </div>
 
         <div class="form-group">
           <label for="role">Role</label>
-          <select id="role" formControlName="role">
-            <option value="" disabled>Select a role</option>
-            @for (role of availableRoles; track role) {
-              <option [value]="role">{{ role }}</option>
-            }
-          </select>
+          <div class="input-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <select id="role" formControlName="role">
+              <option value="" disabled>Select a role</option>
+              @for (role of availableRoles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+          </div>
         </div>
+
+        @if (!isEditMode && selectedRole === 'STUDENT') {
+          <div class="form-row">
+            <div class="form-group">
+              <label for="studentDateOfBirth">Date of Birth</label>
+              <input id="studentDateOfBirth" type="date" formControlName="studentDateOfBirth"/>
+            </div>
+            <div class="form-group">
+              <label for="studentGender">Gender</label>
+              <select id="studentGender" formControlName="studentGender">
+                <option value="" disabled>Select gender</option>
+                @for (g of availableGenders; track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        @if (!isEditMode && selectedRole === 'TEACHER') {
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherQualifications">Qualifications</label>
+              <input id="teacherQualifications" type="text" formControlName="teacherQualifications"/>
+            </div>
+            <div class="form-group">
+              <label for="teacherSpecialization">Specialization</label>
+              <input id="teacherSpecialization" type="text" formControlName="teacherSpecialization"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherDateJoined">Date Joined</label>
+              <input id="teacherDateJoined" type="date" formControlName="teacherDateJoined"/>
+            </div>
+            <div class="form-group">
+              <label for="teacherEmploymentType">Employment Type</label>
+              <select id="teacherEmploymentType" formControlName="teacherEmploymentType">
+                <option value="" disabled>Select type</option>
+                @for (t of availableEmploymentTypes; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
 
         @if (isEditMode) {
           <div class="form-group">

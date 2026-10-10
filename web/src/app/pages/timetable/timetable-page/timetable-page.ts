@@ -89,10 +89,8 @@ export class TimetablePage implements OnInit {
   }
 
   getTeacherFullName(teacher: Teacher): string {
-    return `${teacher.user.firstName} ${teacher.user.lastName}`;
+    return `${teacher.firstName} ${teacher.lastName}`;
   }
-
-  // ----- Periods -----
 
   loadPeriods(): void {
     this.loadingPeriods = true;

@@ -146,8 +146,8 @@ public class AttendanceService {
     private AttendanceDto blankDto(Student student, SchoolClass schoolClass, Lesson lesson) {
         AttendanceDto dto = new AttendanceDto();
         dto.setStudentId(student.getId());
-        dto.setStudentFirstName(student.getFirstName());
-        dto.setStudentLastName(student.getLastName());
+        dto.setStudentFirstName(student.getUser().getFirstName());
+        dto.setStudentLastName(student.getUser().getLastName());
         dto.setSchoolClassId(schoolClass.getId());
         dto.setSchoolClassName(schoolClass.getName());
         dto.setLessonId(lesson.getId());

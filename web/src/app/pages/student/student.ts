@@ -3,8 +3,11 @@ import { StudentStatus } from './student-status';
 
 export interface Student {
   id: number;
+  userId: number;
   firstName: string;
   lastName: string;
+  email: string;
+  phone: string;
   dateOfBirth: string;
   gender: Gender;
   admissionNumber: string;
@@ -14,8 +17,6 @@ export interface Student {
 }
 
 export interface StudentPayload {
-  firstName: string;
-  lastName: string;
   dateOfBirth: string;
   gender: Gender;
   schoolClassId?: number | null;

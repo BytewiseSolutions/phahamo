@@ -23,15 +23,15 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findAllBySchoolIdAndCurrentClassId(Long schoolId, Long currentClassId);
 
     @Query("""
-        SELECT s
-        FROM Student s
-        WHERE s.school.id = :schoolId
-        AND (:search IS NULL OR :search = ''
-            OR LOWER(s.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(s.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(s.admissionNumber) LIKE LOWER(CONCAT('%', :search, '%'))
-        )
-        """)
+    SELECT s
+    FROM Student s
+    WHERE s.school.id = :schoolId
+    AND (:search IS NULL OR :search = ''
+        OR LOWER(s.user.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(s.user.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(s.admissionNumber) LIKE LOWER(CONCAT('%', :search, '%'))
+    )
+    """)
     org.springframework.data.domain.Page<Student> search(
             @Param("schoolId") Long schoolId,
             @Param("search") String search,
@@ -63,4 +63,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsAnyLinkForParent(
             @Param("parentId") Long parentId
     );
+
+    Optional<Student> findByUserId(Long userId);
 }

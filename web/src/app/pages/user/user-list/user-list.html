@@ -2,15 +2,12 @@
   <div class="page-header">
     <h1>Users</h1>
     <button type="button" class="primary-button" (click)="toggleCreateForm()">
-      {{ showCreateForm ? 'Cancel' : '+ Add User' }}
+      + Add User
     </button>
   </div>
 
   @if (errorMessage) {
     <div class="error-banner">{{ errorMessage }}</div>
-  }
-  @if (successMessage) {
-    <div class="success-banner">{{ successMessage }}</div>
   }
 
   <app-user-form
@@ -21,8 +18,45 @@
     (userUpdated)="onUpdateUser($event)">
   </app-user-form>
 
+  <div class="tabs">
+    @for (tab of tabs; track tab.role) {
+      <button class="tab" [class.active]="activeTab === tab.role" (click)="setTab(tab.role)">
+        {{ tab.label }}
+        <span class="tab-count">{{ countByRole(tab.role) }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search by name, email, or phone..."
+        [(ngModel)]="searchTerm"
+        [ngModelOptions]="{ standalone: true }"/>
+    </div>
+
+    <select class="status-filter" [(ngModel)]="statusFilter" [ngModelOptions]="{ standalone: true }">
+      <option value="ALL">All statuses</option>
+      <option value="ACTIVE">Active only</option>
+      <option value="INACTIVE">Inactive only</option>
+    </select>
+
+    @if (hasActiveFilters) {
+      <button type="button" class="clear-filters" (click)="clearFilters()">
+        Clear
+      </button>
+    }
+  </div>
+
   @if (loading) {
-    <p>Loading users...</p>
+    <div class="loading-state">Loading users...</div>
+  } @else if (filteredUsers.length === 0) {
+    <div class="empty-state">
+      <p>No users in this category yet.</p>
+    </div>
   } @else {
     <table class="users-table">
       <thead>
@@ -32,11 +66,11 @@
         <th>Phone</th>
         <th>Roles</th>
         <th>Status</th>
-        <th></th>
+        <th>Action</th>
       </tr>
       </thead>
       <tbody>
-        @for (user of users; track user.id) {
+        @for (user of filteredUsers; track user.id) {
           <tr>
             <td>{{ user.firstName }} {{ user.lastName }}</td>
             <td>{{ user.email }}</td>
@@ -47,25 +81,13 @@
                 {{ user.status }}
               </span>
             </td>
-            <td>
-              <button type="button" class="link-button" (click)="onEdit(user)">
-                Edit
-              </button>
-
+            <td class="actions-cell">
+              <button type="button" class="link-button view" (click)="onView(user)">View</button>
+              <button type="button" class="link-button edit" (click)="onEdit(user)">Edit</button>
               @if (user.status === 'ACTIVE') {
-                <button
-                  type="button"
-                  class="link-button"
-                  (click)="onDeactivate(user)">
-                  Deactivate
-                </button>
+                <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
               } @else {
-                <button
-                  type="button"
-                  class="link-button"
-                  (click)="onActivate(user.id)">
-                  Activate
-                </button>
+                <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
               }
             </td>
           </tr>

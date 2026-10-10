@@ -29,20 +29,12 @@ import { SubjectList } from './pages/subject/subject-list/subject-list';
 import { SubjectForm } from './pages/subject/subject-form/subject-form';
 import { SubjectClassAssignmentList } from './pages/subject-class-assignment/subject-class-assignment-list/subject-class-assignment-list';
 import { SubjectClassAssignmentForm } from './pages/subject-class-assignment/subject-class-assignment-form/subject-class-assignment-form';
-import { StudentList } from './pages/student/student-list/student-list';
-import { StudentForm } from './pages/student/student-form/student-form';
 import { ClassStudentList } from './pages/class/class-student-list/class-student-list';
 import {NgSelectModule} from '@ng-select/ng-select';
 import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 import { SuccessDialog } from './components/success-dialog/success-dialog';
 import { TransferStudentForm } from './pages/class/transfer-student-form/transfer-student-form';
-import { StudentView } from './pages/student/student-view/student-view';
-import { ParentList } from './pages/parent/parent-list/parent-list';
-import { ParentForm } from './pages/parent/parent-form/parent-form';
-import { ParentLinkForm } from './pages/parent/parent-link-form/parent-link-form';
-import { TeacherList } from './pages/teacher/teacher-list/teacher-list';
-import { TeacherForm } from './pages/teacher/teacher-form/teacher-form';
-import { TeacherView } from './pages/teacher/teacher-view/teacher-view';
+import { ParentLinkForm } from './pages/student/parent-link-form/parent-link-form';
 import { TimetablePage } from './pages/timetable/timetable-page/timetable-page';
 import { PeriodForm } from './pages/timetable/period-form/period-form';
 import { TimetableForm } from './pages/timetable/timetable-form/timetable-form';
@@ -52,6 +44,12 @@ import { MyClassesPage } from './pages/my-classes/my-classes-page/my-classes-pag
 import { MyClassView } from './pages/my-classes/my-class-view/my-class-view';
 import { AuthCallback } from './pages/auth-callback/auth-callback';
 import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
+import { UserView } from './pages/user/user-view/user-view';
+import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
+import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-timetable';
+import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
+import { StudentParentList } from './pages/student/student-parent-list/student-parent-list';
+import { StudentParentForm } from './pages/student/student-parent-form/student-parent-form';
 
 @NgModule({
   declarations: [
@@ -79,19 +77,11 @@ import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
     SubjectForm,
     SubjectClassAssignmentList,
     SubjectClassAssignmentForm,
-    StudentList,
-    StudentForm,
     ClassStudentList,
     ConfirmDialog,
     SuccessDialog,
     TransferStudentForm,
-    StudentView,
-    ParentList,
-    ParentForm,
     ParentLinkForm,
-    TeacherList,
-    TeacherForm,
-    TeacherView,
     TimetablePage,
     PeriodForm,
     TimetableForm,
@@ -99,7 +89,13 @@ import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
     AttendanceForm,
     MyClassesPage,
     MyClassView,
-    AuthCallback
+    AuthCallback,
+    UserView,
+    TeacherSubjectList,
+    TeacherTimetable,
+    TeacherLessons,
+    StudentParentList,
+    StudentParentForm
   ],
   imports: [
     BrowserModule,

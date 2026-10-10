@@ -1,3 +1,5 @@
+import {ParentRelationship} from './parent-relationship';
+
 export interface Parent {
   id: number;
   firstName: string;
@@ -11,4 +13,5 @@ export interface ParentPayload {
   lastName: string;
   email: string;
   phone: string;
+  relationship?: ParentRelationship;
 }
