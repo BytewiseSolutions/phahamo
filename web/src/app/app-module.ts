@@ -47,6 +47,7 @@ import { MyClassView } from './pages/my-classes/my-class-view/my-class-view';
 import { AuthCallback } from './pages/auth-callback/auth-callback';
 import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
 import { UserView } from './pages/user/user-view/user-view';
+import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
 
 @NgModule({
   declarations: [
@@ -89,7 +90,8 @@ import { UserView } from './pages/user/user-view/user-view';
     MyClassesPage,
     MyClassView,
     AuthCallback,
-    UserView
+    UserView,
+    TeacherSubjectList
   ],
   imports: [
     BrowserModule,

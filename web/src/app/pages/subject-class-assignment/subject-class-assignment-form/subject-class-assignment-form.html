@@ -19,14 +19,12 @@
 
         <div class="form-group">
           <label for="subjectId">Subject</label>
-
           <select id="subjectId" formControlName="subjectId">
             <option [ngValue]="null" disabled>Select subject</option>
             @for (subject of subjects; track subject.id) {
               <option [ngValue]="subject.id">{{ subject.name }}</option>
             }
           </select>
-
           @if (assignmentForm.get('subjectId')?.touched && assignmentForm.get('subjectId')?.invalid) {
             <span class="field-error">Subject is required.</span>
           }
@@ -34,31 +32,42 @@
 
         <div class="form-group">
           <label for="academicYearId">Academic Year</label>
-
           <select id="academicYearId" formControlName="academicYearId">
             <option [ngValue]="null" disabled>Select academic year</option>
             @for (year of academicYears; track year.id) {
               <option [ngValue]="year.id">{{ year.name }}</option>
             }
           </select>
-
           @if (assignmentForm.get('academicYearId')?.touched && assignmentForm.get('academicYearId')?.invalid) {
             <span class="field-error">Academic year is required.</span>
           }
         </div>
 
-        <div class="form-group">
-          <label for="teacherId">Teacher</label>
+        @if (!isClassLocked) {
+          <div class="form-group">
+            <label for="schoolClassId">Class</label>
+            <select id="schoolClassId" formControlName="schoolClassId">
+              <option [ngValue]="null" disabled>Select class</option>
+              @for (c of classes; track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        }
 
-          <select id="teacherId" formControlName="teacherId">
-            <option [ngValue]="null">No teacher assigned</option>
-            @for (teacher of teachers; track teacher.id) {
-              <option [ngValue]="teacher.id">
-                {{ teacher.firstName }} {{ teacher.lastName }}
-              </option>
-            }
-          </select>
-        </div>
+        @if (!isTeacherLocked) {
+          <div class="form-group">
+            <label for="teacherId">Teacher</label>
+            <select id="teacherId" formControlName="teacherId">
+              <option [ngValue]="null">No teacher assigned</option>
+              @for (teacher of teachers; track teacher.id) {
+                <option [ngValue]="teacher.id">
+                  {{ teacher.firstName }} {{ teacher.lastName }}
+                </option>
+              }
+            </select>
+          </div>
+        }
 
         <div class="form-actions">
           <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>

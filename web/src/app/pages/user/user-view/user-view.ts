@@ -87,10 +87,6 @@ export class UserView implements OnInit {
 
   setTab(key: string): void {
     this.activeTab = key;
-
-    if (key === 'subjects' && this.assignments.length === 0 && !this.loadingAssignments) {
-      this.loadAssignments();
-    }
   }
 
   goBack(): void {
@@ -142,6 +138,12 @@ export class UserView implements OnInit {
           err.error?.message || 'Failed to load teacher subjects.';
         this.loadingAssignments = false;
       }
+    });
+  }
+
+  goToAssignSubjects(): void {
+    this.router.navigate(['/subject-class-assignments'], {
+      queryParams: { teacherId: this.user?.teacher?.userId }
     });
   }
 }

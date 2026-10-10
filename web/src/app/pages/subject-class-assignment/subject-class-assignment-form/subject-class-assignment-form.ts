@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BackendService } from '../../../util/backend.service';
 import { SubjectClassAssignment, SubjectClassAssignmentPayload } from '../subject-class-assignment';
 import { AcademicYear } from '../../academic-years/academic-year';
-import {Subject} from '../../subject/subject';
+import { Subject } from '../../subject/subject';
 
 @Component({
   selector: 'app-subject-class-assignment-form',
@@ -14,7 +14,8 @@ import {Subject} from '../../subject/subject';
 export class SubjectClassAssignmentForm implements OnInit, OnChanges {
 
   @Input() visible = false;
-  @Input() schoolClassId!: number;
+  @Input() schoolClassId: number | null = null;
+  @Input() fixedTeacherId: number | null = null;
   @Input() editingAssignment: SubjectClassAssignment | null = null;
 
   @Output() closed = new EventEmitter<void>();
@@ -24,6 +25,7 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
   assignmentForm: FormGroup;
   academicYears: AcademicYear[] = [];
   subjects: Subject[] = [];
+  classes: { id: number; name: string }[] = [];
   teachers: {
     id: number;
     firstName: string;
@@ -35,12 +37,21 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
     this.assignmentForm = this.fb.group({
       subjectId: [null, Validators.required],
       academicYearId: [null, Validators.required],
+      schoolClassId: [null],
       teacherId: [null]
     });
   }
 
   get isEditMode(): boolean {
     return this.editingAssignment !== null;
+  }
+
+  get isClassLocked(): boolean {
+    return this.schoolClassId !== null && this.schoolClassId !== undefined;
+  }
+
+  get isTeacherLocked(): boolean {
+    return this.fixedTeacherId !== null && this.fixedTeacherId !== undefined;
   }
 
   ngOnInit(): void {
@@ -54,22 +65,40 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
       error: () => this.loadError = 'Failed to load subjects.'
     });
 
-    this.backend.get<{
-      id: number;
-      firstName: string;
-      lastName: string;
-    }[]>('/users/teachers').subscribe({
-      next: (teachers) => this.teachers = teachers,
-      error: () => this.loadError = 'Failed to load teachers.'
-    });
+    if (!this.isClassLocked) {
+      this.backend.get<{ id: number; name: string }[]>('/classes').subscribe({
+        next: (classes) => this.classes = classes,
+        error: () => this.loadError = 'Failed to load classes.'
+      });
+    }
+
+    if (!this.isTeacherLocked) {
+      this.backend.get<{
+        id: number;
+        firstName: string;
+        lastName: string;
+      }[]>('/users/teachers').subscribe({
+        next: (teachers) => this.teachers = teachers,
+        error: () => this.loadError = 'Failed to load teachers.'
+      });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['schoolClassId'] && this.isClassLocked) {
+      this.assignmentForm.get('schoolClassId')?.setValue(this.schoolClassId);
+    }
+
+    if (changes['fixedTeacherId'] && this.isTeacherLocked) {
+      this.assignmentForm.get('teacherId')?.setValue(this.fixedTeacherId);
+    }
+
     if (changes['editingAssignment']) {
       if (this.editingAssignment) {
         this.assignmentForm.patchValue({
           subjectId: this.editingAssignment.subjectId,
           academicYearId: this.editingAssignment.academicYearId,
+          schoolClassId: this.editingAssignment.schoolClassId,
           teacherId: this.editingAssignment.teacherId ?? null
         });
       } else {
@@ -86,11 +115,19 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
 
     const formValue = this.assignmentForm.value;
 
+    const resolvedClassId = this.isClassLocked
+      ? this.schoolClassId!
+      : formValue.schoolClassId;
+
+    const resolvedTeacherId = this.isTeacherLocked
+      ? this.fixedTeacherId!
+      : (formValue.teacherId || null);
+
     const payload: SubjectClassAssignmentPayload = {
       academicYearId: formValue.academicYearId,
       subjectId: formValue.subjectId,
-      schoolClassId: this.schoolClassId,
-      teacherId: formValue.teacherId || null
+      schoolClassId: resolvedClassId,
+      teacherId: resolvedTeacherId
     };
 
     if (this.isEditMode && this.editingAssignment) {
@@ -120,7 +157,8 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
     this.assignmentForm.reset({
       subjectId: null,
       academicYearId: null,
-      teacherId: null
+      schoolClassId: this.isClassLocked ? this.schoolClassId : null,
+      teacherId: this.isTeacherLocked ? this.fixedTeacherId : null
     });
   }
 }

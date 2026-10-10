@@ -108,50 +108,7 @@
         @switch (activeTab) {
 
           @case ('subjects') {
-            @if (loadingAssignments) {
-              <div class="empty-tab">
-                <p>Loading subjects...</p>
-              </div>
-            } @else if (assignmentsError) {
-              <div class="empty-tab">
-                <p>{{ assignmentsError }}</p>
-              </div>
-            } @else if (assignments.length === 0) {
-              <div class="empty-tab">
-                <h3>No Subjects Assigned</h3>
-                <p>This teacher has not been assigned any subjects.</p>
-              </div>
-            } @else {
-              <div class="tab-section">
-                <div class="section-header">
-                  <div>
-                    <h3>Subjects</h3>
-                    <p>Subjects assigned to this teacher.</p>
-                  </div>
-                </div>
-
-                <div class="table-wrapper">
-                  <table class="teacher-table">
-                    <thead>
-                    <tr>
-                      <th>Subject</th>
-                      <th>Academic Year</th>
-                      <th>Class</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                      @for (assignment of assignments; track assignment.id) {
-                        <tr>
-                          <td>{{ assignment.subjectName }}</td>
-                          <td>{{ assignment.academicYearName }}</td>
-                          <td>{{ assignment.schoolClassName }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            }
+            <app-teacher-subject-list [teacherUserId]="user.teacher!.userId" />
           }
 
           @case ('timetable') {
