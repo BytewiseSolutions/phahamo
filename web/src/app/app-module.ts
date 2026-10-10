@@ -48,6 +48,7 @@ import { AuthCallback } from './pages/auth-callback/auth-callback';
 import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
 import { UserView } from './pages/user/user-view/user-view';
 import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
+import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-timetable';
 
 @NgModule({
   declarations: [
@@ -91,7 +92,8 @@ import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher
     MyClassView,
     AuthCallback,
     UserView,
-    TeacherSubjectList
+    TeacherSubjectList,
+    TeacherTimetable
   ],
   imports: [
     BrowserModule,

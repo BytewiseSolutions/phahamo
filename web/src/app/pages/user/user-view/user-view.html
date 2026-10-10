@@ -112,7 +112,7 @@
           }
 
           @case ('timetable') {
-            <p class="tab-placeholder">Timetable content — coming soon.</p>
+            <app-teacher-timetable [teacherUserId]="user.teacher!.userId" />
           }
 
           @case ('lessons') {
