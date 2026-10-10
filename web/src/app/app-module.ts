@@ -49,6 +49,7 @@ import {UnauthorizedInterceptor} from './util/unauthorized.interceptor';
 import { UserView } from './pages/user/user-view/user-view';
 import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
 import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-timetable';
+import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
 
 @NgModule({
   declarations: [
@@ -93,7 +94,8 @@ import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-time
     AuthCallback,
     UserView,
     TeacherSubjectList,
-    TeacherTimetable
+    TeacherTimetable,
+    TeacherLessons
   ],
   imports: [
     BrowserModule,

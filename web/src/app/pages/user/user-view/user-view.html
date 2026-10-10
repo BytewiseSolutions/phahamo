@@ -116,11 +116,7 @@
           }
 
           @case ('lessons') {
-            <p class="tab-placeholder">Lessons content — coming soon.</p>
-          }
-
-          @case ('attendance') {
-            <p class="tab-placeholder">Attendance content — coming soon.</p>
+            <app-teacher-lessons [teacherUserId]="user.teacher!.userId" />
           }
 
           @case ('parents') {

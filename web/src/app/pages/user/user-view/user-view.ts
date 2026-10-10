@@ -70,8 +70,7 @@ export class UserView implements OnInit {
       return [
         { key: 'subjects',   label: 'Subjects' },
         { key: 'timetable',  label: 'Timetable' },
-        { key: 'lessons',    label: 'Lessons' },
-        { key: 'attendance', label: 'Attendance' }
+        { key: 'lessons',    label: 'Lessons' }
       ];
     }
 
