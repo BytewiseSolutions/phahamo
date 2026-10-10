@@ -15,10 +15,6 @@
     <div class="error-banner">{{ errorMessage }}</div>
   }
 
-  @if (successMessage) {
-    <div class="success-banner">{{ successMessage }}</div>
-  }
-
   <app-subject-class-assignment-form
     [visible]="showForm"
     [schoolClassId]="null"

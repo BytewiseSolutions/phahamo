@@ -16,7 +16,6 @@ export class ClassList implements OnInit {
   showCreateForm = false;
   editingClass: SchoolClass | null = null;
   errorMessage = '';
-  successMessage = '';
   selectedClass: SchoolClass | null = null;
   showView = false;
 
@@ -49,14 +48,12 @@ export class ClassList implements OnInit {
     this.editingClass = null;
     this.showCreateForm = !this.showCreateForm;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onEdit(schoolClass: SchoolClass): void {
     this.editingClass = schoolClass;
     this.showCreateForm = true;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onFormClosed(): void {
@@ -66,11 +63,9 @@ export class ClassList implements OnInit {
 
   onCreateClass(newClass: SchoolClassPayload): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
-    this.backend.post<SchoolClass>('/classes', newClass).subscribe({
+    this.backend.postSilently<SchoolClass>('/classes', newClass).subscribe({
       next: () => {
-        this.successMessage = 'Class created.';
         this.showCreateForm = false;
         this.loadClasses();
       },
@@ -86,14 +81,12 @@ export class ClassList implements OnInit {
     payload: SchoolClassPayload
   }): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
-    this.backend.put<SchoolClass>(
+    this.backend.putSilently<SchoolClass>(
       `/classes/${event.id}`,
       event.payload
     ).subscribe({
       next: () => {
-        this.successMessage = 'Class updated.';
         this.showCreateForm = false;
         this.editingClass = null;
         this.loadClasses();
@@ -118,13 +111,11 @@ export class ClassList implements OnInit {
     }
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.delete<void>(
       `/classes/${schoolClass.id}`
     ).subscribe({
       next: () => {
-        this.successMessage = 'Class deleted.';
         this.loadClasses();
       },
       error: (err) => {

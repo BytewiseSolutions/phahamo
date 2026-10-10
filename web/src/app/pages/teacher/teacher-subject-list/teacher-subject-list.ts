@@ -18,7 +18,6 @@ export class TeacherSubjectList implements OnChanges {
   showForm = false;
   editingAssignment: SubjectClassAssignment | null = null;
   errorMessage = '';
-  successMessage = '';
 
   constructor(
     private backend: BackendService,
@@ -53,14 +52,12 @@ export class TeacherSubjectList implements OnChanges {
     this.editingAssignment = null;
     this.showForm = !this.showForm;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onEdit(assignment: SubjectClassAssignment): void {
     this.editingAssignment = assignment;
     this.showForm = true;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onFormClosed(): void {
@@ -70,11 +67,9 @@ export class TeacherSubjectList implements OnChanges {
 
   onCreateAssignment(payload: SubjectClassAssignmentPayload): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.post<SubjectClassAssignment>('/subject-class-assignments', payload).subscribe({
       next: () => {
-        this.successMessage = 'Subject assigned to teacher.';
         this.showForm = false;
         this.loadAssignments();
       },
@@ -86,14 +81,12 @@ export class TeacherSubjectList implements OnChanges {
 
   onUpdateAssignment(event: { id: number; payload: SubjectClassAssignmentPayload }): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.put<SubjectClassAssignment>(
       `/subject-class-assignments/${event.id}`,
       event.payload
     ).subscribe({
       next: () => {
-        this.successMessage = 'Assignment updated.';
         this.showForm = false;
         this.editingAssignment = null;
         this.loadAssignments();
@@ -115,11 +108,9 @@ export class TeacherSubjectList implements OnChanges {
     if (!confirmed) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.delete<void>(`/subject-class-assignments/${assignment.id}`).subscribe({
       next: () => {
-        this.successMessage = 'Subject removed from teacher.';
         this.loadAssignments();
       },
       error: (err) => {
