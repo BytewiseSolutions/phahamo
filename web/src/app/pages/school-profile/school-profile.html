@@ -3,7 +3,7 @@
   @if (loading) {
     <p>Loading...</p>
   } @else {
-
+    <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
     @if (errorMessage) {
       <div class="error-banner">{{ errorMessage }}</div>
     }

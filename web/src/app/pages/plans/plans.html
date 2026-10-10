@@ -1,0 +1,89 @@
+<div class="plans-page">
+
+  <div class="page-header">
+    <h1>Choose a Plan</h1>
+    <p>Select the plan that fits your school. Contact us to complete your subscription.</p>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading plans...</div>
+  } @else if (prices.length === 0) {
+    <div class="empty-state">
+      <h3>No Plans Available</h3>
+      <p>Please contact support to arrange a subscription.</p>
+    </div>
+  } @else {
+    <div class="plans-grid">
+      @for (price of prices; track price.id) {
+        <div class="plan-card">
+          <h3>{{ formatPlanLabel(price.plan) }}</h3>
+          <div class="price">{{ formatPrice(price) }}</div>
+          <div class="suffix">{{ getPlanSuffix(price.plan) }}</div>
+
+          <div class="card-actions">
+            <button type="button" class="primary-button" (click)="onSubscribe(price)">Subscribe</button>
+            <button type="button" class="secondary-button" (click)="callSupport()">Support</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="support-note">
+    <p>Need help? Call <a [href]="'tel:' + supportPhoneTel">{{ supportPhone }}</a> or email <a [href]="'mailto:' + supportEmail">{{ supportEmail }}</a></p>
+  </div>
+
+  @if (showSubscribeModal && selectedPrice) {
+    <div class="modal-overlay" (click)="closeSubscribeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>Subscribe — {{ formatPlanLabel(selectedPrice.plan) }}</h2>
+          <button type="button" class="close-button" (click)="closeSubscribeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="amount-display">
+            <span class="amount">{{ formatPrice(selectedPrice) }}</span>
+            <span class="suffix">{{ getPlanSuffix(selectedPrice.plan) }}</span>
+          </div>
+
+          <p class="message">
+            To arrange payment and activate this plan, please contact Bytewise Solutions:
+          </p>
+
+          <div class="contact-lines">
+            <div class="contact-line">
+              <i class="fa-solid fa-phone"></i>
+              <a [href]="'tel:' + supportPhoneTel">{{ supportPhone }}</a>
+            </div>
+            <div class="contact-line">
+              <i class="fa-solid fa-envelope"></i>
+              <a [href]="'mailto:' + supportEmail">{{ supportEmail }}</a>
+            </div>
+          </div>
+
+          <p class="note">
+            Once we confirm your payment, your subscription will be activated and your school will continue without interruption.
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeSubscribeModal()">Close</button>
+          <button type="button" class="primary-button" (click)="callSupport()">
+            <i class="fa-solid fa-phone"></i>
+            Call Now
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

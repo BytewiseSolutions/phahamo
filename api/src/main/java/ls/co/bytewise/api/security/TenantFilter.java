@@ -20,7 +20,6 @@ public class TenantFilter extends OncePerRequestFilter {
     private static final String[] TENANT_EXEMPT_PREFIXES = {
             "/api/auth/",
             "/api/schools/register",
-            "/api/subscriptions/me",
             "/oauth2/",
             "/login/oauth2/",
             "/error"

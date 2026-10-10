@@ -58,8 +58,9 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
   ],
   SYSTEM_ADMIN: [
     { label: 'Schools', path: '/schools', icon: 'fa-solid fa-school' },
-    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Plan Prices', path: '/plan-prices', icon: 'fa-solid fa-tags' },
   ],
 };
 

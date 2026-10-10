@@ -1,0 +1,13 @@
+@if (shouldShow) {
+  <div class="upgrade-banner" [class.expired]="isExpired">
+    <div class="banner-content">
+      <i class="fa-solid fa-triangle-exclamation banner-icon"></i>
+      <span class="banner-text">{{ message }}</span>
+    </div>
+
+    <button type="button" class="banner-button" (click)="goToPlans()">
+      Upgrade
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </div>
+}
