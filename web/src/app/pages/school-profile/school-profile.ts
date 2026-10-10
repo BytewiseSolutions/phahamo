@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
-import {CURRENCY_OPTIONS, Currency, School, SchoolProfileUpdateRequest, TERM_STRUCTURE_OPTIONS, TermStructure,} from '../../util/school';
+import { CURRENCY_OPTIONS, Currency, School, SchoolProfileUpdateRequest, TERM_STRUCTURE_OPTIONS, TermStructure } from '../../util/school';
+import { Subscription } from '../../util/subscription';
 
 @Component({
   selector: 'app-school-profile',
@@ -26,6 +27,9 @@ export class SchoolProfile implements OnInit, OnDestroy {
   timezoneOptions: string[] = this.buildTimezoneOptions();
 
   private schoolId!: number;
+
+  subscription: Subscription | null = null;
+  subscriptionLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -53,6 +57,60 @@ export class SchoolProfile implements OnInit, OnDestroy {
 
     this.schoolId = Number(activeSchoolId);
     this.loadSchool();
+    this.loadSubscription();
+  }
+
+  private loadSubscription(): void {
+    this.subscriptionLoading = true;
+
+    this.backend.get<Subscription>('/subscriptions/me').subscribe({
+      next: (sub) => {
+        this.subscription = sub;
+        this.subscriptionLoading = false;
+      },
+      error: () => {
+        this.subscription = null;
+        this.subscriptionLoading = false;
+      }
+    });
+  }
+
+  formatDate(value: string | null): string {
+    if (!value) return '—';
+    try {
+      return new Date(value).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC'
+      });
+    } catch {
+      return value;
+    }
+  }
+
+
+  formatEnum(value: string): string {
+    if (!value) return '—';
+    return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  get subscriptionTone(): 'ok' | 'warn' | 'danger' {
+    if (!this.subscription) return 'ok';
+    if (this.subscription.status === 'EXPIRED') return 'danger';
+    if (this.subscription.daysRemaining < 0) return 'ok';
+    if (this.subscription.daysRemaining <= 7) return 'danger';
+    if (this.subscription.daysRemaining <= 30) return 'warn';
+    return 'ok';
+  }
+
+  get daysRemainingLabel(): string {
+    if (!this.subscription) return '—';
+    if (this.subscription.daysRemaining < 0) return 'Lifetime access';
+    if (this.subscription.status === 'EXPIRED') return 'Expired';
+    if (this.subscription.daysRemaining === 0) return 'Expires today';
+    if (this.subscription.daysRemaining === 1) return '1 day';
+    return `${this.subscription.daysRemaining} days`;
   }
 
   ngOnDestroy(): void {

@@ -21,6 +21,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'School Profile', path: '/school-profile', icon: 'fa-solid fa-school' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PRINCIPAL: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
@@ -29,6 +30,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   TEACHER: [
     { label: 'My Classes', path: '/my-classes', icon: 'fa-solid fa-chalkboard-user' },
@@ -40,6 +42,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
     { label: 'Payments', path: '/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [
     { label: 'My Children', path: '/my-children', icon: 'fa-solid fa-child' },
