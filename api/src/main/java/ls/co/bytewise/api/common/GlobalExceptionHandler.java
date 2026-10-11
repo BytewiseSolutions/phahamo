@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.common;
 
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
+import ls.co.bytewise.api.assessment.AssessmentExceptions;
 import ls.co.bytewise.api.parent.ParentExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
@@ -270,6 +271,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LessonExceptions.ActiveSchoolNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleActiveSchoolNotFound(LessonExceptions.ActiveSchoolNotFoundException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AssessmentExceptions.AssessmentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAssessmentNotFound(AssessmentExceptions.AssessmentNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AssessmentExceptions.InvalidAssessmentException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAssessment(AssessmentExceptions.InvalidAssessmentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

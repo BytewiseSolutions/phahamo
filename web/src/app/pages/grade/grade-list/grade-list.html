@@ -1,0 +1,63 @@
+<div class="grades-page">
+
+  <div class="page-header">
+    <h1>Grades</h1>
+    <button type="button" class="primary-button" (click)="openCreate()">+ New Assessment</button>
+  </div>
+
+  @if (errorMessage && !showForm) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading assessments...</div>
+  } @else if (assessments.length === 0) {
+    <div class="empty-state">
+      <h3>No Assessments</h3>
+      <p>Create your first assessment to start entering marks.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="grades-table">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Subject</th>
+          <th>Class</th>
+          <th>Term</th>
+          <th>Date</th>
+          <th>Max</th>
+          <th>Weight</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (a of assessments; track a.id) {
+            <tr>
+              <td>{{ a.name }}</td>
+              <td>{{ a.subjectName }}</td>
+              <td>{{ a.className }}</td>
+              <td>{{ a.termName }}</td>
+              <td>{{ formatDate(a.date) }}</td>
+              <td>{{ a.maxMark }}</td>
+              <td>{{ a.weight }}%</td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openMarks(a)">Enter Marks</button>
+                <button type="button" class="link-button" (click)="openEdit(a)">Edit</button>
+                <button type="button" class="link-button danger" (click)="onDelete(a)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-assessment-form
+    [visible]="showForm"
+    [editing]="editing"
+    (closed)="closeForm()"
+    (save)="onSave($event)">
+  </app-assessment-form>
+
+</div>

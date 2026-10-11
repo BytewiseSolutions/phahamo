@@ -22,6 +22,8 @@ import {SubscriptionList} from './pages/subscription/subscription-list/subscript
 import { PlanPriceList } from "./pages/plan-price/plan-price-list/plan-price-list";
 import {Plans} from './pages/plans/plans';
 import {PaymentMethodList} from './pages/payment-method/payment-method-list/payment-method-list';
+import {GradeList} from './pages/grade/grade-list/grade-list';
+import {MarkEntry} from './pages/grade/mark-entry/mark-entry';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -49,6 +51,8 @@ const routes: Routes = [
       { path: 'plan-prices', component: PlanPriceList },
       { path: 'plans', component: Plans },
       { path: 'payment-methods', component: PaymentMethodList },
+      { path: 'grades', component: GradeList },
+      { path: 'grades/:id/marks', component: MarkEntry },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

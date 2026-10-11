@@ -59,6 +59,9 @@ import { PaymentMethodList } from './pages/payment-method/payment-method-list/pa
 import { PaymentMethodForm } from './pages/payment-method/payment-method-form/payment-method-form';
 import { SubscribeForm } from './pages/plans/subscribe-form/subscribe-form';
 import { SubscriptionHistory } from './pages/subscription/subscription-history/subscription-history';
+import { GradeList } from './pages/grade/grade-list/grade-list';
+import { AssessmentForm } from './pages/grade/assessment-form/assessment-form';
+import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
 
 @NgModule({
   declarations: [
@@ -113,7 +116,10 @@ import { SubscriptionHistory } from './pages/subscription/subscription-history/s
     PaymentMethodList,
     PaymentMethodForm,
     SubscribeForm,
-    SubscriptionHistory
+    SubscriptionHistory,
+    GradeList,
+    AssessmentForm,
+    MarkEntry
   ],
   imports: [
     BrowserModule,
