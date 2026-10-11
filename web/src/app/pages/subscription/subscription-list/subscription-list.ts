@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
+import { AuthService } from '../../../util/auth.service';
 import { Subscription } from '../../../util/subscription';
 import { SubscriptionPlan } from '../../../util/subscription-plan';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
@@ -12,6 +14,10 @@ import { SubscriptionRequest } from '../../../util/subscription-request';
   styleUrl: './subscription-list.scss'
 })
 export class SubscriptionList implements OnInit {
+
+  isSystemAdmin = false;
+
+  activeTab: 'pending' | 'subscriptions' | 'history' = 'pending';
 
   subscriptions: Subscription[] = [];
   loading = false;
@@ -44,18 +50,21 @@ export class SubscriptionList implements OnInit {
   proofType = '';
   proofName = '';
 
-  requestHistory: SubscriptionRequest[] = [];
-  historySchoolId: number | null = null;
-  loadingHistory = false;
-  historyError = '';
-
   constructor(
     private backend: BackendService,
-    private confirmDialog: ConfirmDialogService
-  ) {}
+    private confirmDialog: ConfirmDialogService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
+  }
 
   ngOnInit(): void {
-    this.loadSubscriptions();
+    if (this.isSystemAdmin) {
+      this.loadSubscriptions();
+    } else {
+      this.loadMySubscription();
+    }
     this.loadPendingRequests();
   }
 
@@ -75,13 +84,35 @@ export class SubscriptionList implements OnInit {
     });
   }
 
+  loadMySubscription(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.backend.get<Subscription>('/subscriptions/me').subscribe({
+      next: (sub) => {
+        this.subscriptions = [sub];
+        this.loading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to load subscription.';
+        this.loading = false;
+      }
+    });
+  }
+
   loadPendingRequests(): void {
     this.loadingRequests = true;
     this.requestsError = '';
 
-    this.backend.get<SubscriptionRequest[]>('/subscription-requests/pending').subscribe({
+    const url = this.isSystemAdmin
+      ? '/subscription-requests/pending'
+      : '/subscription-requests/my-school';
+
+    this.backend.get<SubscriptionRequest[]>(url).subscribe({
       next: (reqs) => {
-        this.pendingRequests = reqs;
+        this.pendingRequests = this.isSystemAdmin
+          ? reqs
+          : reqs.filter(r => r.status === 'PENDING');
         this.loadingRequests = false;
       },
       error: (err) => {
@@ -91,44 +122,25 @@ export class SubscriptionList implements OnInit {
     });
   }
 
-  loadRequestHistory(schoolId: number | null): void {
-    this.historySchoolId = schoolId;
-    this.loadingHistory = true;
-    this.historyError = '';
+  get schoolOptions(): { id: number; name: string }[] {
+    return this.subscriptions.map(s => ({ id: s.schoolId, name: s.schoolName }));
+  }
 
-    const url = schoolId
-      ? `/subscription-requests/school/${schoolId}`
-      : `/subscription-requests`;
+  goToPlans(): void {
+    this.router.navigate(['/plans']);
+  }
 
-    this.backend.get<SubscriptionRequest[]>(url).subscribe({
-      next: (reqs) => {
-        this.requestHistory = reqs;
-        this.loadingHistory = false;
-      },
+  cancelMyRequest(request: SubscriptionRequest): void {
+    this.requestsError = '';
+
+    this.backend.delete<SubscriptionRequest>(`/subscription-requests/${request.id}`).subscribe({
+      next: () => this.loadPendingRequests(),
       error: (err) => {
-        this.historyError = err.error?.message || 'Failed to load history.';
-        this.loadingHistory = false;
+        this.requestsError = err.error?.message || 'Failed to cancel request.';
       }
     });
   }
 
-  get schoolOptions(): { id: number; name: string }[] {
-    return this.subscriptions.map(s => ({ id: s.schoolId, name: s.schoolName }));
-  }
-  formatRequestStatus(status: string): string {
-    if (!status) return '—';
-    return status.charAt(0) + status.slice(1).toLowerCase();
-  }
-
-  statusTone(status: string): 'ok' | 'warn' | 'danger' {
-    switch (status) {
-      case 'APPROVED':  return 'ok';
-      case 'PENDING':   return 'warn';
-      case 'REJECTED':  return 'danger';
-      case 'CANCELLED': return 'danger';
-      default:          return 'ok';
-    }
-  }
   openExtend(subscription: Subscription): void {
     this.selectedSubscription = subscription;
     this.extendMonths = 1;
@@ -345,7 +357,11 @@ export class SubscriptionList implements OnInit {
         this.reviewSaving = false;
         this.closeReviewModal();
         this.loadPendingRequests();
-        this.loadSubscriptions();
+        if (this.isSystemAdmin) {
+          this.loadSubscriptions();
+        } else {
+          this.loadMySubscription();
+        }
       },
       error: (err) => {
         this.reviewSaving = false;

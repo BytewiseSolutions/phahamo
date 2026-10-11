@@ -1,0 +1,56 @@
+@if (isSystemAdmin) {
+  <div class="history-header">
+    <select [(ngModel)]="historySchoolId"
+            (ngModelChange)="onSchoolChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            class="history-filter">
+      <option [ngValue]="null">All Schools</option>
+      @for (s of schools; track s.id) {
+        <option [ngValue]="s.id">{{ s.name }}</option>
+      }
+    </select>
+  </div>
+}
+
+@if (loading) {
+  <div class="loading-state">Loading history...</div>
+} @else if (errorMessage) {
+  <div class="error-banner">{{ errorMessage }}</div>
+} @else if (requestHistory.length === 0) {
+  <div class="empty-state">
+    <p>No subscription requests yet.</p>
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table class="history-table">
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th>School</th>
+        <th>Plan</th>
+        <th>Amount</th>
+        <th>Method</th>
+        <th>Status</th>
+        <th>Review Note</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (req of requestHistory; track req.id) {
+          <tr>
+            <td>{{ formatDate(req.createdAt) }}</td>
+            <td>{{ req.schoolName }}</td>
+            <td>{{ formatEnum(req.plan) }}</td>
+            <td>{{ req.currency }} {{ req.amount }}</td>
+            <td>{{ req.methodLabel || '—' }}</td>
+            <td>
+              <span class="history-badge" [class]="statusTone(req.status)">
+                {{ formatStatus(req.status) }}
+              </span>
+            </td>
+            <td class="note-cell">{{ req.reviewNote || '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

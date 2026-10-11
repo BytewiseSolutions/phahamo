@@ -21,11 +21,7 @@ public class SubscriptionController {
     }
 
     @GetMapping("/me")
-    @Secured({
-            "ROLE_SCHOOL_ADMIN",
-            "ROLE_PRINCIPAL",
-            "ROLE_FINANCE_OFFICER"
-    })
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER"})
     public SubscriptionDto me() {
         return subscriptionService.getForCurrentSchool();
     }
