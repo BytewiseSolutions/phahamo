@@ -1,0 +1,53 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Grade Band' : 'New Grade Band' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Min Score</label>
+            <input type="number" min="0" max="99" step="1"
+                   [(ngModel)]="minScore" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+          <div class="form-group">
+            <label>Max Score</label>
+            <input type="number" min="1" max="100" step="1"
+                   [(ngModel)]="maxScore" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Grade</label>
+          <input type="text" placeholder="e.g. A, A*, B"
+                 [(ngModel)]="grade" [ngModelOptions]="{ standalone: true }"/>
+        </div>
+
+        <div class="form-group">
+          <label>Remark</label>
+          <input type="text" placeholder="e.g. Excellent"
+                 [(ngModel)]="remark" [ngModelOptions]="{ standalone: true }"/>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="primary-button" (click)="onSubmit()">
+          {{ isEditMode ? 'Save Changes' : 'Add Band' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

@@ -29,6 +29,7 @@ export class Header implements OnInit {
     '/attendance': 'Attendance',
     '/grades': 'Grades',
     '/examinations': 'Examinations',
+    '/grading-scale': 'Grading Scale',
     '/my-classes': 'My Classes',
     '/fees': 'Fees',
     '/payments': 'Payments',

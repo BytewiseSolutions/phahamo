@@ -3,6 +3,7 @@ package ls.co.bytewise.api.common;
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.assessment.AssessmentExceptions;
 import ls.co.bytewise.api.examination.ExaminationExceptions;
+import ls.co.bytewise.api.grading.GradeBandExceptions;
 import ls.co.bytewise.api.parent.ParentExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
@@ -296,6 +297,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ExaminationExceptions.OverlappingExaminationException.class)
     public ResponseEntity<Map<String, Object>> handleOverlappingExamination(ExaminationExceptions.OverlappingExaminationException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(GradeBandExceptions.GradeBandNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleGradeBandNotFound(GradeBandExceptions.GradeBandNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(GradeBandExceptions.InvalidGradeBandException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidGradeBand(GradeBandExceptions.InvalidGradeBandException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(GradeBandExceptions.DuplicateGradeException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateGrade(GradeBandExceptions.DuplicateGradeException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

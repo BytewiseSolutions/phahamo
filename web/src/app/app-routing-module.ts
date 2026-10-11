@@ -25,6 +25,7 @@ import {PaymentMethodList} from './pages/payment-method/payment-method-list/paym
 import {GradeList} from './pages/grade/grade-list/grade-list';
 import {MarkEntry} from './pages/grade/mark-entry/mark-entry';
 import {ExaminationList} from './pages/examination/examination-list/examination-list';
+import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -55,6 +56,7 @@ const routes: Routes = [
       { path: 'grades', component: GradeList },
       { path: 'grades/:id/marks', component: MarkEntry },
       { path: 'examinations', component: ExaminationList },
+      { path: 'grading-scale', component: GradeBandList },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

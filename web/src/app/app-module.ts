@@ -64,6 +64,8 @@ import { AssessmentForm } from './pages/grade/assessment-form/assessment-form';
 import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
 import { ExaminationList } from './pages/examination/examination-list/examination-list';
 import { ExaminationForm } from './pages/examination/examination-form/examination-form';
+import { GradeBandList } from './pages/grading/grade-band-list/grade-band-list';
+import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
 
 @NgModule({
   declarations: [
@@ -123,7 +125,9 @@ import { ExaminationForm } from './pages/examination/examination-form/examinatio
     AssessmentForm,
     MarkEntry,
     ExaminationList,
-    ExaminationForm
+    ExaminationForm,
+    GradeBandList,
+    GradeBandForm
   ],
   imports: [
     BrowserModule,
