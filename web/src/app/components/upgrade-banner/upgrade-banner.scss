@@ -1,0 +1,50 @@
+.upgrade-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  background: rgb(245, 158, 11, 0.1);
+  border: 1px solid rgb(245, 158, 11, 0.3);
+  border-radius: var(--border-radius-md);
+  color: #92400e;
+}
+
+.upgrade-banner.expired {
+  background: rgb(from var(--error) r g b / 0.1);
+  border-color: rgb(from var(--error) r g b / 0.3);
+  color: var(--error);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.banner-icon {
+  font-size: 16px;
+}
+
+.banner-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--border-radius-md);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.banner-button:hover {
+  background: var(--primary-dark);
+}

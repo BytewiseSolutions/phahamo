@@ -1,0 +1,104 @@
+<div class="plans-page">
+
+  <div class="page-header">
+    <h1>Choose a Plan</h1>
+    <p>Select the plan that fits your school. Submit your payment proof and we'll activate it.</p>
+  </div>
+
+  @if (errorMessage && !showSubscribeModal) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (pendingRequest) {
+    <div class="pending-card">
+      <div class="pending-info">
+        <i class="fa-solid fa-clock"></i>
+        <div>
+          <strong>Pending Request — {{ formatPlanLabel(pendingRequest.plan) }}</strong>
+          <p>
+            Submitted {{ formatDate(pendingRequest.createdAt) }} · {{ pendingRequest.methodLabel }} ·
+            {{ pendingRequest.currency }} {{ pendingRequest.amount }}
+          </p>
+        </div>
+      </div>
+      <button type="button" class="secondary-button" (click)="cancelPendingRequest()">Cancel Request</button>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading plans...</div>
+  } @else if (prices.length === 0) {
+    <div class="empty-state">
+      <h3>No Plans Available</h3>
+      <p>Please contact support to arrange a subscription.</p>
+    </div>
+  } @else {
+    <div class="plans-grid">
+      @for (price of prices; track price.id) {
+        <div class="plan-card">
+          <h3>{{ formatPlanLabel(price.plan) }}</h3>
+          <div class="price">{{ formatPrice(price) }}</div>
+          <div class="suffix">{{ getPlanSuffix(price.plan) }}</div>
+
+          <div class="card-actions">
+            <button type="button" class="primary-button"
+                    [disabled]="!!pendingRequest"
+                    (click)="onSubscribe(price)">
+              Subscribe
+            </button>
+            <button type="button" class="secondary-button" (click)="callSupport()">Support</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (requests.length > 0) {
+    <div class="history-section">
+      <h2 class="history-title">Payment History</h2>
+
+      <div class="table-wrapper">
+        <table class="history-table">
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Note</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (req of requests; track req.id) {
+              <tr>
+                <td>{{ formatDate(req.createdAt) }}</td>
+                <td>{{ formatPlanLabel(req.plan) }}</td>
+                <td>{{ req.currency }} {{ req.amount }}</td>
+                <td>{{ req.methodLabel || '—' }}</td>
+                <td>
+                <span class="history-badge" [class]="statusTone(req.status)">
+                  {{ formatStatus(req.status) }}
+                </span>
+                </td>
+                <td class="note-cell">{{ req.reviewNote || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <div class="support-note">
+    <p>Need help? Call <a [href]="'tel:' + supportPhoneTel">{{ supportPhone }}</a> or email <a [href]="'mailto:' + supportEmail">{{ supportEmail }}</a></p>
+  </div>
+
+  <app-subscribe-form
+    [visible]="showSubscribeModal"
+    [price]="selectedPrice"
+    (closed)="onSubscribeClosed()"
+    (submitted)="onSubscribeSubmitted($event)">
+  </app-subscribe-form>
+
+</div>

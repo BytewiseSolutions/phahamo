@@ -18,6 +18,10 @@ import {MyClassesPage} from './pages/my-classes/my-classes-page/my-classes-page'
 import {MyClassView} from './pages/my-classes/my-class-view/my-class-view';
 import {AuthCallback} from './pages/auth-callback/auth-callback';
 import {UserView} from './pages/user/user-view/user-view';
+import {SubscriptionList} from './pages/subscription/subscription-list/subscription-list';
+import { PlanPriceList } from "./pages/plan-price/plan-price-list/plan-price-list";
+import {Plans} from './pages/plans/plans';
+import {PaymentMethodList} from './pages/payment-method/payment-method-list/payment-method-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -41,6 +45,10 @@ const routes: Routes = [
       { path: 'my-classes', component: MyClassesPage },
       { path: 'my-classes/:assignmentId', component: MyClassView },
       { path: 'my-classes/:assignmentId/attendance/:lessonId', component: AttendancePage },
+      { path: 'subscriptions', component: SubscriptionList },
+      { path: 'plan-prices', component: PlanPriceList },
+      { path: 'plans', component: Plans },
+      { path: 'payment-methods', component: PaymentMethodList },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

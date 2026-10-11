@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
 import { ChangePasswordRequest } from '../../util/auth';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
+import { Subscription } from '../../util/subscription';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,12 +12,14 @@ import {Router} from '@angular/router';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   changePasswordForm: FormGroup;
   submitted = false;
   errorMessage = '';
   successMessage = '';
   showChangePassword = false;
+
+  subscription: Subscription | null = null;
 
   constructor(
     private authService: AuthService,
@@ -28,6 +31,13 @@ export class Dashboard {
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    this.backend.get<Subscription>('/subscriptions/me').subscribe({
+      next: (sub) => this.subscription = sub,
+      error: () => this.subscription = null
     });
   }
 

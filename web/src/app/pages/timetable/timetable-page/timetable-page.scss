@@ -28,7 +28,7 @@
   border: none;
   border-radius: var(--border-radius-md);
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -277,7 +277,7 @@
 .day-tab.active {
   background: var(--primary);
   border-color: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-weight: 600;
 }
 

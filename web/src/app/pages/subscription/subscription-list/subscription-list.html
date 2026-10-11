@@ -1,0 +1,336 @@
+<div class="subscriptions-page">
+
+  <div class="page-header">
+    <h1>Subscriptions</h1>
+  </div>
+
+  <div class="tabs">
+    <button type="button"
+            class="tab"
+            [class.active]="activeTab === 'pending'"
+            (click)="activeTab = 'pending'">
+      Pending
+      @if (pendingRequests.length > 0) {
+        <span class="tab-count">{{ pendingRequests.length }}</span>
+      }
+    </button>
+    <button type="button"
+            class="tab"
+            [class.active]="activeTab === 'subscriptions'"
+            (click)="activeTab = 'subscriptions'">
+      Subscriptions
+    </button>
+    <button type="button"
+            class="tab"
+            [class.active]="activeTab === 'history'"
+            (click)="activeTab = 'history'">
+      History
+    </button>
+  </div>
+
+  @if (activeTab === 'pending') {
+    @if (loadingRequests) {
+      <div class="loading-state">Loading pending requests...</div>
+    } @else if (pendingRequests.length === 0) {
+      <div class="empty-state">
+        <p>No pending requests.</p>
+      </div>
+    } @else {
+      @if (requestsError) {
+        <div class="error-banner">{{ requestsError }}</div>
+      }
+
+      <div class="table-wrapper">
+        <table class="pending-table">
+          <thead>
+          <tr>
+            <th>School</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Submitted</th>
+            <th>Note</th>
+            <th>Proof</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (req of pendingRequests; track req.id) {
+              <tr>
+                <td>{{ req.schoolName }}</td>
+                <td>{{ formatEnum(req.plan) }}</td>
+                <td>{{ req.currency }} {{ req.amount }}</td>
+                <td>{{ req.methodLabel || '—' }}</td>
+                <td>{{ formatRequestDate(req.createdAt) }}</td>
+                <td class="note-cell">{{ req.note || '—' }}</td>
+                <td>
+                  @if (req.proofFileId) {
+                    <div class="proof-actions">
+                      <button type="button" class="link-button" (click)="onViewProof(req)">View</button>
+                      <button type="button" class="link-button" (click)="onDownloadProof(req)">Download</button>
+                    </div>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td class="actions-cell">
+                  @if (isSystemAdmin) {
+                    <button type="button" class="link-button approve" (click)="openApprove(req)">Approve</button>
+                    <button type="button" class="link-button danger" (click)="openReject(req)">Reject</button>
+                  } @else {
+                    <button type="button" class="link-button danger" (click)="cancelMyRequest(req)">Cancel</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (activeTab === 'subscriptions') {
+    @if (loading) {
+      <div class="loading-state">Loading subscriptions...</div>
+    } @else if (subscriptions.length === 0) {
+      <div class="empty-state">
+        <h3>No Subscriptions</h3>
+        <p>No subscriptions found.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="subscriptions-table">
+          <thead>
+          <tr>
+            <th>School</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Started</th>
+            <th>Expires</th>
+            <th>Days Left</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (sub of subscriptions; track sub.id) {
+              <tr>
+                <td>{{ sub.schoolName }}</td>
+                <td>{{ formatEnum(sub.plan) }}</td>
+                <td>
+                  <span class="status-badge" [class.inactive]="sub.status !== 'ACTIVE' && sub.status !== 'TRIAL'">
+                    {{ formatEnum(sub.status) }}
+                  </span>
+                </td>
+                <td>{{ formatDate(sub.startedAt) }}</td>
+                <td>{{ sub.endsAt ? formatDate(sub.endsAt) : 'Lifetime' }}</td>
+                <td>
+                  <span class="days-badge"
+                        [class.warn]="daysRemainingTone(sub) === 'warn'"
+                        [class.danger]="daysRemainingTone(sub) === 'danger'">
+                    {{ daysRemainingLabel(sub) }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  @if (isSystemAdmin) {
+                    <button type="button" class="link-button" (click)="openExtend(sub)">Extend</button>
+                    <button type="button" class="link-button" (click)="openChangePlan(sub)">Change Plan</button>
+                    <button type="button" class="link-button danger" (click)="onCancel(sub)">Cancel</button>
+                  } @else {
+                    <button type="button" class="link-button" (click)="goToPlans()">View Plans</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (activeTab === 'history') {
+    <app-subscription-history [schools]="schoolOptions"></app-subscription-history>
+  }
+
+  @if (showExtendForm && selectedSubscription) {
+    <div class="modal-overlay" (click)="closeExtend()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>Extend — {{ selectedSubscription.schoolName }}</h2>
+          <button type="button" class="close-button" (click)="closeExtend()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+
+          <div class="form-group">
+            <label>Months to add</label>
+            <input type="number" min="1" [(ngModel)]="extendMonths" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+
+          <div class="quick-picks">
+            <button type="button" class="quick-pick" (click)="extendMonths = 1">1</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 3">3</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 6">6</button>
+            <button type="button" class="quick-pick" (click)="extendMonths = 12">12</button>
+          </div>
+
+          <p class="hint">
+            Current expiry:
+            <strong>{{ selectedSubscription.endsAt ? formatDate(selectedSubscription.endsAt) : 'Lifetime' }}</strong>
+          </p>
+          <p class="hint">
+            New expiry will be: <strong>{{ projectedExtendDate }}</strong>
+          </p>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeExtend()">Cancel</button>
+          <button type="button" class="primary-button" [disabled]="saving || extendMonths < 1" (click)="submitExtend()">
+            {{ saving ? 'Saving...' : 'Extend' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  @if (showChangePlanForm && selectedSubscription) {
+    <div class="modal-overlay" (click)="closeChangePlan()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>Change Plan — {{ selectedSubscription.schoolName }}</h2>
+          <button type="button" class="close-button" (click)="closeChangePlan()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+
+          <div class="form-group">
+            <label>Plan</label>
+            <div class="plan-options">
+              @for (p of plans; track p) {
+                <button type="button"
+                        class="plan-option"
+                        [class.active]="selectedPlan === p"
+                        (click)="onPlanChange(p)">
+                  {{ formatEnum(p) }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (selectedPlan !== 'ONE_OFF') {
+            <div class="form-group">
+              <label>Duration (months)</label>
+              <input type="number" min="1" [(ngModel)]="selectedMonths" [ngModelOptions]="{ standalone: true }"/>
+            </div>
+          }
+
+          @if (selectedPlan === 'ONE_OFF') {
+            <p class="hint">Lifetime access. No expiry.</p>
+          }
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeChangePlan()">Cancel</button>
+          <button type="button" class="primary-button" [disabled]="saving" (click)="submitChangePlan()">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  @if (showReviewModal && reviewRequest) {
+    <div class="modal-overlay" (click)="closeReviewModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>{{ reviewMode === 'approve' ? 'Approve Request' : 'Reject Request' }}</h2>
+          <button type="button" class="close-button" (click)="closeReviewModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (requestsError) {
+            <div class="error-banner">{{ requestsError }}</div>
+          }
+
+          <div class="review-summary">
+            <div><strong>School:</strong> {{ reviewRequest.schoolName }}</div>
+            <div><strong>Plan:</strong> {{ formatEnum(reviewRequest.plan) }}</div>
+            <div><strong>Amount:</strong> {{ reviewRequest.currency }} {{ reviewRequest.amount }}</div>
+            <div><strong>Method:</strong> {{ reviewRequest.methodLabel }}</div>
+          </div>
+
+          <div class="form-group">
+            <label>{{ reviewMode === 'approve' ? 'Review Note (optional)' : 'Reason for Rejection' }}</label>
+            <textarea rows="3"
+                      [(ngModel)]="reviewNote"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="{{ reviewMode === 'approve' ? 'Any notes about this approval' : 'Why is this request being rejected?' }}"></textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeReviewModal()">Cancel</button>
+          <button type="button"
+                  [class]="reviewMode === 'approve' ? 'primary-button' : 'primary-button danger'"
+                  [disabled]="reviewSaving"
+                  (click)="submitReview()">
+            {{ reviewSaving ? 'Saving...' : (reviewMode === 'approve' ? 'Approve' : 'Reject') }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  @if (viewingProof && proofUrl) {
+    <div class="modal-overlay" (click)="closeProofModal()">
+      <div class="modal-content proof-modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>{{ proofName }}</h2>
+          <button type="button" class="close-button" (click)="closeProofModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="proof-viewer">
+          @if (proofType.startsWith('image/')) {
+            <img [src]="proofUrl" [alt]="proofName"/>
+          } @else if (proofType === 'application/pdf') {
+            <iframe [src]="proofUrl" title="Proof of payment"></iframe>
+          } @else {
+            <p class="hint">This file type cannot be previewed. Use Download instead.</p>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeProofModal()">Close</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

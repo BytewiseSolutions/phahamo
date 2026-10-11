@@ -26,7 +26,7 @@
 .filter-pill.active {
   background: var(--primary);
   border-color: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-weight: 600;
 }
 

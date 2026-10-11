@@ -50,6 +50,15 @@ import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-time
 import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
 import { StudentParentList } from './pages/student/student-parent-list/student-parent-list';
 import { StudentParentForm } from './pages/student/student-parent-form/student-parent-form';
+import { SubscriptionList } from './pages/subscription/subscription-list/subscription-list';
+import { PlanPriceList } from './pages/plan-price/plan-price-list/plan-price-list';
+import { PlanPriceForm } from './pages/plan-price/plan-price-form/plan-price-form';
+import { Plans } from './pages/plans/plans';
+import { UpgradeBanner } from './components/upgrade-banner/upgrade-banner';
+import { PaymentMethodList } from './pages/payment-method/payment-method-list/payment-method-list';
+import { PaymentMethodForm } from './pages/payment-method/payment-method-form/payment-method-form';
+import { SubscribeForm } from './pages/plans/subscribe-form/subscribe-form';
+import { SubscriptionHistory } from './pages/subscription/subscription-history/subscription-history';
 
 @NgModule({
   declarations: [
@@ -95,7 +104,16 @@ import { StudentParentForm } from './pages/student/student-parent-form/student-p
     TeacherTimetable,
     TeacherLessons,
     StudentParentList,
-    StudentParentForm
+    StudentParentForm,
+    SubscriptionList,
+    PlanPriceList,
+    PlanPriceForm,
+    Plans,
+    UpgradeBanner,
+    PaymentMethodList,
+    PaymentMethodForm,
+    SubscribeForm,
+    SubscriptionHistory
   ],
   imports: [
     BrowserModule,

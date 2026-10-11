@@ -3,14 +3,42 @@
   @if (loading) {
     <p>Loading...</p>
   } @else {
-
+    <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
     @if (errorMessage) {
       <div class="error-banner">{{ errorMessage }}</div>
     }
     @if (successMessage) {
       <div class="success-banner">{{ successMessage }}</div>
     }
-
+    @if (!loading && subscription) {
+      <div class="card subscription-card" [class.warn]="subscriptionTone === 'warn'" [class.danger]="subscriptionTone === 'danger'">
+        <h2 class="card-title">Subscription</h2>
+        <div class="subscription-grid">
+          <div class="subscription-item">
+            <span class="label">Plan</span>
+            <span class="value">{{ formatEnum(subscription.plan) }}</span>
+          </div>
+          <div class="subscription-item">
+            <span class="label">Status</span>
+            <span class="value">{{ formatEnum(subscription.status) }}</span>
+          </div>
+          <div class="subscription-item">
+            <span class="label">Started</span>
+            <span class="value">{{ formatDate(subscription.startedAt) }}</span>
+          </div>
+          <div class="subscription-item">
+            <span class="label">{{ subscription.endsAt ? 'Expires' : 'Duration' }}</span>
+            <span class="value">
+          {{ subscription.endsAt ? formatDate(subscription.endsAt) : 'Lifetime' }}
+        </span>
+          </div>
+          <div class="subscription-item">
+            <span class="label">Days Remaining</span>
+            <span class="value">{{ daysRemainingLabel }}</span>
+          </div>
+        </div>
+      </div>
+    }
     <div class="card">
       <h2 class="card-title">School Logo</h2>
       <div class="logo-section">

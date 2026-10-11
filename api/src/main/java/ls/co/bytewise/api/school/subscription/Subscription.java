@@ -37,6 +37,6 @@ public class Subscription extends BaseEntity {
     @Column(nullable = false)
     private Instant startedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Instant endsAt;
 }

@@ -126,6 +126,13 @@ public class UserService {
 
     public List<UserDto> listUsers() {
         Long schoolId = TenantContext.getSchoolId();
+
+        if (schoolId == null) {
+            return userRepository.findAll().stream()
+                    .map(UserDto::new)
+                    .toList();
+        }
+
         return userRepository.findAllBySchoolId(schoolId).stream()
                 .map(UserDto::new)
                 .toList();

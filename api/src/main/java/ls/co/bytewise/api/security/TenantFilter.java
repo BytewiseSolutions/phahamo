@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.user.User;
 import org.springframework.lang.NonNull;
@@ -21,7 +22,8 @@ public class TenantFilter extends OncePerRequestFilter {
             "/api/schools/register",
             "/oauth2/",
             "/login/oauth2/",
-            "/error"
+            "/error",
+            "/api/files/",
     };
 
     @Override
@@ -43,6 +45,12 @@ public class TenantFilter extends OncePerRequestFilter {
                 : null;
 
         if (principal instanceof User user) {
+
+            if (user.hasRole(UserRole.SYSTEM_ADMIN)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String schoolIdHeader = request.getHeader("X-School-Id");
 
             if (schoolIdHeader == null || schoolIdHeader.isBlank()) {
