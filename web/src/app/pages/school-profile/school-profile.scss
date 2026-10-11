@@ -237,7 +237,7 @@
 }
 
 .subscription-card.warn {
-  border-left-color: #d97706;
+  border-left-color: var(--warning);
 }
 
 .subscription-card.danger {

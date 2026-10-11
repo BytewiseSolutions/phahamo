@@ -57,6 +57,7 @@ import { Plans } from './pages/plans/plans';
 import { UpgradeBanner } from './components/upgrade-banner/upgrade-banner';
 import { PaymentMethodList } from './pages/payment-method/payment-method-list/payment-method-list';
 import { PaymentMethodForm } from './pages/payment-method/payment-method-form/payment-method-form';
+import { SubscribeForm } from './pages/plans/subscribe-form/subscribe-form';
 
 @NgModule({
   declarations: [
@@ -109,7 +110,8 @@ import { PaymentMethodForm } from './pages/payment-method/payment-method-form/pa
     Plans,
     UpgradeBanner,
     PaymentMethodList,
-    PaymentMethodForm
+    PaymentMethodForm,
+    SubscribeForm
   ],
   imports: [
     BrowserModule,

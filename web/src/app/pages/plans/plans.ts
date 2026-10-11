@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../util/backend.service';
 import { PlanPrice } from '../../util/plan-price';
 import { Subscription } from '../../util/subscription';
+import {SubscriptionRequest} from '../../util/subscription-request';
 
 @Component({
   selector: 'app-plans',
@@ -13,11 +14,14 @@ export class Plans implements OnInit {
 
   prices: PlanPrice[] = [];
   subscription: Subscription | null = null;
+  pendingRequest: SubscriptionRequest | null = null;
+
   loading = false;
   errorMessage = '';
 
   showSubscribeModal = false;
   selectedPrice: PlanPrice | null = null;
+  submitting = false;
 
   supportPhone = '+266 6235 4628';
   supportPhoneTel = '+26662354628';
@@ -28,6 +32,7 @@ export class Plans implements OnInit {
   ngOnInit(): void {
     this.loadPrices();
     this.loadSubscription();
+    this.loadRequests();
   }
 
   loadPrices(): void {
@@ -36,7 +41,7 @@ export class Plans implements OnInit {
 
     this.backend.get<PlanPrice[]>('/plan-prices/me').subscribe({
       next: (prices) => {
-        this.prices = prices;
+        this.prices = prices.filter(p => p.plan !== 'FREE_TRIAL');
         this.loading = false;
       },
       error: (err) => {
@@ -53,14 +58,67 @@ export class Plans implements OnInit {
     });
   }
 
-  onSubscribe(price: PlanPrice): void {
-    this.selectedPrice = price;
-    this.showSubscribeModal = true;
+  loadRequests(): void {
+    this.backend.get<SubscriptionRequest[]>('/subscription-requests/my-school').subscribe({
+      next: (reqs) => {
+        this.pendingRequest = reqs.find(r => r.status === 'PENDING') ?? null;
+      },
+      error: () => {
+        this.pendingRequest = null;
+      }
+    });
   }
 
-  closeSubscribeModal(): void {
+  onSubscribe(price: PlanPrice): void {
+    if (this.pendingRequest) {
+      this.errorMessage = 'You already have a pending subscription request.';
+      return;
+    }
+
+    this.selectedPrice = price;
+    this.showSubscribeModal = true;
+    this.errorMessage = '';
+  }
+
+  onSubscribeClosed(): void {
     this.showSubscribeModal = false;
     this.selectedPrice = null;
+    this.submitting = false;
+  }
+
+  onSubscribeSubmitted(event: {
+    plan: string;
+    amount: number;
+    currency: string;
+    methodId: number;
+    proofFileId: number;
+    note: string | null;
+  }): void {
+    this.submitting = true;
+    this.errorMessage = '';
+
+    this.backend.postSilently<SubscriptionRequest>('/subscription-requests', event).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.onSubscribeClosed();
+        this.loadRequests();
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.errorMessage = err.error?.message || 'Failed to submit request.';
+      }
+    });
+  }
+
+  cancelPendingRequest(): void {
+    if (!this.pendingRequest) return;
+
+    this.backend.delete<SubscriptionRequest>(`/subscription-requests/${this.pendingRequest.id}`).subscribe({
+      next: () => this.loadRequests(),
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to cancel request.';
+      }
+    });
   }
 
   callSupport(): void {
@@ -86,6 +144,20 @@ export class Plans implements OnInit {
       case 'ANNUAL':   return '/ year';
       case 'ONE_OFF':  return ' once';
       default:         return '';
+    }
+  }
+
+  formatDate(value: string): string {
+    if (!value) return '—';
+    try {
+      return new Date(value).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC'
+      });
+    } catch {
+      return value;
     }
   }
 }

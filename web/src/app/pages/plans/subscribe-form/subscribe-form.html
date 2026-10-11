@@ -1,0 +1,76 @@
+@if (visible && price) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Subscribe — {{ formatPlanLabel(price.plan) }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="amount-display">
+          <span class="amount">{{ formatPrice(price) }}</span>
+          <span class="suffix">{{ getPlanSuffix(price.plan) }}</span>
+        </div>
+
+        @if (loadingMethods) {
+          <p class="hint">Loading payment methods...</p>
+        } @else if (paymentMethods.length === 0) {
+          <p class="hint">No payment methods are configured. Please contact support.</p>
+        } @else {
+
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select [(ngModel)]="selectedMethodId" [ngModelOptions]="{ standalone: true }">
+              @for (m of paymentMethods; track m.id) {
+                <option [ngValue]="m.id">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+
+          @if (selectedMethod) {
+            <div class="method-details">
+              <div class="method-details-label">Pay to:</div>
+              <pre>{{ selectedMethod.details }}</pre>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Proof of Payment</label>
+            <input type="file" accept="image/*,application/pdf" (change)="onProofSelected($event)"/>
+            @if (uploadingProof) {
+              <p class="hint">Uploading...</p>
+            }
+            @if (selectedProofFileName) {
+              <p class="hint">Attached: <strong>{{ selectedProofFileName }}</strong></p>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Note (optional)</label>
+            <textarea rows="3" placeholder="Any additional information" [(ngModel)]="note" [ngModelOptions]="{ standalone: true }"></textarea>
+          </div>
+
+        }
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="primary-button"
+                [disabled]="uploadingProof || !selectedMethodId || !selectedProofFileId"
+                (click)="onSubmit()">
+          Submit Request
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
