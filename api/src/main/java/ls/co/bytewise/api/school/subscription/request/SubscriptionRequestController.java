@@ -89,4 +89,10 @@ public class SubscriptionRequestController {
             @PathVariable Long id) {
         return requestService.cancel(currentUser, id);
     }
+
+    @GetMapping("/school/{schoolId}")
+    @Secured("ROLE_SYSTEM_ADMIN")
+    public List<SubscriptionRequestDto> listForSchool(@PathVariable Long schoolId) {
+        return requestService.listForSchool(schoolId);
+    }
 }

@@ -50,9 +50,15 @@ public class FileController {
         DataFile file = dataFileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("File not found"));
 
+        String safeName = file.getName() == null ? "file" : file.getName();
+        String encodedName = java.net.URLEncoder.encode(safeName, java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"")
-                .contentType(MediaType.parseMediaType(file.getType() != null ? file.getType() : "application/octet-stream"))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + safeName.replaceAll("[^\\x20-\\x7E]", "_") + "\"; filename*=UTF-8''" + encodedName)
+                .contentType(MediaType.parseMediaType(
+                        file.getType() != null ? file.getType() : "application/octet-stream"))
                 .body(file.getContents());
     }
 }

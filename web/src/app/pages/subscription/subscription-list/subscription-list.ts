@@ -3,6 +3,7 @@ import { BackendService } from '../../../util/backend.service';
 import { Subscription } from '../../../util/subscription';
 import { SubscriptionPlan } from '../../../util/subscription-plan';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
+import { SubscriptionRequest } from '../../../util/subscription-request';
 
 @Component({
   selector: 'app-subscription-list',
@@ -28,6 +29,26 @@ export class SubscriptionList implements OnInit {
   selectedPlan: SubscriptionPlan = SubscriptionPlan.MONTHLY;
   selectedMonths = 1;
 
+  pendingRequests: SubscriptionRequest[] = [];
+  loadingRequests = false;
+  requestsError = '';
+
+  showReviewModal = false;
+  reviewRequest: SubscriptionRequest | null = null;
+  reviewMode: 'approve' | 'reject' = 'approve';
+  reviewNote = '';
+  reviewSaving = false;
+
+  viewingProof = false;
+  proofUrl: string | null = null;
+  proofType = '';
+  proofName = '';
+
+  requestHistory: SubscriptionRequest[] = [];
+  historySchoolId: number | null = null;
+  loadingHistory = false;
+  historyError = '';
+
   constructor(
     private backend: BackendService,
     private confirmDialog: ConfirmDialogService
@@ -35,6 +56,7 @@ export class SubscriptionList implements OnInit {
 
   ngOnInit(): void {
     this.loadSubscriptions();
+    this.loadPendingRequests();
   }
 
   loadSubscriptions(): void {
@@ -53,6 +75,60 @@ export class SubscriptionList implements OnInit {
     });
   }
 
+  loadPendingRequests(): void {
+    this.loadingRequests = true;
+    this.requestsError = '';
+
+    this.backend.get<SubscriptionRequest[]>('/subscription-requests/pending').subscribe({
+      next: (reqs) => {
+        this.pendingRequests = reqs;
+        this.loadingRequests = false;
+      },
+      error: (err) => {
+        this.requestsError = err.error?.message || 'Failed to load pending requests.';
+        this.loadingRequests = false;
+      }
+    });
+  }
+
+  loadRequestHistory(schoolId: number | null): void {
+    this.historySchoolId = schoolId;
+    this.loadingHistory = true;
+    this.historyError = '';
+
+    const url = schoolId
+      ? `/subscription-requests/school/${schoolId}`
+      : `/subscription-requests`;
+
+    this.backend.get<SubscriptionRequest[]>(url).subscribe({
+      next: (reqs) => {
+        this.requestHistory = reqs;
+        this.loadingHistory = false;
+      },
+      error: (err) => {
+        this.historyError = err.error?.message || 'Failed to load history.';
+        this.loadingHistory = false;
+      }
+    });
+  }
+
+  get schoolOptions(): { id: number; name: string }[] {
+    return this.subscriptions.map(s => ({ id: s.schoolId, name: s.schoolName }));
+  }
+  formatRequestStatus(status: string): string {
+    if (!status) return '—';
+    return status.charAt(0) + status.slice(1).toLowerCase();
+  }
+
+  statusTone(status: string): 'ok' | 'warn' | 'danger' {
+    switch (status) {
+      case 'APPROVED':  return 'ok';
+      case 'PENDING':   return 'warn';
+      case 'REJECTED':  return 'danger';
+      case 'CANCELLED': return 'danger';
+      default:          return 'ok';
+    }
+  }
   openExtend(subscription: Subscription): void {
     this.selectedSubscription = subscription;
     this.extendMonths = 1;
@@ -180,7 +256,119 @@ export class SubscriptionList implements OnInit {
     });
   }
 
+  onViewProof(request: SubscriptionRequest): void {
+    if (!request.proofFileId) return;
+
+    this.backend.getBlob(`/files/${request.proofFileId}`).subscribe({
+      next: (blob) => {
+        if (this.proofUrl) URL.revokeObjectURL(this.proofUrl);
+        this.proofUrl = URL.createObjectURL(blob);
+        this.proofType = blob.type || '';
+        this.proofName = request.proofFileName || 'proof';
+        this.viewingProof = true;
+      },
+      error: () => {
+        this.requestsError = 'Failed to open proof file.';
+      }
+    });
+  }
+
+  closeProofModal(): void {
+    this.viewingProof = false;
+    if (this.proofUrl) {
+      URL.revokeObjectURL(this.proofUrl);
+      this.proofUrl = null;
+    }
+    this.proofType = '';
+    this.proofName = '';
+  }
+
+  onDownloadProof(request: SubscriptionRequest): void {
+    if (!request.proofFileId) return;
+
+    this.backend.getBlob(`/files/${request.proofFileId}`).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = request.proofFileName || 'proof';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.requestsError = 'Failed to download proof file.';
+      }
+    });
+  }
+
+  openApprove(request: SubscriptionRequest): void {
+    this.reviewRequest = request;
+    this.reviewMode = 'approve';
+    this.reviewNote = '';
+    this.showReviewModal = true;
+    this.requestsError = '';
+  }
+
+  openReject(request: SubscriptionRequest): void {
+    this.reviewRequest = request;
+    this.reviewMode = 'reject';
+    this.reviewNote = '';
+    this.showReviewModal = true;
+    this.requestsError = '';
+  }
+
+  closeReviewModal(): void {
+    this.showReviewModal = false;
+    this.reviewRequest = null;
+    this.reviewNote = '';
+    this.reviewSaving = false;
+  }
+
+  submitReview(): void {
+    if (!this.reviewRequest) return;
+
+    if (this.reviewMode === 'reject' && !this.reviewNote.trim()) {
+      this.requestsError = 'Rejection reason is required.';
+      return;
+    }
+
+    this.reviewSaving = true;
+    this.requestsError = '';
+
+    const url = `/subscription-requests/${this.reviewRequest.id}/${this.reviewMode}`;
+    const payload = { reviewNote: this.reviewNote.trim() || null };
+
+    this.backend.post<SubscriptionRequest>(url, payload).subscribe({
+      next: () => {
+        this.reviewSaving = false;
+        this.closeReviewModal();
+        this.loadPendingRequests();
+        this.loadSubscriptions();
+      },
+      error: (err) => {
+        this.reviewSaving = false;
+        this.requestsError = err.error?.message || `Failed to ${this.reviewMode} request.`;
+      }
+    });
+  }
+
   formatDate(value: string | null): string {
+    if (!value) return '—';
+    try {
+      return new Date(value).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC'
+      });
+    } catch {
+      return value;
+    }
+  }
+
+  formatRequestDate(value: string): string {
     if (!value) return '—';
     try {
       return new Date(value).toLocaleDateString('en-GB', {

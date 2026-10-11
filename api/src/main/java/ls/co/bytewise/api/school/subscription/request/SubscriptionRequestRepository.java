@@ -16,4 +16,5 @@ public interface SubscriptionRequestRepository extends JpaRepository<Subscriptio
     boolean existsBySchoolIdAndStatus(Long schoolId, SubscriptionRequestStatus status);
 
     Optional<SubscriptionRequest> findByIdAndSchoolId(Long id, Long schoolId);
+
 }

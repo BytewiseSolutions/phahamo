@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -193,8 +194,8 @@ public class SubscriptionRequestService {
                     : now;
 
             Instant newEnd = switch (request.getPlan()) {
-                case MONTHLY -> base.plus(1, ChronoUnit.MONTHS);
-                case ANNUAL  -> base.plus(1, ChronoUnit.YEARS);
+                case MONTHLY -> base.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
+                case ANNUAL  -> base.atZone(ZoneOffset.UTC).plusYears(1).toInstant();
                 default -> base;
             };
 
@@ -208,5 +209,11 @@ public class SubscriptionRequestService {
 
         subscription.setUpdatedBy(reviewer);
         subscriptionRepository.save(subscription);
+    }
+
+    public List<SubscriptionRequestDto> listForSchool(Long schoolId) {
+        return requestRepository.findBySchoolIdOrderByCreatedAtDesc(schoolId).stream()
+                .map(SubscriptionRequestDto::new)
+                .toList();
     }
 }

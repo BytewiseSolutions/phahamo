@@ -3,6 +3,7 @@ import { BackendService } from '../../util/backend.service';
 import { PlanPrice } from '../../util/plan-price';
 import { Subscription } from '../../util/subscription';
 import {SubscriptionRequest} from '../../util/subscription-request';
+import {SubscriptionRequestStatus} from '../../util/subscription-request-status';
 
 @Component({
   selector: 'app-plans',
@@ -15,6 +16,7 @@ export class Plans implements OnInit {
   prices: PlanPrice[] = [];
   subscription: Subscription | null = null;
   pendingRequest: SubscriptionRequest | null = null;
+  requests: SubscriptionRequest[] = [];
 
   loading = false;
   errorMessage = '';
@@ -61,9 +63,11 @@ export class Plans implements OnInit {
   loadRequests(): void {
     this.backend.get<SubscriptionRequest[]>('/subscription-requests/my-school').subscribe({
       next: (reqs) => {
+        this.requests = reqs;
         this.pendingRequest = reqs.find(r => r.status === 'PENDING') ?? null;
       },
       error: () => {
+        this.requests = [];
         this.pendingRequest = null;
       }
     });
@@ -131,6 +135,26 @@ export class Plans implements OnInit {
       case 'ANNUAL':   return 'Annual';
       case 'ONE_OFF':  return 'Lifetime';
       default:         return plan;
+    }
+  }
+
+  formatStatus(status: SubscriptionRequestStatus): string {
+    switch (status) {
+      case SubscriptionRequestStatus.PENDING:   return 'Pending';
+      case SubscriptionRequestStatus.APPROVED:  return 'Approved';
+      case SubscriptionRequestStatus.REJECTED:  return 'Rejected';
+      case SubscriptionRequestStatus.CANCELLED: return 'Cancelled';
+      default:                                  return status;
+    }
+  }
+
+  statusTone(status: SubscriptionRequestStatus): 'ok' | 'warn' | 'danger' {
+    switch (status) {
+      case SubscriptionRequestStatus.APPROVED:  return 'ok';
+      case SubscriptionRequestStatus.PENDING:   return 'warn';
+      case SubscriptionRequestStatus.REJECTED:  return 'danger';
+      case SubscriptionRequestStatus.CANCELLED: return 'danger';
+      default:                                  return 'ok';
     }
   }
 
