@@ -62,6 +62,8 @@ import { SubscriptionHistory } from './pages/subscription/subscription-history/s
 import { GradeList } from './pages/grade/grade-list/grade-list';
 import { AssessmentForm } from './pages/grade/assessment-form/assessment-form';
 import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
+import { ExaminationList } from './pages/examination/examination-list/examination-list';
+import { ExaminationForm } from './pages/examination/examination-form/examination-form';
 
 @NgModule({
   declarations: [
@@ -119,7 +121,9 @@ import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
     SubscriptionHistory,
     GradeList,
     AssessmentForm,
-    MarkEntry
+    MarkEntry,
+    ExaminationList,
+    ExaminationForm
   ],
   imports: [
     BrowserModule,

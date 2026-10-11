@@ -2,6 +2,7 @@ package ls.co.bytewise.api.common;
 
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.assessment.AssessmentExceptions;
+import ls.co.bytewise.api.examination.ExaminationExceptions;
 import ls.co.bytewise.api.parent.ParentExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
@@ -282,5 +283,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AssessmentExceptions.InvalidAssessmentException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidAssessment(AssessmentExceptions.InvalidAssessmentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    @ExceptionHandler(ExaminationExceptions.ExaminationNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleExaminationNotFound(ExaminationExceptions.ExaminationNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExaminationExceptions.InvalidExaminationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidExamination(ExaminationExceptions.InvalidExaminationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExaminationExceptions.OverlappingExaminationException.class)
+    public ResponseEntity<Map<String, Object>> handleOverlappingExamination(ExaminationExceptions.OverlappingExaminationException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 }
