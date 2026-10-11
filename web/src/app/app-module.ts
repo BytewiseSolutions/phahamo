@@ -55,6 +55,8 @@ import { PlanPriceList } from './pages/plan-price/plan-price-list/plan-price-lis
 import { PlanPriceForm } from './pages/plan-price/plan-price-form/plan-price-form';
 import { Plans } from './pages/plans/plans';
 import { UpgradeBanner } from './components/upgrade-banner/upgrade-banner';
+import { PaymentMethodList } from './pages/payment-method/payment-method-list/payment-method-list';
+import { PaymentMethodForm } from './pages/payment-method/payment-method-form/payment-method-form';
 
 @NgModule({
   declarations: [
@@ -105,7 +107,9 @@ import { UpgradeBanner } from './components/upgrade-banner/upgrade-banner';
     PlanPriceList,
     PlanPriceForm,
     Plans,
-    UpgradeBanner
+    UpgradeBanner,
+    PaymentMethodList,
+    PaymentMethodForm
   ],
   imports: [
     BrowserModule,

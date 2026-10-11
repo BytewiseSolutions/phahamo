@@ -1,0 +1,56 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Payment Method' : 'Add Payment Method' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label>Type</label>
+          <select [(ngModel)]="formType" [ngModelOptions]="{ standalone: true }">
+            @for (t of types; track t) {
+              <option [ngValue]="t">{{ formatEnum(t) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" placeholder="e.g. Mpesa" [(ngModel)]="formLabel" [ngModelOptions]="{ standalone: true }"/>
+        </div>
+
+        <div class="form-group">
+          <label>Details</label>
+          <textarea rows="5" placeholder="Account info shown to schools" [(ngModel)]="formDetails" [ngModelOptions]="{ standalone: true }"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" min="0" [(ngModel)]="formSortOrder" [ngModelOptions]="{ standalone: true }"/>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="formActive" [ngModelOptions]="{ standalone: true }"/>
+            <span>Active</span>
+          </label>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="primary-button" [disabled]="!formLabel.trim()" (click)="onSubmit()">
+          {{ isEditMode ? 'Save Changes' : 'Add Method' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

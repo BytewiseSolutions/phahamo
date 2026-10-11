@@ -61,6 +61,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Plan Prices', path: '/plan-prices', icon: 'fa-solid fa-tags' },
+    { label: 'Payment Methods', path: '/payment-methods', icon: 'fa-solid fa-credit-card' },
   ],
 };
 

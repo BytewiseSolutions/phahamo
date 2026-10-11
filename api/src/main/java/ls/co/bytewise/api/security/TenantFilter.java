@@ -22,7 +22,8 @@ public class TenantFilter extends OncePerRequestFilter {
             "/api/schools/register",
             "/oauth2/",
             "/login/oauth2/",
-            "/error"
+            "/error",
+            "/api/files/",
     };
 
     @Override

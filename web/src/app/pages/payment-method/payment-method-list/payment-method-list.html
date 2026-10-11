@@ -1,0 +1,61 @@
+<div class="payment-methods-page">
+
+  <div class="page-header">
+    <h1>Payment Methods</h1>
+    <button type="button" class="primary-button" (click)="openCreate()">+ Add Payment Method</button>
+  </div>
+
+  @if (errorMessage && !showForm) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading payment methods...</div>
+  } @else if (methods.length === 0) {
+    <div class="empty-state">
+      <h3>No Payment Methods</h3>
+      <p>Add Mpesa, EcoCash, EFT or Card so schools can subscribe.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="methods-table">
+        <thead>
+        <tr>
+          <th>Type</th>
+          <th>Label</th>
+          <th>Details</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (method of methods; track method.id) {
+            <tr>
+              <td>{{ formatEnum(method.type) }}</td>
+              <td>{{ method.label }}</td>
+              <td class="details-cell">{{ method.details }}</td>
+              <td>{{ method.sortOrder }}</td>
+              <td>
+                <span class="status-badge" [class.inactive]="!method.active">
+                  {{ method.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <button type="button" class="link-button" (click)="openEdit(method)">Edit</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-payment-method-form
+    [visible]="showForm"
+    [editingMethod]="editingMethod"
+    (closed)="onFormClosed()"
+    (save)="onSave($event)">
+  </app-payment-method-form>
+
+</div>
