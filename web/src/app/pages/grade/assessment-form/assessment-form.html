@@ -44,6 +44,28 @@
           </div>
 
           <div class="form-group">
+            <label>Type</label>
+            <select [ngModel]="selectedType"
+                    (ngModelChange)="onTypeChange($event)"
+                    [ngModelOptions]="{ standalone: true }">
+              <option value="CONTINUOUS">Continuous</option>
+              <option value="EXAM">Exam</option>
+            </select>
+          </div>
+
+          @if (selectedType === 'EXAM') {
+            <div class="form-group">
+              <label>Examination</label>
+              <select [(ngModel)]="selectedExaminationId" [ngModelOptions]="{ standalone: true }">
+                <option [ngValue]="null" disabled>Select examination</option>
+                @for (e of examinations; track e.id) {
+                  <option [ngValue]="e.id">{{ e.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="form-group">
             <label>Name</label>
             <input type="text" placeholder="e.g. Test 1" [(ngModel)]="name" [ngModelOptions]="{ standalone: true }"/>
           </div>

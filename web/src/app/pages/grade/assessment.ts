@@ -1,3 +1,5 @@
+export type AssessmentType = 'CONTINUOUS' | 'EXAM';
+
 export interface Assessment {
   id: number;
   assignmentId: number;
@@ -11,6 +13,9 @@ export interface Assessment {
   termName: string;
   teacherId: number | null;
   teacherName: string | null;
+  type: AssessmentType;
+  examinationId: number | null;
+  examinationName: string | null;
   name: string;
   maxMark: number;
   weight: number;

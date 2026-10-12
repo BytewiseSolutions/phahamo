@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { AuthService } from '../../../util/auth.service';
-import { Assessment } from '../assessment';
+import {Assessment, AssessmentType} from '../assessment';
 import { SubjectClassAssignment } from '../../subject-class-assignment/subject-class-assignment';
 import { Term } from '../../terms/term';
+import {Examination} from '../../examination/examination';
 
 @Component({
   selector: 'app-assessment-form',
@@ -15,18 +16,22 @@ export class AssessmentForm implements OnChanges {
 
   @Input() visible = false;
   @Input() editing: Assessment | null = null;
+  examinations: Examination[] = [];
+  selectedType: AssessmentType = 'CONTINUOUS';
+  selectedExaminationId: number | null = null;
 
   @Output() closed = new EventEmitter<void>();
   @Output() save = new EventEmitter<{
     id: number | null;
     assignmentId: number | null;
+    type: AssessmentType | undefined;
+    examinationId: number | null;
     termId: number;
     name: string;
     maxMark: number;
     weight: number;
     date: string;
   }>();
-
   assignments: SubjectClassAssignment[] = [];
   terms: Term[] = [];
 
@@ -55,6 +60,28 @@ export class AssessmentForm implements OnChanges {
       this.reset();
       this.loadDependencies();
     }
+  }
+  onTypeChange(type: AssessmentType): void {
+    this.selectedType = type;
+    this.selectedExaminationId = null;
+    if (type === 'EXAM') {
+      this.loadExaminations();
+    }
+  }
+
+  private loadExaminations(): void {
+    if (!this.selectedTermId) {
+      this.examinations = [];
+      return;
+    }
+
+    this.backend.get<Examination[]>(`/examinations?termId=${this.selectedTermId}`).subscribe({
+      next: (list) => this.examinations = list,
+      error: () => {
+        this.examinations = [];
+        this.errorMessage = 'Failed to load examinations.';
+      }
+    });
   }
 
   loadDependencies(): void {
@@ -146,9 +173,16 @@ export class AssessmentForm implements OnChanges {
       return;
     }
 
+    if (this.selectedType === 'EXAM' && this.selectedExaminationId == null) {
+      this.errorMessage = 'Please select an examination.';
+      return;
+    }
+
     this.save.emit({
       id: this.editing?.id ?? null,
       assignmentId: this.isEditMode ? null : this.selectedAssignmentId,
+      type: this.isEditMode ? undefined : this.selectedType,
+      examinationId: this.selectedType === 'EXAM' ? this.selectedExaminationId : null,
       termId: this.selectedTermId,
       name: this.name.trim(),
       maxMark: this.maxMark,
@@ -159,6 +193,15 @@ export class AssessmentForm implements OnChanges {
 
   onClose(): void {
     this.closed.emit();
+  }
+
+  onTermChange(termId: number | null): void {
+    this.selectedTermId = termId;
+    this.selectedExaminationId = null;
+
+    if (this.selectedType === 'EXAM' && termId != null) {
+      this.loadExaminations();
+    }
   }
 
   onOverlayClick(event: MouseEvent): void {

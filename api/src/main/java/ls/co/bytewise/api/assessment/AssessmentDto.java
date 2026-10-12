@@ -1,11 +1,10 @@
 package ls.co.bytewise.api.assessment;
 
+import ls.co.bytewise.api.common.BaseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ls.co.bytewise.api.common.BaseDto;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -24,6 +23,10 @@ public class AssessmentDto extends BaseDto {
     private String termName;
     private Long teacherId;
     private String teacherName;
+
+    private AssessmentType type;
+    private Long examinationId;
+    private String examinationName;
 
     private String name;
     private Double maxMark;
@@ -49,6 +52,12 @@ public class AssessmentDto extends BaseDto {
 
         this.termId = assessment.getTerm().getId();
         this.termName = assessment.getTerm().getName();
+
+        this.type = assessment.getType();
+        if (assessment.getExamination() != null) {
+            this.examinationId = assessment.getExamination().getId();
+            this.examinationName = assessment.getExamination().getName();
+        }
 
         this.name = assessment.getName();
         this.maxMark = assessment.getMaxMark();

@@ -2,6 +2,8 @@ package ls.co.bytewise.api.assessment;
 
 import ls.co.bytewise.api.assessment.mark.MarkRepository;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.examination.ExaminationRepository;
+import ls.co.bytewise.api.examination.Examination;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignment;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
@@ -20,15 +22,18 @@ public class AssessmentService {
     private final SubjectClassAssignmentRepository assignmentRepository;
     private final TermRepository termRepository;
     private final MarkRepository markRepository;
+    private final ExaminationRepository examinationRepository;
 
     public AssessmentService(AssessmentRepository assessmentRepository,
                              SubjectClassAssignmentRepository assignmentRepository,
                              TermRepository termRepository,
-                             MarkRepository markRepository) {
+                             MarkRepository markRepository,
+                             ExaminationRepository examinationRepository) {
         this.assessmentRepository = assessmentRepository;
         this.assignmentRepository = assignmentRepository;
         this.termRepository = termRepository;
         this.markRepository = markRepository;
+        this.examinationRepository = examinationRepository;
     }
 
     @Transactional
@@ -62,6 +67,42 @@ public class AssessmentService {
         validate(dto);
 
         Assessment assessment = new Assessment();
+
+
+        AssessmentType type = dto.getType() != null ? dto.getType() : AssessmentType.CONTINUOUS;
+        assessment.setType(type);
+
+        if (type == AssessmentType.EXAM) {
+            if (dto.getExaminationId() == null) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Examination is required for exam assessments");
+            }
+            Examination examination = examinationRepository.findById(dto.getExaminationId())
+                    .orElseThrow(() -> new AssessmentExceptions.InvalidAssessmentException("Examination not found"));
+
+            if (!examination.getSchool().getId().equals(schoolId)) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Examination does not belong to the active school");
+            }
+
+            if (!examination.getTerm().getId().equals(term.getId())) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Examination and assessment must belong to the same term");
+            }
+
+            boolean coversSubjectClass = examination.getSubjectClasses().stream()
+                    .anyMatch(sc -> sc.getSubject().getId().equals(assignment.getSubject().getId())
+                            && sc.getSchoolClass().getId().equals(assignment.getSchoolClass().getId()));
+
+            if (!coversSubjectClass) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Examination does not cover this subject and class");
+            }
+
+            assessment.setExamination(examination);
+        } else {
+            assessment.setExamination(null);
+        }
         assessment.setSchool(assignment.getSchool());
         assessment.setAssignment(assignment);
         assessment.setTerm(term);

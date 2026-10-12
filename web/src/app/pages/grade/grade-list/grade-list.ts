@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
-import { Assessment } from '../assessment';
+import {Assessment, AssessmentType} from '../assessment';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
@@ -65,6 +65,8 @@ export class GradeList implements OnInit {
   onSave(event: {
     id: number | null;
     assignmentId: number | null;
+    type: AssessmentType | undefined;
+    examinationId: number | null;
     termId: number;
     name: string;
     maxMark: number;
@@ -76,6 +78,9 @@ export class GradeList implements OnInit {
 
     if (event.id) {
       const payload = {
+        assignmentId: event.assignmentId,
+        type: event.type,
+        examinationId: event.examinationId,
         termId: event.termId,
         name: event.name,
         maxMark: event.maxMark,

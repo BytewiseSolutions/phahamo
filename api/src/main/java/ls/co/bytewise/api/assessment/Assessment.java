@@ -1,16 +1,21 @@
 package ls.co.bytewise.api.assessment;
 
-import jakarta.persistence.*;
-import ls.co.bytewise.api.assessment.mark.Mark;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import ls.co.bytewise.api.common.SchoolScopedEntity;
+import ls.co.bytewise.api.examination.Examination;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignment;
 import ls.co.bytewise.api.term.Term;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -26,6 +31,14 @@ public class Assessment extends SchoolScopedEntity {
     @JoinColumn(name = "term_id", nullable = false)
     private Term term;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AssessmentType type = AssessmentType.CONTINUOUS;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "examination_id")
+    private Examination examination;
+
     @Column(nullable = false)
     private String name;
 
@@ -37,7 +50,4 @@ public class Assessment extends SchoolScopedEntity {
 
     @Column(nullable = false)
     private LocalDate date;
-
-    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Mark> marks = new ArrayList<>();
 }
