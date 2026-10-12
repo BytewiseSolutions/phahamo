@@ -5,6 +5,7 @@ import ls.co.bytewise.api.assessment.AssessmentExceptions;
 import ls.co.bytewise.api.examination.ExaminationExceptions;
 import ls.co.bytewise.api.grading.GradeBandExceptions;
 import ls.co.bytewise.api.parent.ParentExceptions;
+import ls.co.bytewise.api.result.TermResultExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
@@ -313,5 +314,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GradeBandExceptions.DuplicateGradeException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateGrade(GradeBandExceptions.DuplicateGradeException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(TermResultExceptions.TermResultNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTermResultNotFound(TermResultExceptions.TermResultNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TermResultExceptions.InvalidTermResultOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTermResultOperation(TermResultExceptions.InvalidTermResultOperationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

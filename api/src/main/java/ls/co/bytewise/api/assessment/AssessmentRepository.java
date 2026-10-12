@@ -16,4 +16,6 @@ public interface AssessmentRepository extends JpaRepository<Assessment, Long> {
     List<Assessment> findAllByTermIdAndSchoolIdOrderByDateDesc(Long termId, Long schoolId);
 
     Optional<Assessment> findByIdAndSchoolId(Long id, Long schoolId);
+    List<Assessment> findAllByAssignment_SchoolClass_IdAndAssignment_Subject_IdAndTermIdAndSchoolId(
+            Long schoolClassId, Long subjectId, Long termId, Long schoolId);
 }

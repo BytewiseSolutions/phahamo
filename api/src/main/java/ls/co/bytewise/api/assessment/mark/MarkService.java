@@ -4,6 +4,8 @@ import ls.co.bytewise.api.assessment.Assessment;
 import ls.co.bytewise.api.assessment.AssessmentExceptions;
 import ls.co.bytewise.api.assessment.AssessmentRepository;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.result.TermResultRepository;
+import ls.co.bytewise.api.result.TermResultStatus;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
@@ -22,13 +24,16 @@ public class MarkService {
     private final MarkRepository markRepository;
     private final AssessmentRepository assessmentRepository;
     private final StudentRepository studentRepository;
+    private final TermResultRepository termResultRepository;
 
     public MarkService(MarkRepository markRepository,
                        AssessmentRepository assessmentRepository,
-                       StudentRepository studentRepository) {
+                       StudentRepository studentRepository,
+                       TermResultRepository termResultRepository) {
         this.markRepository = markRepository;
         this.assessmentRepository = assessmentRepository;
         this.studentRepository = studentRepository;
+        this.termResultRepository = termResultRepository;
     }
 
     public List<MarkDto> listForAssessment(User currentUser, Long assessmentId) {
@@ -65,9 +70,24 @@ public class MarkService {
 
         Long schoolId = TenantContext.getSchoolId();
         Long classId = assessment.getAssignment().getSchoolClass().getId();
+        Long subjectId = assessment.getAssignment().getSubject().getId();
+        Long termId = assessment.getTerm().getId();
 
         List<Student> students = studentRepository
                 .findAllBySchoolIdAndCurrentClassId(schoolId, classId);
+
+        for (MarkDto row : rows) {
+            if (row.getStudentId() == null) continue;
+
+            boolean locked = termResultRepository
+                    .existsByStudentIdAndSubjectIdAndTermIdAndStatus(
+                            row.getStudentId(), subjectId, termId, TermResultStatus.FINALISED);
+
+            if (locked) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Results for this subject and term are finalised. Ask an admin to reopen.");
+            }
+        }
 
         for (MarkDto row : rows) {
             if (row.getStudentId() == null) continue;

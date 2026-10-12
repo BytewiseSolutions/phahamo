@@ -2,8 +2,8 @@ package ls.co.bytewise.api.assessment;
 
 import ls.co.bytewise.api.assessment.mark.MarkRepository;
 import ls.co.bytewise.api.common.UserRole;
-import ls.co.bytewise.api.examination.ExaminationRepository;
 import ls.co.bytewise.api.examination.Examination;
+import ls.co.bytewise.api.examination.ExaminationRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignment;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
@@ -68,7 +68,6 @@ public class AssessmentService {
 
         Assessment assessment = new Assessment();
 
-
         AssessmentType type = dto.getType() != null ? dto.getType() : AssessmentType.CONTINUOUS;
         assessment.setType(type);
 
@@ -100,9 +99,27 @@ public class AssessmentService {
             }
 
             assessment.setExamination(examination);
+
+            int existingWeight = assessmentRepository
+                    .findAllByAssignment_SchoolClass_IdAndAssignment_Subject_IdAndTermIdAndSchoolId(
+                            assignment.getSchoolClass().getId(),
+                            assignment.getSubject().getId(),
+                            term.getId(),
+                            schoolId)
+                    .stream()
+                    .filter(a -> a.getType() == AssessmentType.EXAM)
+                    .mapToInt(Assessment::getWeight)
+                    .sum();
+
+            if (existingWeight + dto.getWeight() > 100) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Adding this exam would make the total weight " + (existingWeight + dto.getWeight())
+                                + ". Exam weights for a subject must not exceed 100.");
+            }
         } else {
             assessment.setExamination(null);
         }
+
         assessment.setSchool(assignment.getSchool());
         assessment.setAssignment(assignment);
         assessment.setTerm(term);
@@ -153,6 +170,7 @@ public class AssessmentService {
 
     @Transactional
     public AssessmentDto update(User editor, Long id, AssessmentDto dto) {
+        Long schoolId = TenantContext.getSchoolId();
         Assessment assessment = findOrThrow(id);
 
         requireAccess(editor, assessment);
@@ -190,6 +208,24 @@ public class AssessmentService {
         assessment.setUpdatedBy(editor);
 
         validate(assessment);
+
+        if (assessment.getType() == AssessmentType.EXAM && dto.getWeight() != null) {
+            int otherWeight = assessmentRepository
+                    .findAllByAssignment_SchoolClass_IdAndAssignment_Subject_IdAndTermIdAndSchoolId(
+                            assessment.getAssignment().getSchoolClass().getId(),
+                            assessment.getAssignment().getSubject().getId(),
+                            assessment.getTerm().getId(),
+                            schoolId)
+                    .stream()
+                    .filter(a -> a.getType() == AssessmentType.EXAM && !a.getId().equals(id))
+                    .mapToInt(Assessment::getWeight)
+                    .sum();
+
+            if (otherWeight + dto.getWeight() > 100) {
+                throw new AssessmentExceptions.InvalidAssessmentException(
+                        "Exam weights for this subject must not exceed 100.");
+            }
+        }
 
         Assessment saved = assessmentRepository.save(assessment);
         return new AssessmentDto(saved);
