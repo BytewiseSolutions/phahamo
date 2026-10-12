@@ -26,6 +26,8 @@ import {GradeList} from './pages/grade/grade-list/grade-list';
 import {MarkEntry} from './pages/grade/mark-entry/mark-entry';
 import {ExaminationList} from './pages/examination/examination-list/examination-list';
 import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
+import {ClassResults} from './pages/results/class-results/class-results';
+import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -57,6 +59,8 @@ const routes: Routes = [
       { path: 'grades/:id/marks', component: MarkEntry },
       { path: 'examinations', component: ExaminationList },
       { path: 'grading-scale', component: GradeBandList },
+      { path: 'results', component: ClassResults },
+      { path: 'attendance/history', component: AttendanceHistory },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

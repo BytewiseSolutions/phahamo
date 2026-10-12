@@ -66,6 +66,9 @@ import { ExaminationList } from './pages/examination/examination-list/examinatio
 import { ExaminationForm } from './pages/examination/examination-form/examination-form';
 import { GradeBandList } from './pages/grading/grade-band-list/grade-band-list';
 import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
+import { ClassResults } from './pages/results/class-results/class-results';
+import { ResultOverrideForm } from './pages/results/result-override-form/result-override-form';
+import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
 
 @NgModule({
   declarations: [
@@ -127,7 +130,10 @@ import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
     ExaminationList,
     ExaminationForm,
     GradeBandList,
-    GradeBandForm
+    GradeBandForm,
+    ClassResults,
+    ResultOverrideForm,
+    AttendanceHistory
   ],
   imports: [
     BrowserModule,

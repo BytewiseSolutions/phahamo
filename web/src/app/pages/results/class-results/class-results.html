@@ -1,0 +1,165 @@
+<div class="results-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Results</h1>
+      <p>Calculate and finalise term results for a class and subject.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Class</label>
+      <select [(ngModel)]="selectedClassId" (ngModelChange)="onFilterChange()" [ngModelOptions]="{ standalone: true }">
+        @for (c of classes; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Subject</label>
+      <select [(ngModel)]="selectedSubjectId" (ngModelChange)="onFilterChange()" [ngModelOptions]="{ standalone: true }">
+        @for (s of subjects; track s.id) {
+          <option [ngValue]="s.id">{{ s.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Term</label>
+      <select [(ngModel)]="selectedTermId" (ngModelChange)="onFilterChange()" [ngModelOptions]="{ standalone: true }">
+        @for (t of terms; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (errorMessage && !showReopenModal && !showOverrideForm) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <div class="actions-bar">
+    <button type="button" class="primary-button"
+            [disabled]="calculating || finalising || !selectedClassId || !selectedSubjectId || !selectedTermId"
+            (click)="onCalculate()">
+      {{ calculating ? 'Calculating...' : 'Calculate Results' }}
+    </button>
+
+    <button type="button" class="primary-button"
+            [disabled]="calculating || finalising || !canFinalise"
+            (click)="onFinalise()">
+      {{ finalising ? 'Finalising...' : 'Finalise Results' }}
+    </button>
+
+    @if (isAdmin && anyFinalised) {
+      <button type="button" class="secondary-button"
+              [disabled]="reopening"
+              (click)="openReopenModal()">
+        Reopen
+      </button>
+    }
+  </div>
+
+  @if (loadingResults) {
+    <div class="loading-state">Loading results...</div>
+  } @else if (results.length === 0) {
+    <div class="empty-state">
+      <h3>No Results</h3>
+      <p>Click Calculate to compute results from the exam marks.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="results-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Admission #</th>
+          <th>Student</th>
+          <th>Final Mark</th>
+          <th>Grade</th>
+          <th>Remark</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (r of results; track r.id; let i = $index) {
+            <tr [class.finalised]="r.status === 'FINALISED'">
+              <td>{{ i + 1 }}</td>
+              <td>{{ r.admissionNumber }}</td>
+              <td>{{ r.studentLastName }} {{ r.studentFirstName }}</td>
+              <td class="mark-cell">{{ r.finalMark | number:'1.0-2' }}</td>
+              <td>
+                @if (r.grade) {
+                  <span class="grade-badge">{{ r.grade }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td>{{ r.remark || '—' }}</td>
+              <td>
+                <span class="status-badge" [class.finalised]="r.status === 'FINALISED'">
+                  {{ statusLabel(r.status) }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                @if (isAdmin && r.status === 'FINALISED') {
+                  <button type="button" class="link-button" (click)="openOverride(r)">Override</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showReopenModal) {
+    <div class="modal-overlay" (click)="closeReopenModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Reopen Finalised Results</h2>
+          <button type="button" class="close-button" (click)="closeReopenModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          @if (errorMessage) {
+            <div class="error-banner">{{ errorMessage }}</div>
+          }
+
+          <p class="hint">
+            Reopening unlocks these results so marks can be edited and recalculated. The action is recorded.
+          </p>
+
+          <div class="form-group">
+            <label>Reason</label>
+            <textarea rows="3"
+                      [(ngModel)]="reopenReason"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Why are these results being reopened?"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closeReopenModal()">Cancel</button>
+          <button type="button" class="primary-button" [disabled]="reopening" (click)="submitReopen()">
+            {{ reopening ? 'Reopening...' : 'Reopen' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showOverrideForm && overrideResult) {
+    <app-result-override-form
+      [result]="overrideResult"
+      (closed)="closeOverrideForm()"
+      (saved)="onOverrideSaved()">
+    </app-result-override-form>
+  }
+
+</div>
