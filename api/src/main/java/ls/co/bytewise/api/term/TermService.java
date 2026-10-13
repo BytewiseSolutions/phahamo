@@ -48,12 +48,6 @@ public class TermService {
         return new TermDto(saved);
     }
 
-    public List<TermDto> listTerms() {
-        return termRepository.findAll().stream()
-                .map(TermDto::new)
-                .toList();
-    }
-
     public List<TermDto> getTermsByAcademicYear(Long academicYearId) {
         Long schoolId = TenantContext.getSchoolId();
 
@@ -142,5 +136,12 @@ public class TermService {
         if (overlaps) {
             throw new TermExceptions.InvalidTermException("Term dates overlap with an existing term in this academic year");
         }
+    }
+
+    public List<TermDto> listForCurrentSchool() {
+        Long schoolId = TenantContext.getSchoolId();
+        return termRepository.findBySchoolIdOrderByStartDateDesc(schoolId).stream()
+                .map(TermDto::new)
+                .toList();
     }
 }

@@ -7,15 +7,18 @@ import ls.co.bytewise.api.attendance.AttendanceStatus;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
+import ls.co.bytewise.api.term.TermRepository;
+import ls.co.bytewise.api.user.User;
+import ls.co.bytewise.api.term.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,11 +26,14 @@ public class AttendanceReportService {
 
     private final AttendanceRepository attendanceRepository;
     private final StudentRepository studentRepository;
+    private final TermRepository termRepository;
 
     public AttendanceReportService(AttendanceRepository attendanceRepository,
-                                   StudentRepository studentRepository) {
+                                   StudentRepository studentRepository,
+                                   TermRepository termRepository) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
+        this.termRepository = termRepository;
     }
 
     public List<LessonAttendanceSummaryDto> lessonBreakdown(Long classId,
@@ -178,5 +184,33 @@ public class AttendanceReportService {
     private double pct(int n, int total) {
         if (total == 0) return 0.0;
         return Math.round((n * 10000.0) / total) / 100.0;
+    }
+
+    public StudentAttendanceReportDto studentReportForUser(User user,
+                                                           Long termId,
+                                                           LocalDate fromDate,
+                                                           LocalDate toDate) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .filter(s -> s.getSchool().getId().equals(schoolId))
+                .orElseThrow(() -> new IllegalArgumentException("No student record linked to this account"));
+
+        LocalDate effectiveFrom;
+        LocalDate effectiveTo;
+
+        if (termId != null) {
+            Term term = termRepository.findByIdAndSchoolId(termId, schoolId)
+                    .orElseThrow(() -> new IllegalArgumentException("Term not found"));
+            effectiveFrom = term.getStartDate().atZone(ZoneId.systemDefault()).toLocalDate();
+            effectiveTo   = term.getEndDate().atZone(ZoneId.systemDefault()).toLocalDate();
+        } else if (fromDate != null && toDate != null) {
+            effectiveFrom = fromDate;
+            effectiveTo = toDate;
+        } else {
+            throw new IllegalArgumentException("Provide either termId or both from and to");
+        }
+
+        return studentReport(student.getId(), null, null, effectiveFrom, effectiveTo);
     }
 }

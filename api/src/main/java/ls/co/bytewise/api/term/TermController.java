@@ -29,9 +29,9 @@ public class TermController {
     }
 
     @GetMapping
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER", "ROLE_STUDENT"})
     public List<TermDto> list() {
-        return termService.listTerms();
+        return termService.listForCurrentSchool();
     }
 
     @GetMapping("/academic-year/{academicYearId}")

@@ -1,7 +1,9 @@
 package ls.co.bytewise.api.attendance.report;
 
+import ls.co.bytewise.api.user.User;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,5 +52,15 @@ public class AttendanceReportController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         return reportService.studentReport(studentId, classId, subjectId, from, to);
+    }
+
+    @GetMapping("/me")
+    @Secured({"ROLE_STUDENT"})
+    public StudentAttendanceReportDto myReport(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) Long termId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return reportService.studentReportForUser(currentUser, termId, from, to);
     }
 }

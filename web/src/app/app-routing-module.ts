@@ -28,6 +28,7 @@ import {ExaminationList} from './pages/examination/examination-list/examination-
 import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
 import {ClassResults} from './pages/results/class-results/class-results';
 import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
+import {MyAttendance} from './pages/attendance/my-attendance/my-attendance';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -61,6 +62,7 @@ const routes: Routes = [
       { path: 'grading-scale', component: GradeBandList },
       { path: 'results', component: ClassResults },
       { path: 'attendance/history', component: AttendanceHistory },
+      { path: 'attendance/my', component: MyAttendance },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

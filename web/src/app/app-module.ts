@@ -69,6 +69,7 @@ import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
 import { ClassResults } from './pages/results/class-results/class-results';
 import { ResultOverrideForm } from './pages/results/result-override-form/result-override-form';
 import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
+import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
 
 @NgModule({
   declarations: [
@@ -133,7 +134,8 @@ import { AttendanceHistory } from './pages/attendance/attendance-history/attenda
     GradeBandForm,
     ClassResults,
     ResultOverrideForm,
-    AttendanceHistory
+    AttendanceHistory,
+    MyAttendance
   ],
   imports: [
     BrowserModule,
