@@ -81,4 +81,12 @@ public class TermResultController {
                                   @RequestParam String reason) {
         return termResultService.overrideMark(currentUser, id, mark, reason);
     }
+
+    @GetMapping("/me")
+    @Secured({"ROLE_STUDENT"})
+    public StudentResultsReportDto myResults(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam Long termId) {
+        return termResultService.myResults(currentUser, termId);
+    }
 }

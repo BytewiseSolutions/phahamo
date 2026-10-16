@@ -314,4 +314,52 @@ public class TermResultService {
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
+
+    public StudentResultsReportDto myResults(User user, Long termId) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .filter(s -> s.getSchool().getId().equals(schoolId))
+                .orElseThrow(() -> new TermResultExceptions.TermResultNotFoundException(
+                        "No student record linked to this account"));
+
+        Term term = termRepository.findByIdAndSchoolId(termId, schoolId)
+                .orElseThrow(() -> new TermResultExceptions.TermResultNotFoundException("Term not found"));
+
+        List<TermResult> visible = termResultRepository
+                .findAllByStudentIdAndTermIdAndSchoolId(student.getId(), termId, schoolId)
+                .stream()
+                .filter(r -> r.getStatus() == TermResultStatus.FINALISED)
+                .toList();
+
+        StudentResultsReportDto report = new StudentResultsReportDto();
+        report.setStudentId(student.getId());
+        report.setFirstName(student.getUser().getFirstName());
+        report.setLastName(student.getUser().getLastName());
+        report.setAdmissionNumber(student.getAdmissionNumber());
+        report.setTermId(term.getId());
+        report.setTermName(term.getName());
+        report.setSubjects(visible.stream().map(TermResultDto::new).toList());
+
+        if (!visible.isEmpty()) {
+            double avg = visible.stream()
+                    .mapToDouble(TermResult::getFinalMark)
+                    .average()
+                    .orElse(0.0);
+            double rounded = round(avg);
+            report.setAverageMark(rounded);
+
+            List<GradeBand> bands = gradeBandRepository
+                    .findAllBySchoolIdOrderByMinScoreDesc(schoolId);
+            for (GradeBand band : bands) {
+                if (rounded >= band.getMinScore() && rounded <= band.getMaxScore()) {
+                    report.setOverallGrade(band.getGrade());
+                    report.setOverallRemark(band.getRemark());
+                    break;
+                }
+            }
+        }
+
+        return report;
+    }
 }

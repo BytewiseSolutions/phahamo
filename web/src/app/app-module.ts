@@ -70,6 +70,7 @@ import { ClassResults } from './pages/results/class-results/class-results';
 import { ResultOverrideForm } from './pages/results/result-override-form/result-override-form';
 import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
 import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
+import { MyResults } from './pages/results/my-results/my-results';
 
 @NgModule({
   declarations: [
@@ -135,7 +136,8 @@ import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
     ClassResults,
     ResultOverrideForm,
     AttendanceHistory,
-    MyAttendance
+    MyAttendance,
+    MyResults
   ],
   imports: [
     BrowserModule,

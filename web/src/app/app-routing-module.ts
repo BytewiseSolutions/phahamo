@@ -29,6 +29,7 @@ import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
 import {ClassResults} from './pages/results/class-results/class-results';
 import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
 import {MyAttendance} from './pages/attendance/my-attendance/my-attendance';
+import {MyResults} from './pages/results/my-results/my-results';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -63,6 +64,7 @@ const routes: Routes = [
       { path: 'results', component: ClassResults },
       { path: 'attendance/history', component: AttendanceHistory },
       { path: 'attendance/my', component: MyAttendance },
+      { path: 'results/my', component: MyResults },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

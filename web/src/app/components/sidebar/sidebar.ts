@@ -62,7 +62,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
   STUDENT: [
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'My Attendance', path: '/attendance/my', icon: 'fa-solid fa-clipboard-check' },
-    { label: 'Results', path: '/results', icon: 'fa-solid fa-file-lines' },
+    { label: 'My Results', path: '/results/my', icon: 'fa-solid fa-graduation-cap' },
     { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
   ],
   SYSTEM_ADMIN: [
