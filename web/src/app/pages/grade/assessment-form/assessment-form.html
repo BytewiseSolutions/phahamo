@@ -1,0 +1,102 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Edit Assessment' : 'New Assessment' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        @if (loading) {
+          <p class="hint">Loading...</p>
+        } @else {
+
+          @if (!isEditMode) {
+            <div class="form-group">
+              <label>Subject & Class</label>
+              <select [ngModel]="selectedAssignmentId"
+                      (ngModelChange)="onAssignmentChange($event)"
+                      [ngModelOptions]="{ standalone: true }">
+                <option [ngValue]="null" disabled>Select</option>
+                @for (a of assignments; track a.id) {
+                  <option [ngValue]="a.id">{{ formatAssignment(a) }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Term</label>
+            <select [(ngModel)]="selectedTermId" [ngModelOptions]="{ standalone: true }">
+              <option [ngValue]="null" disabled>Select term</option>
+              @for (t of terms; track t.id) {
+                <option [ngValue]="t.id">{{ t.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Type</label>
+            <select [ngModel]="selectedType"
+                    (ngModelChange)="onTypeChange($event)"
+                    [ngModelOptions]="{ standalone: true }">
+              <option value="CONTINUOUS">Continuous</option>
+              <option value="EXAM">Exam</option>
+            </select>
+          </div>
+
+          @if (selectedType === 'EXAM') {
+            <div class="form-group">
+              <label>Examination</label>
+              <select [(ngModel)]="selectedExaminationId" [ngModelOptions]="{ standalone: true }">
+                <option [ngValue]="null" disabled>Select examination</option>
+                @for (e of examinations; track e.id) {
+                  <option [ngValue]="e.id">{{ e.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" placeholder="e.g. Test 1" [(ngModel)]="name" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Mark</label>
+              <input type="number" min="1" step="0.5" [(ngModel)]="maxMark" [ngModelOptions]="{ standalone: true }"/>
+            </div>
+            <div class="form-group">
+              <label>Weight (%)</label>
+              <input type="number" min="0" max="100" [(ngModel)]="weight" [ngModelOptions]="{ standalone: true }"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Assessment Date</label>
+            <input type="date" [(ngModel)]="date" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+
+        }
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="primary-button" [disabled]="loading" (click)="onSubmit()">
+          {{ isEditMode ? 'Save Changes' : 'Create' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

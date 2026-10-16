@@ -1,0 +1,240 @@
+<div class="attendance-history-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Attendance History</h1>
+      <p>View attendance patterns by lesson, by class, or for a single student.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="exportCsv()" [disabled]="loading">
+      <i class="fa-solid fa-file-csv"></i>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="mode-tabs">
+    <button type="button" class="mode-tab"
+            [class.active]="mode === 'byLesson'"
+            (click)="setMode('byLesson')">
+      By Lesson
+    </button>
+    <button type="button" class="mode-tab"
+            [class.active]="mode === 'byStudent'"
+            (click)="setMode('byStudent')">
+      By Student
+    </button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Class</label>
+      <select [(ngModel)]="selectedClassId" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }">
+        @for (c of classes; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Subject (optional)</label>
+      <select [(ngModel)]="selectedSubjectId" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="null">All subjects</option>
+        @for (s of subjects; track s.id) {
+          <option [ngValue]="s.id">{{ s.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>From</label>
+      <input type="date" [(ngModel)]="fromDate" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }"/>
+    </div>
+
+    <div class="filter-group">
+      <label>To</label>
+      <input type="date" [(ngModel)]="toDate" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }"/>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading attendance...</div>
+  } @else if (mode === 'byLesson') {
+
+    @if (lessonRows.length === 0) {
+      <div class="empty-state">
+        <h3>No Attendance Records</h3>
+        <p>No attendance was marked for this class in the selected range.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="attendance-table">
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Subject</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+            <th>Excused</th>
+            <th>Total</th>
+            <th>Present %</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (row of lessonRows; track row.lessonId) {
+              <tr>
+                <td>{{ formatDate(row.date) }}</td>
+                <td>{{ row.periodName }}</td>
+                <td>{{ row.subjectName }}</td>
+                <td>{{ row.present }}</td>
+                <td>{{ row.absent }}</td>
+                <td>{{ row.late }}</td>
+                <td>{{ row.excused }}</td>
+                <td>{{ row.total }}</td>
+                <td>
+                  <span class="percent-cell"
+                        [class.low]="row.presentPercent < 60"
+                        [class.medium]="row.presentPercent >= 60 && row.presentPercent < 80">
+                    {{ formatPercent(row.presentPercent) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+
+    @if (classRows.length === 0) {
+      <div class="empty-state">
+        <h3>No Attendance Records</h3>
+        <p>No attendance was marked for any student in this class in the selected range.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="attendance-table">
+          <thead>
+          <tr>
+            <th>Admission #</th>
+            <th>Student</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+            <th>Excused</th>
+            <th>Total</th>
+            <th>Present %</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (row of classRows; track row.studentId) {
+              <tr>
+                <td>{{ row.admissionNumber }}</td>
+                <td>{{ row.lastName }} {{ row.firstName }}</td>
+                <td>{{ row.present }}</td>
+                <td>{{ row.absent }}</td>
+                <td>{{ row.late }}</td>
+                <td>{{ row.excused }}</td>
+                <td>{{ row.total }}</td>
+                <td>
+                  <span class="percent-cell"
+                        [class.low]="row.presentPercent < 60"
+                        [class.medium]="row.presentPercent >= 60 && row.presentPercent < 80">
+                    {{ formatPercent(row.presentPercent) }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button type="button" class="link-button" (click)="openStudent(row.studentId)">View</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (studentReport) {
+    <div class="modal-overlay" (click)="closeStudentReport()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <div>
+            <h2>{{ studentReport.summary.lastName }} {{ studentReport.summary.firstName }}</h2>
+            <p class="subtitle">{{ studentReport.summary.admissionNumber }}</p>
+          </div>
+          <button type="button" class="close-button" (click)="closeStudentReport()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="label">Present</span>
+              <span class="value">{{ studentReport.summary.present }}</span>
+              <span class="percent">{{ formatPercent(studentReport.summary.presentPercent) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Absent</span>
+              <span class="value">{{ studentReport.summary.absent }}</span>
+              <span class="percent">{{ formatPercent(studentReport.summary.absentPercent) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Late</span>
+              <span class="value">{{ studentReport.summary.late }}</span>
+              <span class="percent">{{ formatPercent(studentReport.summary.latePercent) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Excused</span>
+              <span class="value">{{ studentReport.summary.excused }}</span>
+              <span class="percent">{{ formatPercent(studentReport.summary.excusedPercent) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Total</span>
+              <span class="value">{{ studentReport.summary.total }}</span>
+            </div>
+          </div>
+
+          @if (studentReport.records.length === 0) {
+            <p class="empty-inline">No attendance records in this range.</p>
+          } @else {
+            <div class="table-wrapper">
+              <table class="attendance-table small">
+                <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Class</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (r of studentReport.records; track r.id) {
+                    <tr>
+                      <td>{{ formatDate(r.date) }}</td>
+                      <td>{{ r.schoolClassName }}</td>
+                      <td>
+                        <span class="status-badge" [class]="r.status.toLowerCase()">
+                          {{ statusLabel(r.status) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

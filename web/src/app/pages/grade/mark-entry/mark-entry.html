@@ -1,0 +1,67 @@
+<div class="mark-entry-page">
+
+  <div class="page-header">
+    <button type="button" class="back-button" (click)="goBack()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Grades</span>
+    </button>
+  </div>
+
+  @if (assessment) {
+    <div class="assessment-header">
+      <h1>{{ assessment.name }}</h1>
+      <p>
+        {{ assessment.subjectName }} — {{ assessment.className }} ·
+        {{ assessment.termName }} · Max {{ assessment.maxMark }} · Weight {{ assessment.weight }}%
+      </p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading marks...</div>
+  } @else if (marks.length === 0) {
+    <div class="empty-state">
+      <p>No active students in this class.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="marks-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Admission #</th>
+          <th>Student</th>
+          <th class="score-col">Score</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (m of marks; track m.studentId; let i = $index) {
+            <tr [class.invalid]="isInvalid(m)">
+              <td>{{ i + 1 }}</td>
+              <td>{{ m.admissionNumber }}</td>
+              <td>{{ m.studentFirstName }} {{ m.studentLastName }}</td>
+              <td class="score-col">
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  [value]="m.score ?? ''"
+                  (input)="onScoreInput(m, $any($event.target).value)"/>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-actions">
+      <button type="button" class="primary-button" [disabled]="saving" (click)="onSave()">
+        {{ saving ? 'Saving...' : 'Save Marks' }}
+      </button>
+    </div>
+  }
+
+</div>

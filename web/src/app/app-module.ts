@@ -59,6 +59,18 @@ import { PaymentMethodList } from './pages/payment-method/payment-method-list/pa
 import { PaymentMethodForm } from './pages/payment-method/payment-method-form/payment-method-form';
 import { SubscribeForm } from './pages/plans/subscribe-form/subscribe-form';
 import { SubscriptionHistory } from './pages/subscription/subscription-history/subscription-history';
+import { GradeList } from './pages/grade/grade-list/grade-list';
+import { AssessmentForm } from './pages/grade/assessment-form/assessment-form';
+import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
+import { ExaminationList } from './pages/examination/examination-list/examination-list';
+import { ExaminationForm } from './pages/examination/examination-form/examination-form';
+import { GradeBandList } from './pages/grading/grade-band-list/grade-band-list';
+import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
+import { ClassResults } from './pages/results/class-results/class-results';
+import { ResultOverrideForm } from './pages/results/result-override-form/result-override-form';
+import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
+import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
+import { MyResults } from './pages/results/my-results/my-results';
 
 @NgModule({
   declarations: [
@@ -113,7 +125,19 @@ import { SubscriptionHistory } from './pages/subscription/subscription-history/s
     PaymentMethodList,
     PaymentMethodForm,
     SubscribeForm,
-    SubscriptionHistory
+    SubscriptionHistory,
+    GradeList,
+    AssessmentForm,
+    MarkEntry,
+    ExaminationList,
+    ExaminationForm,
+    GradeBandList,
+    GradeBandForm,
+    ClassResults,
+    ResultOverrideForm,
+    AttendanceHistory,
+    MyAttendance,
+    MyResults
   ],
   imports: [
     BrowserModule,

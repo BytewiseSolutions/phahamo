@@ -1,0 +1,58 @@
+<div class="examinations-page">
+
+  <div class="page-header">
+    <h1>Examinations</h1>
+    <button type="button" class="primary-button" (click)="openCreate()">+ New Examination</button>
+  </div>
+
+  @if (errorMessage && !showForm) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading examinations...</div>
+  } @else if (examinations.length === 0) {
+    <div class="empty-state">
+      <h3>No Examinations</h3>
+      <p>Create an examination period to organize formal exams.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="examinations-table">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Term</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Subjects & Classes</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (e of examinations; track e.id) {
+            <tr>
+              <td>{{ e.name }}</td>
+              <td>{{ e.termName }}</td>
+              <td>{{ formatDate(e.startDate) }}</td>
+              <td>{{ formatDate(e.endDate) }}</td>
+              <td>{{ subjectClassSummary(e) }}</td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openEdit(e)">Edit</button>
+                <button type="button" class="link-button danger" (click)="onDelete(e)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-examination-form
+    [visible]="showForm"
+    [editing]="editing"
+    (closed)="closeForm()"
+    (save)="onSave($event)">
+  </app-examination-form>
+
+</div>

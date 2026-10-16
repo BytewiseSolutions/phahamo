@@ -1,0 +1,86 @@
+<div class="my-results-page">
+
+  <div class="page-header">
+    <div>
+      <h1>My Results</h1>
+      <p>Your finalised marks and grades by subject.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Term</label>
+      <select [(ngModel)]="selectedTermId"
+              (ngModelChange)="load()"
+              [ngModelOptions]="{ standalone: true }">
+        @for (t of terms; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading your results...</div>
+  } @else if (report) {
+
+    @if (report.subjects.length === 0) {
+      <div class="empty-state">
+        <h3>Results Not Available</h3>
+        <p>Results for {{ report.termName }} haven't been finalised yet. Check back later.</p>
+      </div>
+    } @else {
+
+      <div class="summary-grid">
+        <div class="summary-item highlight">
+          <span class="label">Average</span>
+          <span class="value">{{ formatMark(report.averageMark) }}</span>
+        </div>
+        <div class="summary-item highlight">
+          <span class="label">Overall Grade</span>
+          <span class="value">{{ report.overallGrade || '—' }}</span>
+          @if (report.overallRemark) {
+            <span class="percent">{{ report.overallRemark }}</span>
+          }
+        </div>
+        <div class="summary-item">
+          <span class="label">Subjects</span>
+          <span class="value">{{ report.subjects.length }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="results-table">
+          <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Mark</th>
+            <th>Grade</th>
+            <th>Remark</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (r of report.subjects; track r.id) {
+              <tr>
+                <td>{{ r.subjectName }}</td>
+                <td class="mark-cell">{{ formatMark(r.finalMark) }}</td>
+                <td>
+                  <span class="grade-badge" [class]="gradeClass(r.grade)">
+                    {{ r.grade || '—' }}
+                  </span>
+                </td>
+                <td class="remark-cell">{{ r.remark || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    }
+  }
+
+</div>

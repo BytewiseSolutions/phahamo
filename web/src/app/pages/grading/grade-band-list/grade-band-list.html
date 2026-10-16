@@ -1,0 +1,81 @@
+<div class="grading-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Grading Scale</h1>
+      <p>Define how numeric scores map to letter grades and remarks.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="openCreate()">+ Add Grade Band</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading grading scale...</div>
+  } @else if (bands.length === 0) {
+    <div class="empty-state">
+      <h3>No Grading Scale Defined</h3>
+      <p>Add grade bands to enable automatic grading. Bands must cover 0 to 100 with no gaps.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="grades-table">
+        <thead>
+        <tr>
+          <th>Grade</th>
+          <th>Range</th>
+          <th>Remark</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (band of bands; track band.id || band.grade; let i = $index) {
+            <tr>
+              <td class="grade-cell">
+                <span class="grade-badge">{{ band.grade }}</span>
+              </td>
+              <td>{{ displayMin(band.minScore) }} – {{ displayMax(band) }}</td>
+              <td>{{ band.remark }}</td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openEdit(band, i)">Edit</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <div class="preview-card">
+    <h3>Preview a Score</h3>
+    <div class="preview-row">
+      <input type="number" min="0" max="100" step="0.5"
+             [(ngModel)]="previewScore"
+             [ngModelOptions]="{ standalone: true }"
+             placeholder="e.g. 85"/>
+      <button type="button" class="primary-button" (click)="onPreview()">Resolve</button>
+    </div>
+
+    @if (previewError) {
+      <p class="preview-error">{{ previewError }}</p>
+    }
+
+    @if (previewResult) {
+      <div class="preview-result">
+        <span class="preview-grade">{{ previewResult.grade }}</span>
+        <span class="preview-remark">{{ previewResult.remark }}</span>
+      </div>
+    }
+  </div>
+
+  <app-grade-band-form
+    [visible]="showForm"
+    [editing]="editingBand"
+    [existingBands]="bands"
+    (closed)="closeForm()"
+    (save)="onFormSave($event)">
+  </app-grade-band-form>
+
+</div>

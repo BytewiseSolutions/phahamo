@@ -22,6 +22,14 @@ import {SubscriptionList} from './pages/subscription/subscription-list/subscript
 import { PlanPriceList } from "./pages/plan-price/plan-price-list/plan-price-list";
 import {Plans} from './pages/plans/plans';
 import {PaymentMethodList} from './pages/payment-method/payment-method-list/payment-method-list';
+import {GradeList} from './pages/grade/grade-list/grade-list';
+import {MarkEntry} from './pages/grade/mark-entry/mark-entry';
+import {ExaminationList} from './pages/examination/examination-list/examination-list';
+import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
+import {ClassResults} from './pages/results/class-results/class-results';
+import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
+import {MyAttendance} from './pages/attendance/my-attendance/my-attendance';
+import {MyResults} from './pages/results/my-results/my-results';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -49,6 +57,14 @@ const routes: Routes = [
       { path: 'plan-prices', component: PlanPriceList },
       { path: 'plans', component: Plans },
       { path: 'payment-methods', component: PaymentMethodList },
+      { path: 'grades', component: GradeList },
+      { path: 'grades/:id/marks', component: MarkEntry },
+      { path: 'examinations', component: ExaminationList },
+      { path: 'grading-scale', component: GradeBandList },
+      { path: 'results', component: ClassResults },
+      { path: 'attendance/history', component: AttendanceHistory },
+      { path: 'attendance/my', component: MyAttendance },
+      { path: 'results/my', component: MyResults },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

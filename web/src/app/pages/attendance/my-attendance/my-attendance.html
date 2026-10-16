@@ -1,0 +1,123 @@
+<div class="my-attendance-page">
+
+  <div class="page-header">
+    <div>
+      <h1>My Attendance</h1>
+      <p>Your attendance history and overall attendance rate.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+
+    <div class="range-mode-toggle">
+      <button type="button"
+              class="range-mode-button"
+              [class.active]="rangeMode === 'term'"
+              (click)="setRangeMode('term')">
+        By Term
+      </button>
+      <button type="button"
+              class="range-mode-button"
+              [class.active]="rangeMode === 'custom'"
+              (click)="setRangeMode('custom')">
+        Custom Range
+      </button>
+    </div>
+
+    @if (rangeMode === 'term') {
+      <div class="filter-group">
+        <label>Term</label>
+        <select [(ngModel)]="selectedTermId"
+                (ngModelChange)="load()"
+                [ngModelOptions]="{ standalone: true }">
+          @for (t of terms; track t.id) {
+            <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+          }
+        </select>
+      </div>
+    } @else {
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" [(ngModel)]="fromDate"
+               (ngModelChange)="load()"
+               [ngModelOptions]="{ standalone: true }"/>
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" [(ngModel)]="toDate"
+               (ngModelChange)="load()"
+               [ngModelOptions]="{ standalone: true }"/>
+      </div>
+    }
+
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading your attendance...</div>
+  } @else if (report) {
+
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="label">Present</span>
+        <span class="value">{{ report.summary.present }}</span>
+        <span class="percent">{{ formatPercent(report.summary.presentPercent) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Absent</span>
+        <span class="value">{{ report.summary.absent }}</span>
+        <span class="percent">{{ formatPercent(report.summary.absentPercent) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Late</span>
+        <span class="value">{{ report.summary.late }}</span>
+        <span class="percent">{{ formatPercent(report.summary.latePercent) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Excused</span>
+        <span class="value">{{ report.summary.excused }}</span>
+        <span class="percent">{{ formatPercent(report.summary.excusedPercent) }}</span>
+      </div>
+      <div class="summary-item highlight">
+        <span class="label">Attendance</span>
+        <span class="value">{{ formatPercent(report.summary.presentPercent) }}</span>
+      </div>
+    </div>
+
+    @if (report.records.length === 0) {
+      <div class="empty-state">
+        <h3>No Records</h3>
+        <p>No attendance was recorded for you in this range.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="attendance-table">
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>Class</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (r of report.records; track r.id) {
+              <tr>
+                <td>{{ formatDate(r.date) }}</td>
+                <td>{{ r.schoolClassName }}</td>
+                <td>
+                  <span class="status-badge" [class]="r.status.toLowerCase()">
+                    {{ statusLabel(r.status) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+</div>
