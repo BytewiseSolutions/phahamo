@@ -69,7 +69,7 @@
                 <td>{{ r.subjectName }}</td>
                 <td class="mark-cell">{{ formatMark(r.finalMark) }}</td>
                 <td>
-                  <span class="grade-badge" [class]="(r.grade || 'none').toLowerCase()">
+                  <span class="grade-badge" [class]="gradeClass(r.grade)">
                     {{ r.grade || '—' }}
                   </span>
                 </td>

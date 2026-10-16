@@ -75,6 +75,11 @@ export class MyResults implements OnInit {
     return value.toFixed(1) + '%';
   }
 
+  gradeClass(grade: string | null): string {
+    if (!grade) return 'none';
+    return grade.toLowerCase().replace('*', '-star');
+  }
+
   private iso(d: Date): string {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
