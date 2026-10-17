@@ -1,6 +1,27 @@
 <div class="dashboard-page">
   <h1>Dashboard</h1>
 
+  @if (isAdmin && stats) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Students</span>
+        <span class="stat-value">{{ stats.totalStudents }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Total Teachers</span>
+        <span class="stat-value">{{ stats.totalTeachers }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Attendance Rate (Term)</span>
+        <span class="stat-value">{{ stats.attendanceRateTerm | number:'1.1-1' }}%</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Fee Collection (Term)</span>
+        <span class="stat-value">{{ stats.feeCollectionRateTerm | number:'1.1-1' }}%</span>
+      </div>
+    </div>
+  }
+
   <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
 
   @if (announcements.length > 0) {

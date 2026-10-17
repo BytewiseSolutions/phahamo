@@ -67,4 +67,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     );
 
     Optional<Student> findByUserId(Long userId);
+    long countBySchoolIdAndStatus(Long schoolId, StudentStatus status);
 }

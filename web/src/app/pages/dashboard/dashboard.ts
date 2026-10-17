@@ -5,7 +5,8 @@ import { BackendService } from '../../util/backend.service';
 import { ChangePasswordRequest } from '../../util/auth';
 import { Router } from '@angular/router';
 import { Subscription } from '../../util/subscription';
-import {Announcement} from '../announcements/announcement';
+import { Announcement } from '../announcements/announcement';
+import { DashboardStats } from './dashboard-stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +24,9 @@ export class Dashboard implements OnInit {
   subscription: Subscription | null = null;
   announcements: Announcement[] = [];
 
+  stats: DashboardStats | null = null;
+  isAdmin = false;
+
   constructor(
     private authService: AuthService,
     private backend: BackendService,
@@ -37,6 +41,17 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isAdmin = this.authService.hasRole('SCHOOL_ADMIN')
+      || this.authService.hasRole('SYSTEM_ADMIN')
+      || this.authService.hasRole('PRINCIPAL');
+
+    if (this.isAdmin) {
+      this.backend.get<DashboardStats>('/dashboard/stats').subscribe({
+        next: (data) => this.stats = data,
+        error: () => this.stats = null
+      });
+    }
+
     this.backend.get<Subscription>('/subscriptions/me').subscribe({
       next: (sub) => this.subscription = sub,
       error: () => this.subscription = null
