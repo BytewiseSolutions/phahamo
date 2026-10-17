@@ -1,4 +1,7 @@
 package ls.co.bytewise.api.studentfee;
 
-public class AdjustmentType {
+public enum AdjustmentType {
+    DISCOUNT,
+    SCHOLARSHIP,
+    WAIVER
 }
