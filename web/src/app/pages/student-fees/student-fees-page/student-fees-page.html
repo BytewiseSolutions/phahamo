@@ -38,6 +38,15 @@
         }
       </select>
     </div>
+
+    <div class="filter-group">
+      <label>Status</label>
+      <select [(ngModel)]="statusFilter" [ngModelOptions]="{ standalone: true }">
+        <option value="all">All Students</option>
+        <option value="owing">Owing Balance</option>
+        <option value="paid">Fully Paid</option>
+      </select>
+    </div>
   </div>
 
   @if (loading) {
@@ -46,6 +55,11 @@
     <div class="empty-state">
       <h3>No fee accounts</h3>
       <p>Click "Generate for Class" to create fee accounts for all students.</p>
+    </div>
+  } @else if (filteredAccounts.length === 0) {
+    <div class="empty-state">
+      <h3>No students match the filter</h3>
+      <p>Try changing the Status or Class filter.</p>
     </div>
   } @else {
     <div class="table-wrapper">
@@ -62,7 +76,7 @@
         </tr>
         </thead>
         <tbody>
-          @for (a of accounts; track a.id) {
+          @for (a of filteredAccounts; track a.id) {
             <tr>
               <td>{{ a.admissionNumber }}</td>
               <td>{{ a.studentLastName }} {{ a.studentFirstName }}</td>

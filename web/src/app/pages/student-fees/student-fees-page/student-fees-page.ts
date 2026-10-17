@@ -6,6 +6,8 @@ import { SchoolClass } from '../../class/class';
 import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
 
+type StatusFilter = 'all' | 'owing' | 'paid';
+
 @Component({
   selector: 'app-student-fees-page',
   standalone: false,
@@ -19,6 +21,7 @@ export class StudentFeesPage implements OnInit {
 
   selectedClassId: number | null = null;
   selectedTermId: number | null = null;
+  statusFilter: StatusFilter = 'all';
 
   accounts: StudentFeeAccount[] = [];
 
@@ -34,6 +37,16 @@ export class StudentFeesPage implements OnInit {
 
   ngOnInit(): void {
     this.loadFilters();
+  }
+
+  get filteredAccounts(): StudentFeeAccount[] {
+    if (this.statusFilter === 'owing') {
+      return this.accounts.filter(a => a.balance > 0);
+    }
+    if (this.statusFilter === 'paid') {
+      return this.accounts.filter(a => a.balance <= 0);
+    }
+    return this.accounts;
   }
 
   loadFilters(): void {

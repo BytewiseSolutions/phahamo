@@ -5,6 +5,8 @@ import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { StudentFeeAccount } from '../student-fee-account';
 import { StudentFeeAdjustment } from '../student-fee-adjustment';
 
+type Tab = 'breakdown' | 'adjustments' | 'payments';
+
 @Component({
   selector: 'app-student-fee-detail',
   standalone: false,
@@ -17,7 +19,10 @@ export class StudentFeeDetail implements OnInit {
   loading = false;
   errorMessage = '';
 
+  activeTab: Tab = 'breakdown';
+
   showAdjustmentForm = false;
+  showPaymentForm = false;
   accountId: number | null = null;
 
   constructor(
@@ -31,6 +36,10 @@ export class StudentFeeDetail implements OnInit {
     const idParam = this.route.snapshot.paramMap.get('accountId');
     this.accountId = idParam ? Number(idParam) : null;
     this.load();
+  }
+
+  setTab(tab: Tab): void {
+    this.activeTab = tab;
   }
 
   load(): void {
@@ -72,6 +81,19 @@ export class StudentFeeDetail implements OnInit {
     this.load();
   }
 
+  openPaymentForm(): void {
+    this.showPaymentForm = true;
+  }
+
+  onPaymentClosed(): void {
+    this.showPaymentForm = false;
+  }
+
+  onPaymentSaved(): void {
+    this.showPaymentForm = false;
+    this.load();
+  }
+
   async removeAdjustment(adj: StudentFeeAdjustment): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
       title: 'Remove Adjustment',
@@ -107,5 +129,16 @@ export class StudentFeeDetail implements OnInit {
 
   typeLabel(type: string): string {
     return type.charAt(0) + type.slice(1).toLowerCase();
+  }
+
+  paymentMethodLabel(method: string): string {
+    const labels: Record<string, string> = {
+      CASH: 'Cash',
+      MPESA: 'M-Pesa',
+      ECOCASH: 'EcoCash',
+      EFT: 'Bank Transfer (EFT)',
+      CARD: 'Card'
+    };
+    return labels[method] || method;
   }
 }

@@ -40,105 +40,167 @@
       </div>
     </div>
 
-    <div class="section">
-      <h2>Fee Breakdown</h2>
-
-      <!-- Added wrapper here -->
-      <div class="table-responsive">
-        <table class="detail-table">
-          <thead>
-          <tr>
-            <th>Item</th>
-            <th class="num">Amount</th>
-            <th>Source</th>
-          </tr>
-          </thead>
-          <tbody>
-            @for (line of account.lines; track line.id) {
-              <tr>
-                <td>{{ line.name }}</td>
-                <td class="num">{{ formatAmount(line.amount) }}</td>
-                <td>
-                  @if (line.fromAnnualFee) {
-                    <span class="badge annual">Annual</span>
-                  } @else {
-                    <span class="badge term">Term</span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-          <tfoot>
-          <tr>
-            <td>Total</td>
-            <td class="num">{{ formatAmount(account.totalFees) }}</td>
-            <td></td>
-          </tr>
-          </tfoot>
-        </table>
-      </div>
-
+    <div class="tabs">
+      <button type="button" class="tab"
+              [class.active]="activeTab === 'breakdown'"
+              (click)="setTab('breakdown')">
+        Fee Breakdown
+      </button>
+      <button type="button" class="tab"
+              [class.active]="activeTab === 'adjustments'"
+              (click)="setTab('adjustments')">
+        Adjustments
+      </button>
+      <button type="button" class="tab"
+              [class.active]="activeTab === 'payments'"
+              (click)="setTab('payments')">
+        Payments
+      </button>
     </div>
 
-    <div class="section">
-      <div class="section-header">
-        <h2>Adjustments</h2>
-        <button type="button" class="secondary-button" (click)="openAdjustmentForm()">
-          + Add Adjustment
-        </button>
-      </div>
+    <div class="tab-content">
 
-      @if (account.adjustments.length === 0) {
-        <p class="empty-inline">No adjustments applied.</p>
-      } @else {
-
-        <!-- Added wrapper here -->
+      @if (activeTab === 'breakdown') {
         <div class="table-responsive">
           <table class="detail-table">
             <thead>
             <tr>
-              <th>Type</th>
+              <th>Item</th>
               <th class="num">Amount</th>
-              <th>Reason</th>
-              <th>Applied</th>
-              <th></th>
+              <th>Source</th>
             </tr>
             </thead>
             <tbody>
-              @for (adj of account.adjustments; track adj.id) {
+              @for (line of account.lines; track line.id) {
                 <tr>
+                  <td>{{ line.name }}</td>
+                  <td class="num">{{ formatAmount(line.amount) }}</td>
                   <td>
-                    <span class="adjustment-badge" [class]="adj.type.toLowerCase()">
-                      {{ typeLabel(adj.type) }}
-                    </span>
-                  </td>
-                  <td class="num">− {{ formatAmount(adj.amount) }}</td>
-                  <td>{{ adj.reason }}</td>
-                  <td class="small">
-                    {{ formatDate(adj.appliedAt) }}
-                    @if (adj.approvedByName) {
-                      <br/><span class="muted">by {{ adj.approvedByName }}</span>
+                    @if (line.fromAnnualFee) {
+                      <span class="badge annual">Annual</span>
+                    } @else {
+                      <span class="badge term">Term</span>
                     }
-                  </td>
-                  <td>
-                    <button type="button" class="link-button danger" (click)="removeAdjustment(adj)">
-                      Remove
-                    </button>
                   </td>
                 </tr>
               }
             </tbody>
             <tfoot>
             <tr>
-              <td>Total Adjustments</td>
-              <td class="num">− {{ formatAmount(account.totalAdjustments) }}</td>
-              <td colspan="3"></td>
+              <td>Total</td>
+              <td class="num">{{ formatAmount(account.totalFees) }}</td>
+              <td></td>
             </tr>
             </tfoot>
           </table>
         </div>
-
       }
+
+      @if (activeTab === 'adjustments') {
+        <div class="section-header">
+          <h2>Adjustments</h2>
+          <button type="button" class="secondary-button" (click)="openAdjustmentForm()">
+            + Add Adjustment
+          </button>
+        </div>
+
+        @if (account.adjustments.length === 0) {
+          <p class="empty-inline">No adjustments applied.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="detail-table">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th class="num">Amount</th>
+                <th>Reason</th>
+                <th>Applied</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (adj of account.adjustments; track adj.id) {
+                  <tr>
+                    <td>
+                      <span class="adjustment-badge" [class]="adj.type.toLowerCase()">
+                        {{ typeLabel(adj.type) }}
+                      </span>
+                    </td>
+                    <td class="num">− {{ formatAmount(adj.amount) }}</td>
+                    <td>{{ adj.reason }}</td>
+                    <td class="small">
+                      {{ formatDate(adj.appliedAt) }}
+                      @if (adj.approvedByName) {
+                        <br/><span class="muted">by {{ adj.approvedByName }}</span>
+                      }
+                    </td>
+                    <td>
+                      <button type="button" class="link-button danger" (click)="removeAdjustment(adj)">
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+              <tr>
+                <td>Total Adjustments</td>
+                <td class="num">− {{ formatAmount(account.totalAdjustments) }}</td>
+                <td colspan="3"></td>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      }
+
+      @if (activeTab === 'payments') {
+        <div class="section-header">
+          <h2>Payments</h2>
+          <button type="button" class="secondary-button"
+                  (click)="openPaymentForm()"
+                  [disabled]="account.balance <= 0">
+            + Record Payment
+          </button>
+        </div>
+
+        @if (account.payments.length === 0) {
+          <p class="empty-inline">No payments recorded.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="detail-table">
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th class="num">Amount</th>
+                <th>Method</th>
+                <th>Reference</th>
+                <th>Received By</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (p of account.payments; track p.id) {
+                  <tr>
+                    <td>{{ formatDate(p.paidAt) }}</td>
+                    <td class="num">{{ formatAmount(p.amount) }}</td>
+                    <td>{{ paymentMethodLabel(p.method) }}</td>
+                    <td>{{ p.reference || '—' }}</td>
+                    <td class="small">{{ p.receivedByName || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+              <tr>
+                <td>Total Paid</td>
+                <td class="num">{{ formatAmount(account.amountPaid) }}</td>
+                <td colspan="3"></td>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      }
+
     </div>
 
     <app-adjustment-form
@@ -148,6 +210,14 @@
       (closed)="onAdjustmentClosed()"
       (saved)="onAdjustmentSaved()">
     </app-adjustment-form>
+
+    <app-payment-form
+      [visible]="showPaymentForm"
+      [accountId]="accountId"
+      [maxAmount]="account.balance"
+      (closed)="onPaymentClosed()"
+      (saved)="onPaymentSaved()">
+    </app-payment-form>
 
   }
 

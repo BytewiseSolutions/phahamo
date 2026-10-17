@@ -24,17 +24,20 @@ public class StudentFeeService {
     private final TermRepository termRepository;
     private final FeeStructureRepository feeStructureRepository;
     private final AnnualFeeRepository annualFeeRepository;
+    private final StudentFeePaymentRepository paymentRepository;
 
     public StudentFeeService(StudentFeeAccountRepository accountRepository,
                              StudentRepository studentRepository,
                              TermRepository termRepository,
                              FeeStructureRepository feeStructureRepository,
-                             AnnualFeeRepository annualFeeRepository) {
+                             AnnualFeeRepository annualFeeRepository,
+                             StudentFeePaymentRepository paymentRepository) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
         this.feeStructureRepository = feeStructureRepository;
         this.annualFeeRepository = annualFeeRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -245,5 +248,56 @@ public class StudentFeeService {
 
     public StudentFeeAccountDto getById(Long id) {
         return new StudentFeeAccountDto(requireAccount(id));
+    }
+
+    @Transactional
+    public StudentFeeAccountDto recordPayment(Long accountId, PaymentPayloadDto dto, User receivedBy) {
+        StudentFeeAccount account = requireAccount(accountId);
+
+        if (dto.getAmount() == null || dto.getAmount() <= 0) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("Amount must be greater than 0");
+        }
+        if (dto.getMethod() == null) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("Payment method is required");
+        }
+        if (account.getBalance() <= 0) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("This account is already fully paid");
+        }
+        if (dto.getAmount() > account.getBalance()) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException(
+                    "Payment exceeds remaining balance (M " + account.getBalance() + ")");
+        }
+
+        StudentFeePayment payment = new StudentFeePayment();
+        payment.setAccount(account);
+        payment.setAmount(dto.getAmount());
+        payment.setMethod(dto.getMethod());
+        payment.setReference(dto.getReference());
+        payment.setPaidAt(Instant.now());
+        payment.setReceivedBy(receivedBy);
+        payment.setSchool(account.getSchool());
+        payment.setCreatedBy(receivedBy);
+        payment.setUpdatedBy(receivedBy);
+        account.getPayments().add(payment);
+
+        account.setAmountPaid(account.getAmountPaid() + dto.getAmount());
+        account.setUpdatedBy(receivedBy);
+
+        StudentFeeAccount saved = accountRepository.save(account);
+        return new StudentFeeAccountDto(saved);
+    }
+
+    public StudentFeeAccountDto getAccountForStudent(User user, Long termId) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .filter(s -> s.getSchool().getId().equals(schoolId))
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
+                        "No student record linked to this account"));
+
+        return accountRepository.findByStudentIdAndTermIdAndSchoolId(student.getId(), termId, schoolId)
+                .map(StudentFeeAccountDto::new)
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
+                        "Your fee account hasn't been generated yet. Please contact the school."));
     }
 }

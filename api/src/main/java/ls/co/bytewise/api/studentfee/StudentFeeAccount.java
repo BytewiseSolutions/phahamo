@@ -58,6 +58,9 @@ public class StudentFeeAccount extends SchoolScopedEntity {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentFeeAdjustment> adjustments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentFeePayment> payments = new ArrayList<>();
+
     public Double getBalance() {
         return totalFees - totalAdjustments - amountPaid;
     }

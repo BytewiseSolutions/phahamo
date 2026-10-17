@@ -55,6 +55,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
     { label: 'Payments', path: '/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [
@@ -67,7 +68,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'My Attendance', path: '/attendance/my', icon: 'fa-solid fa-clipboard-check' },
     { label: 'My Results', path: '/results/my', icon: 'fa-solid fa-graduation-cap' },
-    { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
+    { label: 'My Fees', path: '/my-fees', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   SYSTEM_ADMIN: [
     { label: 'Schools', path: '/schools', icon: 'fa-solid fa-school' },

@@ -77,6 +77,8 @@ import { AnnualFeeForm } from './pages/fees/annual-fee-form/annual-fee-form';
 import { StudentFeesPage } from './pages/student-fees/student-fees-page/student-fees-page';
 import { StudentFeeDetail } from './pages/student-fees/student-fee-detail/student-fee-detail';
 import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-form';
+import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
+import { MyFees } from './pages/student-fees/my-fees/my-fees';
 
 @NgModule({
   declarations: [
@@ -149,7 +151,9 @@ import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-
     AnnualFeeForm,
     StudentFeesPage,
     StudentFeeDetail,
-    AdjustmentForm
+    AdjustmentForm,
+    PaymentForm,
+    MyFees
   ],
   imports: [
     BrowserModule,

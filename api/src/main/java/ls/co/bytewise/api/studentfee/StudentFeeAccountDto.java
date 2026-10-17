@@ -31,6 +31,7 @@ public class StudentFeeAccountDto extends BaseDto {
 
     private List<StudentFeeLineDto> lines;
     private List<StudentFeeAdjustmentDto> adjustments;
+    private List<StudentFeePaymentDto> payments;
 
     public StudentFeeAccountDto(StudentFeeAccount acc) {
         super(acc);
@@ -55,5 +56,6 @@ public class StudentFeeAccountDto extends BaseDto {
 
         this.lines = acc.getLines().stream().map(StudentFeeLineDto::new).toList();
         this.adjustments = acc.getAdjustments().stream().map(StudentFeeAdjustmentDto::new).toList();
+        this.payments = acc.getPayments().stream().map(StudentFeePaymentDto::new).toList();
     }
 }

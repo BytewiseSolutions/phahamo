@@ -1,5 +1,6 @@
 import { StudentFeeLine } from './student-fee-line';
 import { StudentFeeAdjustment } from './student-fee-adjustment';
+import { StudentFeePayment } from './student-fee-payment';
 
 export interface StudentFeeAccount {
   id: number;
@@ -18,4 +19,5 @@ export interface StudentFeeAccount {
   balance: number;
   lines: StudentFeeLine[];
   adjustments: StudentFeeAdjustment[];
+  payments: StudentFeePayment[];
 }

@@ -1,0 +1,64 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Record Payment</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount (M)</label>
+            <input type="number" [(ngModel)]="amount"
+                   step="0.01" min="0" [max]="maxAmount"
+                   placeholder="0.00"
+                   [ngModelOptions]="{ standalone: true }"/>
+          </div>
+
+          <div class="form-group">
+            <label>Method</label>
+            <select [(ngModel)]="method" [ngModelOptions]="{ standalone: true }">
+              @for (m of methods; track m.value) {
+                <option [ngValue]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Reference (optional)</label>
+            <input type="text" [(ngModel)]="reference"
+                   placeholder="Receipt number, transaction ID..."
+                   [ngModelOptions]="{ standalone: true }"/>
+          </div>
+        </div>
+
+        <div class="info-note">
+          <i class="fa-solid fa-circle-info"></i>
+          Maximum payment: <strong>M {{ maxAmount.toFixed(2) }}</strong>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-button" (click)="onClose()" [disabled]="saving">
+          Cancel
+        </button>
+        <button type="button" class="primary-button" (click)="onSave()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Record Payment' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

@@ -28,6 +28,7 @@ public class StudentFeeController {
     }
 
     @PostMapping("/generate/{studentId}")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public ResponseEntity<StudentFeeAccountDto> generateForStudent(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long studentId,
@@ -83,5 +84,20 @@ public class StudentFeeController {
     @GetMapping("/{id}")
     public StudentFeeAccountDto getById(@PathVariable Long id) {
         return feeService.getById(id);
+    }
+
+    @PostMapping("/{accountId}/payments")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER"})
+    public StudentFeeAccountDto recordPayment(@AuthenticationPrincipal User currentUser,
+                                              @PathVariable Long accountId,
+                                              @RequestBody PaymentPayloadDto dto) {
+        return feeService.recordPayment(accountId, dto, currentUser);
+    }
+
+    @GetMapping("/me")
+    @Secured({"ROLE_STUDENT"})
+    public StudentFeeAccountDto getMyAccount(@AuthenticationPrincipal User currentUser,
+                                             @RequestParam Long termId) {
+        return feeService.getAccountForStudent(currentUser, termId);
     }
 }
