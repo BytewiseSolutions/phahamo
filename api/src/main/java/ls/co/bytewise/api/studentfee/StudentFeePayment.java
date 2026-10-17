@@ -33,6 +33,9 @@ public class StudentFeePayment extends SchoolScopedEntity {
     @Column(nullable = false)
     private PaymentMethodType method;
 
+    @Column(name = "balance_after", nullable = false)
+    private Double balanceAfter = 0.0;
+
     @Column(length = 100)
     private String reference;
 

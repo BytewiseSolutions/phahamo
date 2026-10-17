@@ -65,22 +65,26 @@
           <table class="detail-table">
             <thead>
             <tr>
-              <th>Item</th>
+              <th>Date</th>
               <th class="num">Amount</th>
-              <th>Source</th>
+              <th>Method</th>
+              <th>Reference</th>
+              <th>Received By</th>
+              <th></th>
             </tr>
             </thead>
             <tbody>
-              @for (line of account.lines; track line.id) {
+              @for (p of account.payments; track p.id) {
                 <tr>
-                  <td>{{ line.name }}</td>
-                  <td class="num">{{ formatAmount(line.amount) }}</td>
+                  <td>{{ formatDate(p.paidAt) }}</td>
+                  <td class="num">{{ formatAmount(p.amount) }}</td>
+                  <td>{{ paymentMethodLabel(p.method) }}</td>
+                  <td>{{ p.reference || '—' }}</td>
+                  <td class="small">{{ p.receivedByName || '—' }}</td>
                   <td>
-                    @if (line.fromAnnualFee) {
-                      <span class="badge annual">Annual</span>
-                    } @else {
-                      <span class="badge term">Term</span>
-                    }
+                    <button type="button" class="link-button" (click)="downloadReceipt(p.id)">
+                      <i class="fa-solid fa-file-pdf"></i> Receipt
+                    </button>
                   </td>
                 </tr>
               }

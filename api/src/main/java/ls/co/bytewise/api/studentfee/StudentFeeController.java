@@ -100,4 +100,15 @@ public class StudentFeeController {
                                              @RequestParam Long termId) {
         return feeService.getAccountForStudent(currentUser, termId);
     }
+
+    @GetMapping("/payments/{paymentId}/receipt")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER", "ROLE_STUDENT"})
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long paymentId,
+                                                  @AuthenticationPrincipal User currentUser) {
+        byte[] pdf = feeService.generateReceipt(paymentId, currentUser);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"receipt-" + paymentId + ".pdf\"")
+                .body(pdf);
+    }
 }

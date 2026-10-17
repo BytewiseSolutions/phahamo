@@ -282,3 +282,24 @@
 .empty-state p:last-child {
   margin-bottom: 0;
 }
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button.danger {
+  color: var(--error);
+}

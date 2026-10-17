@@ -2,6 +2,7 @@ package ls.co.bytewise.api.studentfee;
 
 import ls.co.bytewise.api.academicyear.AcademicYear;
 import ls.co.bytewise.api.fee.*;
+import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
@@ -277,11 +278,10 @@ public class StudentFeeService {
         payment.setReceivedBy(receivedBy);
         payment.setSchool(account.getSchool());
         payment.setCreatedBy(receivedBy);
-        payment.setUpdatedBy(receivedBy);
-        account.getPayments().add(payment);
-
+        payment.setBalanceAfter(account.getBalance() - dto.getAmount());
         account.setAmountPaid(account.getAmountPaid() + dto.getAmount());
         account.setUpdatedBy(receivedBy);
+        account.getPayments().add(payment);
 
         StudentFeeAccount saved = accountRepository.save(account);
         return new StudentFeeAccountDto(saved);
@@ -299,5 +299,51 @@ public class StudentFeeService {
                 .map(StudentFeeAccountDto::new)
                 .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
                         "Your fee account hasn't been generated yet. Please contact the school."));
+    }
+
+    public byte[] generateReceipt(Long paymentId, User currentUser) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        StudentFeePayment payment = paymentRepository.findByIdAndAccount_SchoolId(paymentId, schoolId)
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Payment not found"));
+
+        if (currentUser.hasRole(ls.co.bytewise.api.common.UserRole.STUDENT)) {
+            Student student = studentRepository.findByUserId(currentUser.getId())
+                    .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Student not found"));
+            if (!payment.getAccount().getStudent().getId().equals(student.getId())) {
+                throw new StudentFeeExceptions.AccountNotFoundException("Payment not found");
+            }
+        }
+
+        StudentFeeAccount account = payment.getAccount();
+        ls.co.bytewise.api.school.School school = account.getSchool();
+
+        PaymentReceiptDto dto = new PaymentReceiptDto();
+        dto.setSchoolName(school.getName());
+        dto.setSchoolAddress(school.getAddress());
+        dto.setSchoolPhone(school.getContactPhone());
+        dto.setSchoolEmail(school.getContactEmail());
+        if (school.getLogo() != null) {
+            dto.setSchoolLogo(school.getLogo().getContents());
+            dto.setSchoolLogoMimeType(school.getLogo().getType());
+        }
+
+        dto.setReceiptNumber(String.format("RCPT-%05d", payment.getId()));
+        dto.setStudentName(account.getStudent().getUser().getFullName());
+        dto.setAdmissionNumber(account.getStudent().getAdmissionNumber());
+        dto.setClassName(account.getSchoolClass().getName());
+
+        dto.setAmountPaid(payment.getAmount());
+        dto.setPaymentMethod(payment.getMethod().name());
+        dto.setReference(payment.getReference());
+        dto.setPaymentDate(payment.getPaidAt().atZone(java.time.ZoneOffset.UTC).toLocalDate());
+        dto.setBalanceAfter(payment.getBalanceAfter());
+
+        if (payment.getReceivedBy() != null) {
+            dto.setReceivedBy(payment.getReceivedBy().getFullName());
+        }
+        dto.setGeneratedDate(java.time.LocalDate.now());
+
+        return PaymentReceiptRenderer.render(dto);
     }
 }

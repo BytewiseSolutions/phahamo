@@ -17,6 +17,7 @@ public class StudentFeePaymentDto {
     private PaymentMethodType method;
     private String reference;
     private Instant paidAt;
+    private Double balanceAfter;
     private Long receivedById;
     private String receivedByName;
 
@@ -24,6 +25,7 @@ public class StudentFeePaymentDto {
         this.id = p.getId();
         this.amount = p.getAmount();
         this.method = p.getMethod();
+        this.balanceAfter = p.getBalanceAfter();
         this.reference = p.getReference();
         this.paidAt = p.getPaidAt();
         if (p.getReceivedBy() != null) {

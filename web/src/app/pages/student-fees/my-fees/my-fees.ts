@@ -80,6 +80,25 @@ export class MyFees implements OnInit {
     this.load();
   }
 
+  downloadReceipt(paymentId: number): void {
+    const path = `/student-fees/payments/${paymentId}/receipt`;
+
+    this.backend.downloadBlob(path).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `receipt-${paymentId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to download receipt.';
+      }
+    });
+  }
+
   formatAmount(value: number | null | undefined): string {
     if (value == null) return '—';
     return `M ${value.toFixed(2)}`;
