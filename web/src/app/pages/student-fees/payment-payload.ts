@@ -4,4 +4,5 @@ export interface PaymentPayload {
   amount: number;
   method: PaymentMethodType;
   reference?: string;
+  paidAt?: string;
 }

@@ -21,6 +21,7 @@ export class PaymentForm implements OnChanges {
 
   method: PaymentMethodType = PaymentMethodType.CASH;
   amount: number | null = null;
+  paidAt = '';
   reference = '';
 
   saving = false;
@@ -45,6 +46,7 @@ export class PaymentForm implements OnChanges {
   private reset(): void {
     this.method = PaymentMethodType.CASH;
     this.amount = null;
+    this.paidAt = this.iso(new Date());
     this.reference = '';
     this.errorMessage = '';
     this.saving = false;
@@ -65,11 +67,16 @@ export class PaymentForm implements OnChanges {
       this.errorMessage = `Amount cannot exceed remaining balance (M ${this.maxAmount.toFixed(2)}).`;
       return;
     }
+    if (!this.paidAt) {
+      this.errorMessage = 'Payment date is required.';
+      return;
+    }
 
     const payload: PaymentPayload = {
       amount: this.amount,
       method: this.method,
-      reference: this.reference?.trim() || undefined
+      reference: this.reference?.trim() || undefined,
+      paidAt: this.paidAt + 'T12:00:00Z'
     };
 
     this.saving = true;
@@ -91,5 +98,12 @@ export class PaymentForm implements OnChanges {
   onClose(): void {
     if (this.saving) return;
     this.closed.emit();
+  }
+
+  private iso(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

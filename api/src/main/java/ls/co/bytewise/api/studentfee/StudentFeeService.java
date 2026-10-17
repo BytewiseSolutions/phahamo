@@ -273,7 +273,7 @@ public class StudentFeeService {
         payment.setAmount(dto.getAmount());
         payment.setMethod(dto.getMethod());
         payment.setReference(dto.getReference());
-        payment.setPaidAt(Instant.now());
+        payment.setPaidAt(dto.getPaidAt() != null ? dto.getPaidAt() : Instant.now());
         payment.setReceivedBy(receivedBy);
         payment.setSchool(account.getSchool());
         payment.setCreatedBy(receivedBy);
