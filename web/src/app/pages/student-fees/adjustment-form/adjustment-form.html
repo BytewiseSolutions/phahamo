@@ -1,0 +1,65 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Add Adjustment</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select [(ngModel)]="type" [ngModelOptions]="{ standalone: true }">
+              @for (t of types; track t) {
+                <option [ngValue]="t">{{ typeLabel(t) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Amount (M)</label>
+            <input type="number" [(ngModel)]="amount"
+                   step="0.01" min="0" [max]="maxAmount"
+                   placeholder="0.00"
+                   [ngModelOptions]="{ standalone: true }"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Reason</label>
+            <textarea [(ngModel)]="reason"
+                      rows="3"
+                      placeholder="e.g. Orphan scholarship, Sibling discount..."
+                      [ngModelOptions]="{ standalone: true }"></textarea>
+          </div>
+        </div>
+
+        <div class="info-note">
+          <i class="fa-solid fa-circle-info"></i>
+          Maximum allowed adjustment: <strong>M {{ maxAmount.toFixed(2) }}</strong>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-button" (click)="onClose()" [disabled]="saving">
+          Cancel
+        </button>
+        <button type="button" class="primary-button" (click)="onSave()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Add Adjustment' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

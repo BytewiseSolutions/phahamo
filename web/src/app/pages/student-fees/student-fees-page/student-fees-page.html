@@ -1,0 +1,87 @@
+<div class="student-fees-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Student Fees</h1>
+      <p>Track each student's fee obligations and balance.</p>
+    </div>
+    <button type="button" class="primary-button"
+            (click)="generateForClass()"
+            [disabled]="!selectedClassId || !selectedTermId || generating || loading">
+      {{ generating ? 'Generating...' : 'Generate for Class' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Class</label>
+      <select [(ngModel)]="selectedClassId"
+              (ngModelChange)="onFilterChange()"
+              [ngModelOptions]="{ standalone: true }">
+        @for (c of classes; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Term</label>
+      <select [(ngModel)]="selectedTermId"
+              (ngModelChange)="onFilterChange()"
+              [ngModelOptions]="{ standalone: true }">
+        @for (t of terms; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Loading accounts...</div>
+  } @else if (accounts.length === 0) {
+    <div class="empty-state">
+      <h3>No fee accounts</h3>
+      <p>Click "Generate for Class" to create fee accounts for all students.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="accounts-table">
+        <thead>
+        <tr>
+          <th>Admission #</th>
+          <th>Student</th>
+          <th class="num">Total Fees</th>
+          <th class="num">Adjustments</th>
+          <th class="num">Paid</th>
+          <th class="num">Balance</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (a of accounts; track a.id) {
+            <tr>
+              <td>{{ a.admissionNumber }}</td>
+              <td>{{ a.studentLastName }} {{ a.studentFirstName }}</td>
+              <td class="num">{{ formatAmount(a.totalFees) }}</td>
+              <td class="num">{{ formatAmount(a.totalAdjustments) }}</td>
+              <td class="num">{{ formatAmount(a.amountPaid) }}</td>
+              <td class="num">
+                <span class="balance-badge" [class]="balanceClass(a.balance)">
+                  {{ formatAmount(a.balance) }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openDetail(a)">View</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

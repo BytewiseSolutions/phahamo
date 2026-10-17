@@ -242,4 +242,8 @@ public class StudentFeeService {
                 .orElse(null);
         return earliest != null && earliest.getId().equals(term.getId());
     }
+
+    public StudentFeeAccountDto getById(Long id) {
+        return new StudentFeeAccountDto(requireAccount(id));
+    }
 }

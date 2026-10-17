@@ -79,4 +79,9 @@ public class StudentFeeController {
         feeService.deleteAccount(accountId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}")
+    public StudentFeeAccountDto getById(@PathVariable Long id) {
+        return feeService.getById(id);
+    }
 }
