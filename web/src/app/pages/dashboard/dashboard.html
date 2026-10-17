@@ -3,6 +3,26 @@
 
   <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
 
+  @if (announcements.length > 0) {
+    <div class="section">
+      <h2>Announcements</h2>
+      <div class="announcement-list">
+        @for (a of announcements; track a.id) {
+          <div class="announcement-card">
+            <div class="announcement-header">
+              <h3>{{ a.title }}</h3>
+              <span class="date">{{ a.publishAt | date:'dd MMM yyyy, HH:mm' }}</span>
+            </div>
+            <div class="announcement-body">{{ a.body }}</div>
+            <div class="announcement-footer">
+              Posted by {{ a.authorName }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <p>You're logged in. This is a placeholder — real dashboard content comes next.</p>
 
   <button type="button" (click)="toggleChangePassword()">

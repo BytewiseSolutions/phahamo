@@ -1,0 +1,68 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1>Announcements</h1>
+      <p>Create and manage notices for students, parents, and staff.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="openCreate()">+ New Announcement</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading...</div>
+  } @else if (announcements.length === 0) {
+    <div class="empty-state">
+      <h3>No announcements yet</h3>
+      <p>Click "New Announcement" to create your first notice.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>Title</th>
+          <th>Audience</th>
+          <th>Status</th>
+          <th>Publish Date</th>
+          <th>Author</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (a of announcements; track a.id) {
+            <tr>
+              <td>{{ a.title }}</td>
+              <td>
+                @if (a.audienceType === 'ALL') { Everyone }
+                @else if (a.audienceType === 'CLASS') { {{ a.targetClassName }} }
+                @else if (a.audienceType === 'ROLE') { {{ a.targetRole }} }
+                @else { {{ a.targetUserName }} }
+              </td>
+              <td>
+                <span class="badge" [class.published]="a.status === 'PUBLISHED'" [class.draft]="a.status === 'DRAFT'">
+                  {{ a.status }}
+                </span>
+              </td>
+              <td>{{ a.publishAt | date:'dd MMM yyyy, HH:mm' }}</td>
+              <td>{{ a.authorName }}</td>
+              <td class="actions-cell">
+                <button type="button" class="link-button" (click)="openEdit(a)">Edit</button>
+                <button type="button" class="link-button danger" (click)="delete(a)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <app-announcement-form
+    [visible]="showForm"
+    [editingAnnouncement]="editingAnnouncement"
+    (closed)="onClosed()"
+    (saved)="onSaved()">
+  </app-announcement-form>
+</div>

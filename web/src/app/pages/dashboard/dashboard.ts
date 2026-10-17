@@ -5,6 +5,7 @@ import { BackendService } from '../../util/backend.service';
 import { ChangePasswordRequest } from '../../util/auth';
 import { Router } from '@angular/router';
 import { Subscription } from '../../util/subscription';
+import {Announcement} from '../announcements/announcement';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ export class Dashboard implements OnInit {
   showChangePassword = false;
 
   subscription: Subscription | null = null;
+  announcements: Announcement[] = [];
 
   constructor(
     private authService: AuthService,
@@ -38,6 +40,10 @@ export class Dashboard implements OnInit {
     this.backend.get<Subscription>('/subscriptions/me').subscribe({
       next: (sub) => this.subscription = sub,
       error: () => this.subscription = null
+    });
+
+    this.backend.get<Announcement[]>('/announcements/feed').subscribe({
+      next: (data) => this.announcements = data
     });
   }
 

@@ -15,4 +15,5 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
     Optional<SchoolClass> findByClassTeacher_IdAndSchool_Id(Long classTeacherId, Long schoolId);
     boolean existsByClassTeacher_IdAndSchool_Id(Long classTeacherId, Long schoolId);
     boolean existsByClassTeacher_IdAndSchool_IdAndIdNot(Long classTeacherId, Long schoolId, Long excludeId);
+    List<SchoolClass> findAllByClassTeacherId(Long teacherId);
 }
