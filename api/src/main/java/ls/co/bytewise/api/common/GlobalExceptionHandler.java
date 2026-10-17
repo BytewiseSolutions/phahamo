@@ -3,13 +3,16 @@ package ls.co.bytewise.api.common;
 import ls.co.bytewise.api.academicyear.AcademicYearExceptions;
 import ls.co.bytewise.api.assessment.AssessmentExceptions;
 import ls.co.bytewise.api.examination.ExaminationExceptions;
+import ls.co.bytewise.api.fee.FeeExceptions;
 import ls.co.bytewise.api.grading.GradeBandExceptions;
 import ls.co.bytewise.api.parent.ParentExceptions;
+import ls.co.bytewise.api.reportcard.ReportCardExceptions;
 import ls.co.bytewise.api.result.TermResultExceptions;
 import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
 import ls.co.bytewise.api.student.StudentExceptions;
+import ls.co.bytewise.api.studentfee.StudentFeeExceptions;
 import ls.co.bytewise.api.subject.SubjectExceptions;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentExceptions;
 import ls.co.bytewise.api.teacher.TeacherExceptions;
@@ -324,5 +327,40 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TermResultExceptions.InvalidTermResultOperationException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidTermResultOperation(TermResultExceptions.InvalidTermResultOperationException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(FeeExceptions.FeeStructureNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleFeeStructureNotFound(FeeExceptions.FeeStructureNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(FeeExceptions.AnnualFeeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAnnualFeeNotFound(FeeExceptions.AnnualFeeNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(FeeExceptions.InvalidFeeOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidFeeOperation(FeeExceptions.InvalidFeeOperationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(StudentFeeExceptions.AccountNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleStudentFeeAccountNotFound(StudentFeeExceptions.AccountNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(StudentFeeExceptions.InvalidFeeOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidStudentFeeOperation(StudentFeeExceptions.InvalidFeeOperationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ReportCardExceptions.ReportCardNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleReportCardNotFound(ReportCardExceptions.ReportCardNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(ReportCardExceptions.ReportCardRenderException.class)
+    public ResponseEntity<Map<String, Object>> handleReportCardRenderException(ReportCardExceptions.ReportCardRenderException ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 }

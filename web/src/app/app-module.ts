@@ -71,6 +71,14 @@ import { ResultOverrideForm } from './pages/results/result-override-form/result-
 import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
 import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
 import { MyResults } from './pages/results/my-results/my-results';
+import { FeesPage } from './pages/fees/fees-page/fees-page';
+import { FeeStructureForm } from './pages/fees/fee-structure-form/fee-structure-form';
+import { AnnualFeeForm } from './pages/fees/annual-fee-form/annual-fee-form';
+import { StudentFeesPage } from './pages/student-fees/student-fees-page/student-fees-page';
+import { StudentFeeDetail } from './pages/student-fees/student-fee-detail/student-fee-detail';
+import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-form';
+import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
+import { MyFees } from './pages/student-fees/my-fees/my-fees';
 
 @NgModule({
   declarations: [
@@ -137,7 +145,15 @@ import { MyResults } from './pages/results/my-results/my-results';
     ResultOverrideForm,
     AttendanceHistory,
     MyAttendance,
-    MyResults
+    MyResults,
+    FeesPage,
+    FeeStructureForm,
+    AnnualFeeForm,
+    StudentFeesPage,
+    StudentFeeDetail,
+    AdjustmentForm,
+    PaymentForm,
+    MyFees
   ],
   imports: [
     BrowserModule,

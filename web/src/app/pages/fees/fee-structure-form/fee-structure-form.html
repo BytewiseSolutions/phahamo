@@ -1,0 +1,126 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Edit Fee Structure' : 'New Fee Structure' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Applies to Classes</label>
+            <div class="checkbox-group">
+              @for (c of classes; track c.id) {
+                <label class="checkbox-item">
+                  <input type="checkbox"
+                         [checked]="isClassSelected(c.id)"
+                         (change)="toggleClass(c.id)"
+                         [disabled]="isEditing"/>
+                  <span>{{ c.name }}</span>
+                </label>
+              }
+            </div>
+            @if (!isEditing) {
+              <div class="checkbox-actions">
+                <button type="button" class="link-button" (click)="selectAllClasses()">Select all</button>
+                <button type="button" class="link-button" (click)="clearClasses()">Clear</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Term</label>
+            <select [(ngModel)]="selectedTermId"
+                    [disabled]="isEditing"
+                    [ngModelOptions]="{ standalone: true }">
+              @for (t of terms; track t.id) {
+                <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="items-section">
+          <div class="items-header">
+            <h3>Fee Items</h3>
+            <button type="button" class="secondary-button" (click)="addItem()">
+              + Add Item
+            </button>
+          </div>
+
+          <table class="items-editor">
+            <thead>
+            <tr>
+              <th>Fee Name</th>
+              <th>Amount (M)</th>
+              <th>Mandatory</th>
+              <th>Description</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (item of items; track $index; let i = $index) {
+                <tr>
+                  <td>
+                    <input type="text" [(ngModel)]="item.name"
+                           placeholder="e.g. School Fees"
+                           [ngModelOptions]="{ standalone: true }"/>
+                  </td>
+                  <td>
+                    <input type="number" [(ngModel)]="item.amount"
+                           step="0.01" min="0"
+                           [ngModelOptions]="{ standalone: true }"/>
+                  </td>
+                  <td class="center-cell">
+                    <input type="checkbox" [(ngModel)]="item.mandatory"
+                           [ngModelOptions]="{ standalone: true }"/>
+                  </td>
+                  <td>
+                    <input type="text" [(ngModel)]="item.description"
+                           placeholder="Optional"
+                           [ngModelOptions]="{ standalone: true }"/>
+                  </td>
+                  <td>
+                    @if (items.length > 1) {
+                      <button type="button" class="icon-button danger" (click)="removeItem(i)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+            <tr>
+              <td colspan="4" class="running-total-label">Running Total</td>
+              <td class="running-total">M {{ runningTotal.toFixed(2) }}</td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-button" (click)="onClose()" [disabled]="saving">
+          Cancel
+        </button>
+        <button type="button" class="primary-button" (click)="onSave()" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

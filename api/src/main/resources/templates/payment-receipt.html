@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #222; }
+        .header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 24px; }
+        .logo { float: right; width: 80px; }
+        .school-name { font-size: 22px; font-weight: bold; color: #2563eb; margin: 0; }
+        .school-meta { color: #555; margin-top: 4px; font-size: 11px; }
+        .title { text-align: center; font-size: 20px; font-weight: bold; margin: 30px 0 20px; letter-spacing: 1px; }
+        .info-table { width: 100%; margin-bottom: 24px; }
+        .info-table td { padding: 4px 0; vertical-align: top; }
+        .info-label { color: #666; width: 130px; font-size: 11px; text-transform: uppercase; }
+        .info-value { font-weight: bold; }
+        .amount-box { background: #f3f4f6; border: 1px solid #ddd; padding: 20px; text-align: center; margin: 24px 0; border-radius: 6px; }
+        .amount-box .label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
+        .amount-box .amount { font-size: 32px; font-weight: bold; color: #2563eb; }
+        .amount-box .balance { font-size: 12px; color: #555; margin-top: 8px; }
+        .amount-box .balance strong { color: #222; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #888; font-size: 9px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img th:if="${logoDataUri != null}" th:src="${logoDataUri}" class="logo" alt=""/>
+    <div class="school-name" th:text="${receipt.schoolName}">School Name</div>
+    <div class="school-meta">
+        <div th:text="${receipt.schoolAddress}">Address</div>
+        <div>
+            <span th:text="${receipt.schoolPhone}">Phone</span> |
+            <span th:text="${receipt.schoolEmail}">Email</span>
+        </div>
+    </div>
+</div>
+
+<div class="title">PAYMENT RECEIPT</div>
+
+<table class="info-table">
+    <tr>
+        <td class="info-label">Receipt #</td>
+        <td class="info-value" th:text="${receipt.receiptNumber}">RCPT-000001</td>
+        <td class="info-label">Date</td>
+        <td class="info-value" th:text="${#temporals.format(receipt.paymentDate, 'dd MMMM yyyy')}">17 October 2026</td>
+    </tr>
+    <tr>
+        <td class="info-label">Student</td>
+        <td class="info-value" th:text="${receipt.studentName}">Student Name</td>
+        <td class="info-label">Admission #</td>
+        <td class="info-value" th:text="${receipt.admissionNumber}">2026-000001</td>
+    </tr>
+    <tr>
+        <td class="info-label">Class</td>
+        <td class="info-value" th:text="${receipt.className}">Grade 10</td>
+        <td class="info-label">Method</td>
+        <td class="info-value" th:text="${receipt.paymentMethod}">Cash</td>
+    </tr>
+    <tr>
+        <td class="info-label">Reference</td>
+        <td class="info-value" th:text="${receipt.reference != null ? receipt.reference : '—'}">RCP-001</td>
+        <td class="info-label">Received By</td>
+        <td class="info-value" th:text="${receipt.receivedBy}">Admin Name</td>
+    </tr>
+</table>
+
+<div class="amount-box">
+    <div class="label">Amount Paid</div>
+    <div class="amount" th:text="'M ' + ${#numbers.formatDecimal(receipt.amountPaid, 1, 2)}">M 950.00</div>
+    <div class="balance">
+        Outstanding balance after this payment:
+        <strong th:text="'M ' + ${#numbers.formatDecimal(receipt.balanceAfter, 1, 2)}">M 0.00</strong>
+    </div>
+</div>
+
+<div class="footer" th:text="${receipt.schoolName} + ' — Official Payment Receipt'">Footer</div>
+
+</body>
+</html>

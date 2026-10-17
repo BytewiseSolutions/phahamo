@@ -1,0 +1,202 @@
+<div class="fees-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Fee Structures</h1>
+      <p>Define fee amounts per class and term.</p>
+    </div>
+    @if (activeTab === 'termFees') {
+      <button type="button" class="primary-button" (click)="openCreateStructure()">
+        + Add Fee Structure
+      </button>
+    } @else {
+      <button type="button" class="primary-button" (click)="openCreateAnnualFee()">
+        + Add Annual Fee
+      </button>
+    }
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <div class="tabs">
+    <button type="button" class="tab"
+            [class.active]="activeTab === 'termFees'"
+            (click)="setTab('termFees')">
+      Term Fees
+    </button>
+    <button type="button" class="tab"
+            [class.active]="activeTab === 'annualFees'"
+            (click)="setTab('annualFees')">
+      Annual Fees
+    </button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Class</label>
+      <select [(ngModel)]="selectedClassId"
+              (ngModelChange)="loadForTab()"
+              [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="null">All classes</option>
+        @for (c of classes; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (activeTab === 'termFees') {
+      <div class="filter-group">
+        <label>Term</label>
+        <select [(ngModel)]="selectedTermId"
+                (ngModelChange)="loadForTab()"
+                [ngModelOptions]="{ standalone: true }">
+          @for (t of terms; track t.id) {
+            <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+          }
+        </select>
+      </div>
+    } @else {
+      <div class="filter-group">
+        <label>Academic Year</label>
+        <select [(ngModel)]="selectedAcademicYearId"
+                (ngModelChange)="loadForTab()"
+                [ngModelOptions]="{ standalone: true }">
+          @for (y of academicYears; track y.id) {
+            <option [ngValue]="y.id">{{ y.name }}</option>
+          }
+        </select>
+      </div>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Loading...</div>
+  } @else if (activeTab === 'termFees') {
+
+    @if (structures.length === 0) {
+      <div class="empty-state">
+        <h3>No fee structure defined</h3>
+        <p>Add a fee structure for this class and term.</p>
+      </div>
+    } @else {
+      @for (s of structures; track s.id) {
+        <div class="structure-card">
+          <div class="structure-header">
+            <div>
+              <h3>{{ s.className }} — {{ s.termName }}</h3>
+              <p class="structure-meta">{{ s.academicYearName }}</p>
+            </div>
+            <div class="structure-actions">
+              <button type="button" class="link-button" (click)="openEditStructure(s)">Edit</button>
+              <button type="button" class="link-button danger" (click)="deleteStructure(s)">Delete</button>
+            </div>
+          </div>
+
+          <table class="items-table">
+            <thead>
+            <tr>
+              <th>Fee Item</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (item of s.items; track item.id) {
+                <tr>
+                  <td>{{ item.name }}</td>
+                  <td class="amount-cell">{{ formatAmount(item.amount) }}</td>
+                  <td>
+                    @if (item.mandatory) {
+                      <span class="badge mandatory">Mandatory</span>
+                    } @else {
+                      <span class="badge optional">Optional</span>
+                    }
+                  </td>
+                  <td class="desc-cell">{{ item.description || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td class="amount-cell"><strong>{{ formatAmount(s.total) }}</strong></td>
+              <td colspan="2"></td>
+            </tr>
+            <tr>
+              <td>Mandatory Only</td>
+              <td class="amount-cell">{{ formatAmount(s.mandatoryTotal) }}</td>
+              <td colspan="2"></td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    }
+
+  } @else {
+
+    @if (annualFees.length === 0) {
+      <div class="empty-state">
+        <h3>No annual fees defined</h3>
+        <p>Add a one-time annual fee like Registration.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="annual-fees-table">
+          <thead>
+          <tr>
+            <th>Fee Name</th>
+            <th>Amount</th>
+            <th>Class</th>
+            <th>Academic Year</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (fee of annualFees; track fee.id) {
+              <tr>
+                <td>{{ fee.name }}</td>
+                <td class="amount-cell">{{ formatAmount(fee.amount) }}</td>
+                <td>{{ fee.className }}</td>
+                <td>{{ fee.academicYearName }}</td>
+                <td class="desc-cell">{{ fee.description || '—' }}</td>
+                <td class="actions-cell">
+                  <button type="button" class="link-button" (click)="openEditAnnualFee(fee)">Edit</button>
+                  <button type="button" class="link-button danger" (click)="deleteAnnualFee(fee)">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  }
+
+  <app-fee-structure-form
+    [visible]="showStructureForm"
+    [editingStructure]="editingStructure"
+    [classes]="classes"
+    [terms]="terms"
+    [defaultClassId]="selectedClassId"
+    [defaultTermId]="selectedTermId"
+    (closed)="onStructureFormClosed()"
+    (saved)="onStructureSaved()">
+  </app-fee-structure-form>
+
+  <app-annual-fee-form
+    [visible]="showAnnualFeeForm"
+    [editingAnnualFee]="editingAnnualFee"
+    [classes]="classes"
+    [academicYears]="academicYears"
+    [defaultClassId]="selectedClassId"
+    [defaultAcademicYearId]="selectedAcademicYearId"
+    (closed)="onAnnualFeeFormClosed()"
+    (saved)="onAnnualFeeSaved()">
+  </app-annual-fee-form>
+
+</div>

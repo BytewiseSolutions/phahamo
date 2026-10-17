@@ -1,10 +1,10 @@
 package ls.co.bytewise.api.school;
 
 import ls.co.bytewise.api.common.*;
-import ls.co.bytewise.api.school.subscription.Subscription;
-import ls.co.bytewise.api.school.subscription.SubscriptionPlan;
-import ls.co.bytewise.api.school.subscription.SubscriptionRepository;
-import ls.co.bytewise.api.school.subscription.SubscriptionStatus;
+import ls.co.bytewise.api.subscription.Subscription;
+import ls.co.bytewise.api.subscription.SubscriptionPlan;
+import ls.co.bytewise.api.subscription.SubscriptionRepository;
+import ls.co.bytewise.api.subscription.SubscriptionStatus;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserDto;

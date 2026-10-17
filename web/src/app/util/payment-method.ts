@@ -1,4 +1,5 @@
 export enum PaymentMethodType {
+  CASH = 'CASH',
   MPESA = 'MPESA',
   ECOCASH = 'ECOCASH',
   EFT = 'EFT',
