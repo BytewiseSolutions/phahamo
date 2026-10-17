@@ -3,6 +3,8 @@ import { BackendService } from '../../../util/backend.service';
 import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
 
+type Tab = 'breakdown' | 'payments';
+
 @Component({
   selector: 'app-my-fees',
   standalone: false,
@@ -14,6 +16,8 @@ export class MyFees implements OnInit {
   terms: Term[] = [];
   selectedTermId: number | null = null;
 
+  activeTab: Tab = 'breakdown';
+
   account: StudentFeeAccount | null = null;
   loading = false;
   errorMessage = '';
@@ -22,6 +26,10 @@ export class MyFees implements OnInit {
 
   ngOnInit(): void {
     this.loadTerms();
+  }
+
+  setTab(tab: Tab): void {
+    this.activeTab = tab;
   }
 
   loadTerms(): void {
@@ -56,8 +64,13 @@ export class MyFees implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to load your fee account.';
-        this.account = null;
+        if (err.status === 404) {
+          this.account = null;
+          this.errorMessage = '';
+        } else {
+          this.errorMessage = err.error?.message || 'Failed to load your fee account.';
+          this.account = null;
+        }
         this.loading = false;
       }
     });
@@ -86,11 +99,17 @@ export class MyFees implements OnInit {
   paymentMethodLabel(method: string): string {
     const labels: Record<string, string> = {
       CASH: 'Cash',
-      MOBILE_MONEY: 'Mobile Money',
-      BANK_TRANSFER: 'Bank Transfer',
+      MPESA: 'M-Pesa',
+      ECOCASH: 'EcoCash',
+      EFT: 'Bank Transfer (EFT)',
       CARD: 'Card'
     };
     return labels[method] || method;
+  }
+
+  getSelectedTermName(): string {
+    const term = this.terms.find(t => t.id === this.selectedTermId);
+    return term ? `${term.name} — ${term.academicYearName}` : 'this term';
   }
 
   private iso(d: Date): string {

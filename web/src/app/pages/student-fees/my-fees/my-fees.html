@@ -26,6 +26,13 @@
 
   @if (loading) {
     <div class="loading-state">Loading your fees...</div>
+  } @else if (!account && !errorMessage) {
+    <div class="empty-state">
+      <i class="fa-solid fa-receipt"></i>
+      <h3>No Fee Account Found</h3>
+      <p>Your fee account for <strong>{{ getSelectedTermName() }}</strong> hasn't been generated yet.</p>
+      <p>Please contact the school administration if you believe this is a mistake.</p>
+    </div>
   } @else if (account) {
 
     <div class="summary-grid">
@@ -47,79 +54,93 @@
       </div>
     </div>
 
-    <div class="section">
-      <h2>Fee Breakdown</h2>
-      <div class="table-responsive">
-        <table class="detail-table">
-          <thead>
-          <tr>
-            <th>Item</th>
-            <th class="num">Amount</th>
-            <th>Source</th>
-          </tr>
-          </thead>
-          <tbody>
-            @for (line of account.lines; track line.id) {
-              <tr>
-                <td>{{ line.name }}</td>
-                <td class="num">{{ formatAmount(line.amount) }}</td>
-                <td>
-                  @if (line.fromAnnualFee) {
-                    <span class="badge annual">Annual</span>
-                  } @else {
-                    <span class="badge term">Term</span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-          <tfoot>
-          <tr>
-            <td>Total</td>
-            <td class="num">{{ formatAmount(account.totalFees) }}</td>
-            <td></td>
-          </tr>
-          </tfoot>
-        </table>
-      </div>
+    <div class="tabs">
+      <button type="button" class="tab"
+              [class.active]="activeTab === 'breakdown'"
+              (click)="setTab('breakdown')">
+        Fee Breakdown
+      </button>
+      <button type="button" class="tab"
+              [class.active]="activeTab === 'payments'"
+              (click)="setTab('payments')">
+        Payment History
+      </button>
     </div>
 
-    <div class="section">
-      <h2>Payment History</h2>
+    <div class="tab-content">
 
-      @if (account.payments.length === 0) {
-        <p class="empty-inline">No payments recorded.</p>
-      } @else {
+      @if (activeTab === 'breakdown') {
         <div class="table-responsive">
           <table class="detail-table">
             <thead>
             <tr>
-              <th>Date</th>
+              <th>Item</th>
               <th class="num">Amount</th>
-              <th>Method</th>
-              <th>Reference</th>
+              <th>Source</th>
             </tr>
             </thead>
             <tbody>
-              @for (p of account.payments; track p.id) {
+              @for (line of account.lines; track line.id) {
                 <tr>
-                  <td>{{ formatDate(p.paidAt) }}</td>
-                  <td class="num">{{ formatAmount(p.amount) }}</td>
-                  <td>{{ paymentMethodLabel(p.method) }}</td>
-                  <td>{{ p.reference || '—' }}</td>
+                  <td>{{ line.name }}</td>
+                  <td class="num">{{ formatAmount(line.amount) }}</td>
+                  <td>
+                    @if (line.fromAnnualFee) {
+                      <span class="badge annual">Annual</span>
+                    } @else {
+                      <span class="badge term">Term</span>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
             <tfoot>
             <tr>
-              <td>Total Paid</td>
-              <td class="num">{{ formatAmount(account.amountPaid) }}</td>
-              <td colspan="2"></td>
+              <td>Total</td>
+              <td class="num">{{ formatAmount(account.totalFees) }}</td>
+              <td></td>
             </tr>
             </tfoot>
           </table>
         </div>
       }
+
+      @if (activeTab === 'payments') {
+        @if (account.payments.length === 0) {
+          <p class="empty-inline">No payments recorded.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="detail-table">
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th class="num">Amount</th>
+                <th>Method</th>
+                <th>Reference</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (p of account.payments; track p.id) {
+                  <tr>
+                    <td>{{ formatDate(p.paidAt) }}</td>
+                    <td class="num">{{ formatAmount(p.amount) }}</td>
+                    <td>{{ paymentMethodLabel(p.method) }}</td>
+                    <td>{{ p.reference || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+              <tr>
+                <td>Total Paid</td>
+                <td class="num">{{ formatAmount(account.amountPaid) }}</td>
+                <td colspan="2"></td>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
+      }
+
     </div>
 
   }
