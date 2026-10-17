@@ -1,5 +1,5 @@
-export type AudienceType = 'ALL' | 'CLASS' | 'ROLE' | 'USER';
-export type AnnouncementStatus = 'DRAFT' | 'PUBLISHED';
+import { AudienceType } from './audience-type';
+import { AnnouncementStatus } from './announcement-status';
 
 export interface Announcement {
   id: number;

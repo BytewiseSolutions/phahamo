@@ -1,4 +1,5 @@
-import { AudienceType, AnnouncementStatus } from './announcement';
+import { AudienceType } from './audience-type';
+import { AnnouncementStatus } from './announcement-status';
 
 export interface AnnouncementPayload {
   title: string;

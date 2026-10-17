@@ -1,8 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
-import { Announcement, AudienceType, AnnouncementStatus } from '../announcement';
 import { AnnouncementPayload } from '../announcement-payload';
 import { SchoolClass } from '../../class/class';
+import { AnnouncementStatus } from '../announcement-status';
+import { AudienceType } from '../audience-type';
+import { Announcement } from '../announcement';
 
 @Component({
   selector: 'app-announcement-form',
@@ -18,8 +20,8 @@ export class AnnouncementForm implements OnChanges {
 
   title = '';
   body = '';
-  status: AnnouncementStatus = 'PUBLISHED';
-  audienceType: AudienceType = 'ALL';
+  status: AnnouncementStatus = AnnouncementStatus.PUBLISHED;
+  audienceType: AudienceType = AudienceType.ALL;
 
   targetClassId: number | null = null;
   targetRole = 'STUDENT';
@@ -35,7 +37,6 @@ export class AnnouncementForm implements OnChanges {
 
   roles = ['STUDENT', 'PARENT', 'TEACHER'];
 
-  // Search Dropdown State
   userSearchQuery = '';
   showUserDropdown = false;
   selectedUserLabel = '';
@@ -120,8 +121,8 @@ export class AnnouncementForm implements OnChanges {
     } else {
       this.title = '';
       this.body = '';
-      this.status = 'PUBLISHED';
-      this.audienceType = 'ALL';
+      this.status = AnnouncementStatus.PUBLISHED;
+      this.audienceType = AudienceType.ALL;
       this.targetClassId = null;
       this.targetRole = 'STUDENT';
       this.targetUserId = null;
@@ -147,14 +148,14 @@ export class AnnouncementForm implements OnChanges {
       expiresAt: this.expiresAt ? new Date(this.expiresAt).toISOString() : undefined
     };
 
-    if (this.audienceType === 'CLASS') {
+    if (this.audienceType === AudienceType.CLASS) {
       if (!this.targetClassId) { this.errorMessage = 'Please select a class.'; return; }
       payload.targetClassId = this.targetClassId;
     }
-    if (this.audienceType === 'ROLE') {
+    if (this.audienceType === AudienceType.ROLE) {
       payload.targetRole = this.targetRole;
     }
-    if (this.audienceType === 'USER') {
+    if (this.audienceType === AudienceType.USER) {
       if (!this.targetUserId) { this.errorMessage = 'Please select a user.'; return; }
       payload.targetUserId = this.targetUserId;
     }
