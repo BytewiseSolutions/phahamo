@@ -30,6 +30,7 @@ import {ClassResults} from './pages/results/class-results/class-results';
 import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
 import {MyAttendance} from './pages/attendance/my-attendance/my-attendance';
 import {MyResults} from './pages/results/my-results/my-results';
+import {FeesPage} from './pages/fees/fees-page/fees-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -65,6 +66,7 @@ const routes: Routes = [
       { path: 'attendance/history', component: AttendanceHistory },
       { path: 'attendance/my', component: MyAttendance },
       { path: 'results/my', component: MyResults },
+      { path: 'fees/structures', component: FeesPage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

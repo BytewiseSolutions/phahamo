@@ -260,4 +260,32 @@ public class FeeStructureService {
                     "Fee item amount must be greater than 0: " + item.getName());
         }
     }
+
+    @Transactional
+    public List<AnnualFeeDto> createAnnualFeeBulk(User creator, AnnualFeeBulkDto dto) {
+        if (dto.getClassIds() == null || dto.getClassIds().isEmpty()) {
+            throw new FeeExceptions.InvalidFeeOperationException("Select at least one class");
+        }
+        if (dto.getAcademicYearId() == null) {
+            throw new FeeExceptions.InvalidFeeOperationException("Academic year is required");
+        }
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new FeeExceptions.InvalidFeeOperationException("Name is required");
+        }
+        if (dto.getAmount() == null || dto.getAmount() <= 0) {
+            throw new FeeExceptions.InvalidFeeOperationException("Amount must be greater than 0");
+        }
+
+        List<AnnualFeeDto> created = new java.util.ArrayList<>();
+        for (Long classId : dto.getClassIds()) {
+            AnnualFeeDto single = new AnnualFeeDto();
+            single.setClassId(classId);
+            single.setAcademicYearId(dto.getAcademicYearId());
+            single.setName(dto.getName());
+            single.setAmount(dto.getAmount());
+            single.setDescription(dto.getDescription());
+            created.add(createAnnualFee(creator, single));
+        }
+        return created;
+    }
 }

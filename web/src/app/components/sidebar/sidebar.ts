@@ -26,6 +26,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Grading Scale', path: '/grading-scale', icon: 'fa-solid fa-award' },
     { label: 'School Profile', path: '/school-profile', icon: 'fa-solid fa-school' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
   ],
   PRINCIPAL: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
@@ -37,6 +38,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Results', path: '/results', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Attendance Reports', path: '/attendance/history', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Examinations', path: '/examinations', icon: 'fa-solid fa-file-pen' },
+    { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   TEACHER: [

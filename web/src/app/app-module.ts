@@ -71,6 +71,9 @@ import { ResultOverrideForm } from './pages/results/result-override-form/result-
 import { AttendanceHistory } from './pages/attendance/attendance-history/attendance-history';
 import { MyAttendance } from './pages/attendance/my-attendance/my-attendance';
 import { MyResults } from './pages/results/my-results/my-results';
+import { FeesPage } from './pages/fees/fees-page/fees-page';
+import { FeeStructureForm } from './pages/fees/fee-structure-form/fee-structure-form';
+import { AnnualFeeForm } from './pages/fees/annual-fee-form/annual-fee-form';
 
 @NgModule({
   declarations: [
@@ -137,7 +140,10 @@ import { MyResults } from './pages/results/my-results/my-results';
     ResultOverrideForm,
     AttendanceHistory,
     MyAttendance,
-    MyResults
+    MyResults,
+    FeesPage,
+    FeeStructureForm,
+    AnnualFeeForm
   ],
   imports: [
     BrowserModule,

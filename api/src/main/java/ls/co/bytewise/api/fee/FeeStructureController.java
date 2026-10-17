@@ -104,4 +104,13 @@ public class FeeStructureController {
         feeService.deleteAnnualFee(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/annual-fees/bulk")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<List<AnnualFeeDto>> createBulk(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody AnnualFeeBulkDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(feeService.createAnnualFeeBulk(currentUser, dto));
+    }
 }
