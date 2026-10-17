@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222; }
+        .header { border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 16px; }
+        .school-name { font-size: 20px; font-weight: bold; color: #2563eb; margin: 0; }
+        .school-meta { color: #555; margin-top: 4px; }
+        .logo { float: right; max-width: 80px; max-height: 80px; }
+        .title { text-align: center; font-size: 16px; font-weight: bold; margin: 20px 0 12px; }
+        .info-table { width: 100%; margin-bottom: 16px; }
+        .info-table td { padding: 3px 0; vertical-align: top; }
+        .info-label { color: #666; width: 110px; }
+        table.marks { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        table.marks th { background: #f3f4f6; text-align: left; }
+        table.marks th, table.marks td { border: 1px solid #ccc; padding: 6px 8px; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .summary { margin-bottom: 16px; padding: 10px; background: #f9fafb; border-radius: 4px; }
+        .summary-item { display: inline-block; margin-right: 24px; }
+        .summary-label { color: #666; font-size: 10px; text-transform: uppercase; }
+        .summary-value { font-size: 14px; font-weight: bold; }
+        .attendance { margin-bottom: 16px; }
+        .attendance table { width: 100%; border-collapse: collapse; }
+        .attendance th { background: #f3f4f6; text-align: left; }
+        .attendance th, .attendance td { border: 1px solid #ccc; padding: 6px 8px; }
+        .sig-block { margin-top: 60px; }
+        .sig-line { border-top: 1px solid #444; width: 220px; padding-top: 4px; margin-top: 40px; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #888; font-size: 9px; }
+        .empty { color: #888; font-style: italic; padding: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img th:if="${logoDataUri != null}" th:src="${logoDataUri}" class="logo"
+         width="80" alt=""/>
+    <div class="school-name" th:text="${card.schoolName}">School Name</div>
+    <div class="school-meta">
+        <div th:text="${card.schoolAddress}">Address</div>
+        <div>
+            <span th:text="${card.schoolPhone}">Phone</span> |
+            <span th:text="${card.schoolEmail}">Email</span>
+        </div>
+    </div>
+</div>
+
+<div class="title">STUDENT REPORT CARD</div>
+
+<table class="info-table">
+    <tr>
+        <td class="info-label">Student</td>
+        <td th:text="${card.studentFullName}">Name</td>
+        <td class="info-label">Term</td>
+        <td th:text="${card.termName}">Term</td>
+    </tr>
+    <tr>
+        <td class="info-label">Admission No</td>
+        <td th:text="${card.admissionNumber}">000</td>
+        <td class="info-label">Academic Year</td>
+        <td th:text="${card.academicYearName}">Year</td>
+    </tr>
+    <tr>
+        <td class="info-label">Class</td>
+        <td th:text="${card.className}">Class</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+
+<table class="marks">
+    <thead>
+    <tr>
+        <th>Subject</th>
+        <th class="num">Mark</th>
+        <th>Grade</th>
+        <th>Remark</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${card.subjects}">
+        <td th:text="${s.subjectName}">Math</td>
+        <td class="num" th:text="${s.finalMark} + '%'">82.5%</td>
+        <td th:text="${s.grade}">A</td>
+        <td th:text="${s.remark}">Excellent</td>
+    </tr>
+    <tr th:if="${card.subjects.isEmpty()}">
+        <td colspan="4" class="empty">No finalised results for this term.</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="summary">
+    <div class="summary-item">
+        <div class="summary-label">Average</div>
+        <div class="summary-value" th:text="${card.averageMark != null ? card.averageMark + '%' : '—'}">—</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-label">Overall Grade</div>
+        <div class="summary-value" th:text="${card.overallGrade != null ? card.overallGrade : '—'}">—</div>
+    </div>
+</div>
+
+<div class="attendance">
+    <div class="title" style="font-size: 13px; margin: 16px 0 8px;">Attendance Summary</div>
+    <table>
+        <tr>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+            <th>Excused</th>
+            <th>Total</th>
+            <th>Attendance %</th>
+        </tr>
+        <tr>
+            <td th:text="${card.attendancePresent}">0</td>
+            <td th:text="${card.attendanceAbsent}">0</td>
+            <td th:text="${card.attendanceLate}">0</td>
+            <td th:text="${card.attendanceExcused}">0</td>
+            <td th:text="${card.attendanceTotal}">0</td>
+            <td th:text="${card.attendancePercent} + '%'">0%</td>
+        </tr>
+    </table>
+</div>
+
+<div class="sig-block">
+    <div class="sig-line">
+        <span th:text="${card.principalName}">Principal</span><br/>
+        <span style="color: #666;">Principal / Class Teacher</span>
+    </div>
+    <p style="margin-top: 20px; color: #666;">
+        Generated on <span th:text="${card.generatedDate}">2026-10-17</span>
+    </p>
+</div>
+
+<div class="footer" th:text="${card.schoolName} + ' — Official Report Card'">Footer</div>
+
+</body>
+</html>

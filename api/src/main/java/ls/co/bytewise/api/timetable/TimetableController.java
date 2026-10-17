@@ -60,4 +60,9 @@ public class TimetableController {
         timetableService.deleteTimetable(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/my-class")
+    @Secured({"ROLE_STUDENT"})
+    public List<TimetableDto> myClassTimetable(@AuthenticationPrincipal User currentUser) {
+        return timetableService.listForStudent(currentUser);
+    }
 }

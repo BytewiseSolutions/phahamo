@@ -5,10 +5,18 @@
       <h1>Attendance History</h1>
       <p>View attendance patterns by lesson, by class, or for a single student.</p>
     </div>
-    <button type="button" class="secondary-button" (click)="exportCsv()" [disabled]="loading">
-      <i class="fa-solid fa-file-csv"></i>
-      Export CSV
-    </button>
+    <div class="header-actions">
+      <button type="button" class="secondary-button"
+              (click)="downloadClassReportCards()"
+              [disabled]="mode !== 'byStudent' || !selectedClassId || !selectedTermId || loading">
+        <i class="fa-solid fa-file-zipper"></i>
+        Report Cards (ZIP)
+      </button>
+      <button type="button" class="secondary-button" (click)="exportCsv()" [disabled]="loading">
+        <i class="fa-solid fa-file-csv"></i>
+        Export CSV
+      </button>
+    </div>
   </div>
 
   <div class="mode-tabs">
@@ -35,6 +43,18 @@
     </div>
 
     <div class="filter-group">
+      <label>Term</label>
+      <select [(ngModel)]="selectedTermId"
+              (ngModelChange)="onTermChange()"
+              [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="null">Custom range</option>
+        @for (t of terms; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
       <label>Subject (optional)</label>
       <select [(ngModel)]="selectedSubjectId" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }">
         <option [ngValue]="null">All subjects</option>
@@ -46,12 +66,18 @@
 
     <div class="filter-group">
       <label>From</label>
-      <input type="date" [(ngModel)]="fromDate" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }"/>
+      <input type="date" [(ngModel)]="fromDate"
+             [disabled]="selectedTermId !== null"
+             (ngModelChange)="loadForMode()"
+             [ngModelOptions]="{ standalone: true }"/>
     </div>
 
     <div class="filter-group">
       <label>To</label>
-      <input type="date" [(ngModel)]="toDate" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }"/>
+      <input type="date" [(ngModel)]="toDate"
+             [disabled]="selectedTermId !== null"
+             (ngModelChange)="loadForMode()"
+             [ngModelOptions]="{ standalone: true }"/>
     </div>
   </div>
 
@@ -150,6 +176,11 @@
                 </td>
                 <td class="actions-cell">
                   <button type="button" class="link-button" (click)="openStudent(row.studentId)">View</button>
+                  <button type="button" class="link-button"
+                          (click)="downloadStudentReportCard(row.studentId)"
+                          [disabled]="!selectedTermId">
+                    Report Card
+                  </button>
                 </td>
               </tr>
             }

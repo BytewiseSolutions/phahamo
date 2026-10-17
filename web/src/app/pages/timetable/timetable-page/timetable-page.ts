@@ -17,6 +17,7 @@ export class TimetablePage implements OnInit {
 
   isTeacher = false;
   activeTab: 'schedule' | 'periods' = 'schedule';
+  isStudent = false;
 
   activeDay: DayOfWeek = this.getTodayDayOfWeek();
   days = Object.values(DayOfWeek);
@@ -48,12 +49,13 @@ export class TimetablePage implements OnInit {
 
   ngOnInit(): void {
     this.isTeacher = this.authService.hasRole('TEACHER');
+    this.isStudent = this.authService.hasRole('STUDENT');
     this.userId = this.authService.getUserId();
 
     this.loadPeriods();
     this.loadTimetable();
 
-    if (!this.isTeacher) {
+    if (!this.isTeacher && !this.isStudent) {
       this.loadSchoolClasses();
       this.loadTeachers();
     }
@@ -153,8 +155,6 @@ export class TimetablePage implements OnInit {
     });
   }
 
-  // ----- School Classes -----
-
   loadSchoolClasses(): void {
     this.loadingClasses = true;
 
@@ -169,8 +169,6 @@ export class TimetablePage implements OnInit {
       }
     });
   }
-
-  // ----- Teachers -----
 
   loadTeachers(): void {
     this.loadingTeachers = true;
@@ -187,14 +185,17 @@ export class TimetablePage implements OnInit {
     });
   }
 
-  // ----- Timetable -----
-
   loadTimetable(): void {
     this.loadingTimetable = true;
 
-    const url = this.isTeacher
-      ? `/timetable/teacher/${this.userId}`
-      : '/timetable';
+    let url: string;
+    if (this.isTeacher) {
+      url = `/timetable/teacher/${this.userId}`;
+    } else if (this.isStudent) {
+      url = '/timetable/my-class';
+    } else {
+      url = '/timetable';
+    }
 
     this.backend.get<Timetable[]>(url).subscribe({
       next: (slots) => {

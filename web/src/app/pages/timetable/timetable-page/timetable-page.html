@@ -3,10 +3,18 @@
   <div class="page-header">
     <div>
       <h1>Timetable</h1>
-      <p>{{ isTeacher ? 'Your weekly teaching schedule.' : 'Manage your school\'s periods and weekly class schedule.' }}</p>
+      <p>
+        @if (isTeacher) {
+          Your weekly teaching schedule.
+        } @else if (isStudent) {
+          Your weekly class schedule.
+        } @else {
+          Manage your school's periods and weekly class schedule.
+        }
+      </p>
     </div>
 
-    @if (!isTeacher) {
+    @if (!isTeacher && !isStudent) {
       @if (activeTab === 'periods') {
         <button type="button" class="primary-button" (click)="togglePeriodForm()">+ Add Period</button>
       } @else {
@@ -19,7 +27,7 @@
     <div class="error-banner">{{ errorMessage }}</div>
   }
 
-  @if (!isTeacher) {
+  @if (!isTeacher && !isStudent) {
     <div class="timetable-tabs">
       <button type="button" class="timetable-tab" [class.active]="activeTab === 'schedule'" (click)="onTabChange('schedule')">Schedule</button>
       <button type="button" class="timetable-tab" [class.active]="activeTab === 'periods'" (click)="onTabChange('periods')">Periods</button>
@@ -77,7 +85,7 @@
           }
         </div>
 
-        @if (!isTeacher) {
+        @if (!isTeacher && !isStudent)  {
           <div class="view-toggle">
             <button type="button" class="view-toggle-btn" [class.active]="viewMode === 'class'" (click)="onViewModeChange('class')">By Class</button>
             <button type="button" class="view-toggle-btn" [class.active]="viewMode === 'teacher'" (click)="onViewModeChange('teacher')">By Teacher</button>
@@ -89,7 +97,7 @@
 
         <p class="loading-message">Loading schedule...</p>
 
-      } @else if (isTeacher) {
+      } @else if (isTeacher || isStudent)  {
 
         @if (timetableSlots.length === 0) {
           <div class="empty-state">
