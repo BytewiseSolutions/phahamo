@@ -2,6 +2,8 @@ package ls.co.bytewise.api.timetable;
 
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.student.Student;
+import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignment;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
 import ls.co.bytewise.api.timetable.period.Period;
@@ -20,13 +22,16 @@ public class TimetableService {
     private final TimetableRepository timetableRepository;
     private final PeriodRepository periodRepository;
     private final SubjectClassAssignmentRepository assignmentRepository;
+    private final StudentRepository studentRepository;
 
     public TimetableService(TimetableRepository timetableRepository,
                             PeriodRepository periodRepository,
-                            SubjectClassAssignmentRepository assignmentRepository) {
+                            SubjectClassAssignmentRepository assignmentRepository,
+                            StudentRepository studentRepository) {
         this.timetableRepository = timetableRepository;
         this.periodRepository = periodRepository;
         this.assignmentRepository = assignmentRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Transactional
@@ -178,5 +183,21 @@ public class TimetableService {
         }
 
         return timetable;
+    }
+
+    public List<TimetableDto> listForStudent(User user) {
+        Long schoolId = TenantContext.getSchoolId();
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .filter(s -> s.getSchool().getId().equals(schoolId))
+                .orElseThrow(() -> new TimetableExceptions.TimetableNotFoundException(
+                        "No student record linked to this account"));
+
+        if (student.getCurrentClass() == null) {
+            throw new TimetableExceptions.TimetableNotFoundException(
+                    "Student has no current class assigned");
+        }
+
+        return listByClass(student.getCurrentClass().getId());
     }
 }
