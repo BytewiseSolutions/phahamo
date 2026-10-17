@@ -29,7 +29,7 @@ public class SubjectController {
     }
 
     @GetMapping
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<SubjectDto> list() {
         return subjectService.listSubjects();
     }

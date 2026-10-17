@@ -86,4 +86,9 @@ export class BackendService {
     return this.http.patch<T>(`${this.baseUrl}${path}`, body);
   }
 
+  downloadBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, {
+      responseType: 'blob'
+    });
+  }
 }

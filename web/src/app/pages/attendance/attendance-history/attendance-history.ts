@@ -7,6 +7,7 @@ import {
 } from '../attendance-report';
 import { SchoolClass } from '../../class/class';
 import { Subject } from '../../subject/subject';
+import { Term } from '../../terms/term';
 
 type Mode = 'byLesson' | 'byStudent';
 
@@ -22,6 +23,9 @@ export class AttendanceHistory implements OnInit {
 
   classes: SchoolClass[] = [];
   subjects: Subject[] = [];
+
+  terms: Term[] = [];
+  selectedTermId: number | null = null;
 
   selectedClassId: number | null = null;
   selectedSubjectId: number | null = null;
@@ -41,10 +45,11 @@ export class AttendanceHistory implements OnInit {
 
   ngOnInit(): void {
     const today = new Date();
-    const firstOfYear = new Date(today.getFullYear(), 0, 1);
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(today.getDate() - 90);
 
     this.toDate = this.iso(today);
-    this.fromDate = this.iso(firstOfYear);
+    this.fromDate = this.iso(ninetyDaysAgo);
 
     this.loadFilters();
   }
@@ -60,8 +65,26 @@ export class AttendanceHistory implements OnInit {
         this.backend.get<Subject[]>('/subjects').subscribe({
           next: (subjects) => {
             this.subjects = subjects;
-            this.loadingFilters = false;
-            this.loadForMode();
+
+            this.backend.get<Term[]>('/terms').subscribe({
+              next: (terms) => {
+                this.terms = terms;
+
+                const today = this.iso(new Date());
+                const current = terms.find(t =>
+                  t.startDate.substring(0, 10) <= today &&
+                  today <= t.endDate.substring(0, 10)
+                );
+                this.selectedTermId = (current ?? terms[0])?.id ?? null;
+
+                this.loadingFilters = false;
+                this.loadForMode();
+              },
+              error: () => {
+                this.errorMessage = 'Failed to load terms.';
+                this.loadingFilters = false;
+              }
+            });
           },
           error: () => {
             this.errorMessage = 'Failed to load subjects.';
@@ -79,6 +102,21 @@ export class AttendanceHistory implements OnInit {
   setMode(mode: Mode): void {
     this.mode = mode;
     this.errorMessage = '';
+    this.loadForMode();
+  }
+
+  onTermChange(): void {
+    if (this.selectedTermId === null) {
+      this.loadForMode();
+      return;
+    }
+
+    const term = this.terms.find(t => t.id === this.selectedTermId);
+    if (!term) return;
+
+    this.fromDate = term.startDate.substring(0, 10);
+    this.toDate = term.endDate.substring(0, 10);
+
     this.loadForMode();
   }
 
@@ -175,6 +213,54 @@ export class AttendanceHistory implements OnInit {
     this.selectedStudentId = null;
   }
 
+  downloadClassReportCards(): void {
+    if (!this.selectedClassId || !this.selectedTermId) {
+      this.errorMessage = 'Select a class and term first.';
+      return;
+    }
+
+    const path = `/report-cards/class/${this.selectedClassId}?termId=${this.selectedTermId}`;
+
+    this.backend.downloadBlob(path).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `report-cards-class-${this.selectedClassId}-term-${this.selectedTermId}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to download class report cards.';
+      }
+    });
+  }
+
+  downloadStudentReportCard(studentId: number): void {
+    if (!this.selectedTermId) {
+      this.errorMessage = 'Select a term first.';
+      return;
+    }
+
+    const path = `/report-cards/student/${studentId}?termId=${this.selectedTermId}`;
+
+    this.backend.downloadBlob(path).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `report-card-student-${studentId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to download report card.';
+      }
+    });
+  }
+
   exportCsv(): void {
     const rows = this.mode === 'byLesson' ? this.lessonRows : this.classRows;
 
@@ -258,6 +344,9 @@ export class AttendanceHistory implements OnInit {
   }
 
   private iso(d: Date): string {
-    return d.toISOString().substring(0, 10);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -5,7 +5,14 @@
       <h1>My Results</h1>
       <p>Your finalised marks and grades by subject.</p>
     </div>
+    <button type="button" class="download-button"
+            (click)="downloadMyReportCard()"
+            [disabled]="!selectedTermId || loading">
+      <i class="fa-solid fa-file-pdf"></i>
+      Download Report Card
+    </button>
   </div>
+
 
   <div class="filters">
     <div class="filter-group">

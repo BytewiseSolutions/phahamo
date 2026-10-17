@@ -86,4 +86,36 @@ export class MyResults implements OnInit {
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+
+  downloadMyReportCard(): void {
+    if (!this.selectedTermId) return;
+
+    const url = `/report-cards/me?termId=${this.selectedTermId}`;
+
+    this.backend.downloadBlob(url).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `report-card-term-${this.selectedTermId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      },
+      error: (err) => {
+        this.errorMessage = 'Failed to download report card.';
+        console.error(err);
+      }
+    });
+  }
+
+  private saveBlob(blob: Blob, filename: string): void {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
 }
