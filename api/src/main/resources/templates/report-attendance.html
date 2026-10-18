@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #222; }
+
+        .header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 24px; }
+        .logo { float: right; width: 80px; }
+        .school-name { font-size: 22px; font-weight: bold; color: #2563eb; margin: 0; }
+        .school-meta { color: #555; margin-top: 4px; font-size: 11px; }
+
+        h1 { text-align: center; font-size: 18px; margin: 30px 0 10px; }
+        .subtitle { text-align: center; font-size: 14px; color: #555; margin-bottom: 24px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th { background: #f3f4f6; text-align: left; padding: 10px; border: 1px solid #ccc; }
+        td { padding: 10px; border: 1px solid #ccc; }
+        .num { text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img th:if="${logoDataUri != null}" th:src="${logoDataUri}" class="logo" alt=""/>
+    <div class="school-name" th:text="${school.name}">School Name</div>
+    <div class="school-meta">
+        <div th:text="${school.address}">Address</div>
+        <div>
+            <span th:text="${school.phone}">Phone</span> |
+            <span th:text="${school.email}">Email</span>
+        </div>
+    </div>
+</div>
+
+<h1 th:text="${title}">Attendance Report</h1>
+<div class="subtitle" th:text="${termName}">Term Name</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Class</th>
+        <th class="num">Total Records</th>
+        <th class="num">Present %</th>
+        <th class="num">Absent %</th>
+        <th class="num">Late %</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row : ${rows}">
+        <td th:text="${row.className}">Grade 10</td>
+        <td class="num" th:text="${row.totalRecords}">6</td>
+        <td class="num" th:text="${row.presentPercent} + '%'">50.0%</td>
+        <td class="num" th:text="${row.absentPercent} + '%'">16.7%</td>
+        <td class="num" th:text="${row.latePercent} + '%'">16.7%</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

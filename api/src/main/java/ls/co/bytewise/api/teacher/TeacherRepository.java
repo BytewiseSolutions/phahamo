@@ -1,5 +1,6 @@
 package ls.co.bytewise.api.teacher;
 
+import ls.co.bytewise.api.common.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

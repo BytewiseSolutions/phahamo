@@ -34,6 +34,8 @@ import {FeesPage} from './pages/fees/fees-page/fees-page';
 import {StudentFeesPage} from './pages/student-fees/student-fees-page/student-fees-page';
 import {StudentFeeDetail} from './pages/student-fees/student-fee-detail/student-fee-detail';
 import {MyFees} from './pages/student-fees/my-fees/my-fees';
+import {AnnouncementList} from './pages/announcements/announcement-list/announcement-list';
+import {ReportsPage} from './pages/reports/reports-page/reports-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -73,6 +75,8 @@ const routes: Routes = [
       { path: 'student-fees', component: StudentFeesPage },
       { path: 'student-fees/:accountId', component: StudentFeeDetail },
       { path: 'my-fees', component: MyFees },
+      { path: 'announcements', component: AnnouncementList },
+      { path: 'reports', component: ReportsPage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

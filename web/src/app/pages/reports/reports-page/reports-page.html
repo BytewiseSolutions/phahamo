@@ -1,0 +1,139 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>School Reports</h1>
+    <div class="filter-group">
+      <label>Filter by Term</label>
+      <select [(ngModel)]="selectedTermId" (change)="onTermChange()" [ngModelOptions]="{ standalone: true }">
+        @for (term of terms; track term.id) {
+          <option [value]="term.id">{{ term.name }} — {{ term.academicYearName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="activeTab === 'student'" (click)="setTab('student')">
+      Student Enrollment
+    </button>
+    <button type="button" class="tab" [class.active]="activeTab === 'attendance'" (click)="setTab('attendance')">
+      Attendance
+    </button>
+    <button type="button" class="tab" [class.active]="activeTab === 'academic'" (click)="setTab('academic')">
+      Academic Performance
+    </button>
+    <button type="button" class="tab" [class.active]="activeTab === 'financial'" (click)="setTab('financial')">
+      Financial Collection
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Generating reports...</div>
+  } @else {
+    <div class="report-section">
+
+      @if (activeTab === 'student') {
+        <div class="report-header">
+          <h2>Student Enrollment</h2>
+          <div class="actions">
+            <button type="button" class="secondary-button" (click)="downloadCsv()">Export CSV</button>
+            <button type="button" class="primary-button" (click)="downloadPdf()">Export PDF</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Class Name</th><th class="num">Total Students</th></tr></thead>
+            <tbody>
+              @for (row of studentReport; track row.className) {
+                <tr><td>{{ row.className }}</td><td class="num">{{ row.totalStudents }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (activeTab === 'attendance') {
+        <div class="report-header">
+          <h2>Attendance</h2>
+          <div class="actions">
+            <button type="button" class="secondary-button" (click)="downloadCsv()">Export CSV</button>
+            <button type="button" class="primary-button" (click)="downloadPdf()">Export PDF</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+            <tr><th>Class</th><th class="num">Records</th><th class="num">Present %</th><th class="num">Absent %</th><th class="num">Late %</th></tr>
+            </thead>
+            <tbody>
+              @for (row of attendanceReport; track row.className) {
+                <tr>
+                  <td>{{ row.className }}</td>
+                  <td class="num">{{ row.totalRecords }}</td>
+                  <td class="num">{{ row.presentPercent }}%</td>
+                  <td class="num">{{ row.absentPercent }}%</td>
+                  <td class="num">{{ row.latePercent }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (activeTab === 'academic') {
+        <div class="report-header">
+          <h2>Academic Performance</h2>
+          <div class="actions">
+            <button type="button" class="secondary-button" (click)="downloadCsv()">Export CSV</button>
+            <button type="button" class="primary-button" (click)="downloadPdf()">Export PDF</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+            <tr><th>Subject</th><th class="num">Students</th><th class="num">Average</th><th class="num">Pass %</th><th class="num">Highest</th></tr>
+            </thead>
+            <tbody>
+              @for (row of academicReport; track row.subjectName) {
+                <tr>
+                  <td>{{ row.subjectName }}</td>
+                  <td class="num">{{ row.totalStudents }}</td>
+                  <td class="num">{{ row.averageMark }}</td>
+                  <td class="num">{{ row.passRate }}%</td>
+                  <td class="num">{{ row.highestMark }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (activeTab === 'financial') {
+        <div class="report-header">
+          <h2>Financial Collection</h2>
+          <div class="actions">
+            <button type="button" class="secondary-button" (click)="downloadCsv()">Export CSV</button>
+            <button type="button" class="primary-button" (click)="downloadPdf()">Export PDF</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+            <tr><th>Class</th><th class="num">Expected</th><th class="num">Collected</th><th class="num">Outstanding</th></tr>
+            </thead>
+            <tbody>
+              @for (row of financialReport; track row.className) {
+                <tr>
+                  <td>{{ row.className }}</td>
+                  <td class="num">M {{ row.expectedFees }}</td>
+                  <td class="num">M {{ row.collectedFees }}</td>
+                  <td class="num">M {{ row.outstandingFees }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  }
+</div>

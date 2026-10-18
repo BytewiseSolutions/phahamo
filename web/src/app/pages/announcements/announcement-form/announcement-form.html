@@ -1,0 +1,141 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ editingAnnouncement ? 'Edit Announcement' : 'New Announcement' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Title</label>
+            <input type="text" [(ngModel)]="title" placeholder="e.g. End of Term Exams" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Body</label>
+            <textarea [(ngModel)]="body" rows="5" placeholder="Type your announcement here..." [ngModelOptions]="{ standalone: true }"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Target Audience</label>
+            <select [(ngModel)]="audienceType" [ngModelOptions]="{ standalone: true }">
+              <option value="ALL">Everyone</option>
+              <option value="CLASS">Specific Class</option>
+              <option value="ROLE">Specific Role</option>
+              <option value="USER">Specific Individual</option>
+            </select>
+          </div>
+
+          @if (audienceType === 'CLASS') {
+            <div class="form-group">
+              <label>Select Class</label>
+              <select [(ngModel)]="targetClassId" [ngModelOptions]="{ standalone: true }">
+                <option [ngValue]="null">-- Select --</option>
+                @for (c of classes; track c.id) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (audienceType === 'ROLE') {
+            <div class="form-group">
+              <label>Select Role</label>
+              <select [(ngModel)]="targetRole" [ngModelOptions]="{ standalone: true }">
+                @for (r of roles; track r) {
+                  <option [value]="r">{{ r }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (audienceType === 'USER') {
+            <div class="form-group relative-group">
+              <label>Select Individual</label>
+
+              <div class="search-dropdown-container">
+
+                @if (!targetUserId) {
+                  <div class="search-input-wrapper">
+                    <i class="fa-solid fa-search search-icon"></i>
+                    <input type="text"
+                           [(ngModel)]="userSearchQuery"
+                           (ngModelChange)="showUserDropdown = true"
+                           (focus)="showUserDropdown = true"
+                           (blur)="onUserSearchBlur()"
+                           placeholder="Search by name or email..."
+                           [ngModelOptions]="{ standalone: true }"
+                           autocomplete="off"/>
+                  </div>
+                } @else {
+                  <div class="selected-user-chip">
+                    <span class="chip-label">{{ selectedUserLabel }}</span>
+                    <button type="button" class="clear-btn" (click)="clearUserSelection()" title="Clear selection">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                }
+
+                @if (showUserDropdown && !targetUserId) {
+                  <ul class="dropdown-list">
+                    @for (u of filteredUsers | slice:0:50; track u.id) {
+                      <li (click)="selectUser(u)" class="dropdown-item">
+                        <span class="user-name">{{ fullName(u) }}</span>
+                        <span class="user-meta">{{ u.email || u.role }}</span>
+                      </li>
+                    } @empty {
+                      <li class="dropdown-item empty">No users found.</li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="status" [ngModelOptions]="{ standalone: true }">
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Publish Date & Time</label>
+            <input type="datetime-local" [(ngModel)]="publishAt" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+          <div class="form-group">
+            <label>Expiry Date (Optional)</label>
+            <input type="datetime-local" [(ngModel)]="expiresAt" [ngModelOptions]="{ standalone: true }"/>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-button" (click)="onClose()" [disabled]="saving">Cancel</button>
+        <button type="button" class="primary-button" (click)="onSave()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

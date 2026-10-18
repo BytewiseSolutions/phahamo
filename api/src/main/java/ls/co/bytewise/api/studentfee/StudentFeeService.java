@@ -2,6 +2,8 @@ package ls.co.bytewise.api.studentfee;
 
 import ls.co.bytewise.api.academicyear.AcademicYear;
 import ls.co.bytewise.api.fee.*;
+import ls.co.bytewise.api.mail.MailService;
+import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.security.TenantContext;
@@ -26,19 +28,22 @@ public class StudentFeeService {
     private final FeeStructureRepository feeStructureRepository;
     private final AnnualFeeRepository annualFeeRepository;
     private final StudentFeePaymentRepository paymentRepository;
+    private final MailService mailService;
 
     public StudentFeeService(StudentFeeAccountRepository accountRepository,
                              StudentRepository studentRepository,
                              TermRepository termRepository,
                              FeeStructureRepository feeStructureRepository,
                              AnnualFeeRepository annualFeeRepository,
-                             StudentFeePaymentRepository paymentRepository) {
+                             StudentFeePaymentRepository paymentRepository,
+                             MailService mailService) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
         this.feeStructureRepository = feeStructureRepository;
         this.annualFeeRepository = annualFeeRepository;
         this.paymentRepository = paymentRepository;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -254,6 +259,7 @@ public class StudentFeeService {
     @Transactional
     public StudentFeeAccountDto recordPayment(Long accountId, PaymentPayloadDto dto, User receivedBy) {
         StudentFeeAccount account = requireAccount(accountId);
+        Student student = account.getStudent();
 
         if (dto.getAmount() == null || dto.getAmount() <= 0) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("Amount must be greater than 0");
@@ -284,6 +290,34 @@ public class StudentFeeService {
         account.getPayments().add(payment);
 
         StudentFeeAccount saved = accountRepository.save(account);
+
+        String recipientEmail = null;
+        String recipientName = null;
+
+        if (student.getParents() != null && !student.getParents().isEmpty()) {
+            Parent parent = student.getParents().iterator().next();
+            if (parent.getUser() != null) {
+                recipientEmail = parent.getUser().getEmail();
+                recipientName = parent.getUser().getFirstName();
+            }
+        } else if (student.getUser() != null) {
+            recipientEmail = student.getUser().getEmail();
+            recipientName = student.getUser().getFirstName();
+        }
+
+        if (recipientEmail != null) {
+            String subject = "Payment Received - M " + String.format("%.2f", dto.getAmount());
+            String body = "Dear " + recipientName + ",\n\n"
+                    + "We have received a payment of M " + String.format("%.2f", dto.getAmount()) + " for "
+                    + student.getUser().getFullName() + " on " + java.time.LocalDate.now() + ".\n\n"
+                    + "Receipt Number: RCPT-" + String.format("%05d", saved.getPayments().get(saved.getPayments().size() - 1).getId()) + "\n"
+                    + "Payment Method: " + dto.getMethod() + "\n"
+                    + "Remaining Balance: M " + String.format("%.2f", saved.getBalance()) + "\n\n"
+                    + "Thank you for your payment.\n\n"
+                    + account.getSchool().getName();
+            mailService.send(recipientEmail, subject, body);
+        }
+
         return new StudentFeeAccountDto(saved);
     }
 
@@ -297,8 +331,7 @@ public class StudentFeeService {
 
         return accountRepository.findByStudentIdAndTermIdAndSchoolId(student.getId(), termId, schoolId)
                 .map(StudentFeeAccountDto::new)
-                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
-                        "Your fee account hasn't been generated yet. Please contact the school."));
+                .orElse(null);
     }
 
     public byte[] generateReceipt(Long paymentId, User currentUser) {
@@ -316,7 +349,7 @@ public class StudentFeeService {
         }
 
         StudentFeeAccount account = payment.getAccount();
-        ls.co.bytewise.api.school.School school = account.getSchool();
+        School school = account.getSchool();
 
         PaymentReceiptDto dto = new PaymentReceiptDto();
         dto.setSchoolName(school.getName());

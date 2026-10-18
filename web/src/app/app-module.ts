@@ -79,6 +79,10 @@ import { StudentFeeDetail } from './pages/student-fees/student-fee-detail/studen
 import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-form';
 import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
 import { MyFees } from './pages/student-fees/my-fees/my-fees';
+import { AnnouncementList } from './pages/announcements/announcement-list/announcement-list';
+import { AnnouncementForm } from './pages/announcements/announcement-form/announcement-form';
+import {NgxEchartsModule} from 'ngx-echarts';
+import { ReportsPage } from './pages/reports/reports-page/reports-page';
 
 @NgModule({
   declarations: [
@@ -153,7 +157,10 @@ import { MyFees } from './pages/student-fees/my-fees/my-fees';
     StudentFeeDetail,
     AdjustmentForm,
     PaymentForm,
-    MyFees
+    MyFees,
+    AnnouncementList,
+    AnnouncementForm,
+    ReportsPage
   ],
   imports: [
     BrowserModule,
@@ -161,7 +168,10 @@ import { MyFees } from './pages/student-fees/my-fees/my-fees';
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
-    NgSelectModule
+    NgSelectModule,
+    NgxEchartsModule.forRoot({
+      echarts: () => import('echarts'),
+    }),
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

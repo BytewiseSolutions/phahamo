@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.studentfee;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +22,24 @@ public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAcc
             Long studentId, Long termId, Long schoolId);
 
     Optional<StudentFeeAccount> findByIdAndSchoolId(Long id, Long schoolId);
+
+    @Query("""
+    SELECT COALESCE(SUM(a.totalFees - a.totalAdjustments), 0), COALESCE(SUM(a.amountPaid), 0)
+    FROM StudentFeeAccount a
+    WHERE a.school.id = :schoolId
+    AND a.term.id = :termId
+""")
+    List<Object[]> sumFeesForTerm(@Param("schoolId") Long schoolId, @Param("termId") Long termId);
+
+    @Query("""
+    SELECT a.schoolClass.name,
+           SUM(a.totalFees - a.totalAdjustments),
+           SUM(a.amountPaid),
+           SUM(a.totalFees - a.totalAdjustments - a.amountPaid)
+    FROM StudentFeeAccount a
+    WHERE a.school.id = :schoolId AND a.term.id = :termId
+    GROUP BY a.schoolClass.id, a.schoolClass.name
+    ORDER BY a.schoolClass.name
+""")
+    List<Object[]> getFinancialReport(@Param("schoolId") Long schoolId, @Param("termId") Long termId);
 }

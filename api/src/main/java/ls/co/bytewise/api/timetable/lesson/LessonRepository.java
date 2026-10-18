@@ -17,4 +17,5 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
             Long schoolClassId, LocalDate startDate, LocalDate endDate, Long schoolId);
 
     List<Lesson> findAllByStatusAndDateLessThanEqual(LessonStatus status, LocalDate date);
+    boolean existsByTimetableIdAndDateAndStatus(Long timetableId, LocalDate date, LessonStatus status);
 }

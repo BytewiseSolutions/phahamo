@@ -25,9 +25,11 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Examinations', path: '/examinations', icon: 'fa-solid fa-file-pen' },
     { label: 'Grading Scale', path: '/grading-scale', icon: 'fa-solid fa-award' },
     { label: 'School Profile', path: '/school-profile', icon: 'fa-solid fa-school' },
-    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Announcements', path: '/announcements', icon: 'fa-solid fa-bullhorn' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PRINCIPAL: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
@@ -40,8 +42,10 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Attendance Reports', path: '/attendance/history', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Examinations', path: '/examinations', icon: 'fa-solid fa-file-pen' },
     { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
-    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Announcements', path: '/announcements', icon: 'fa-solid fa-bullhorn' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
+    { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   TEACHER: [
     { label: 'My Classes', path: '/my-classes', icon: 'fa-solid fa-chalkboard-user' },
@@ -56,6 +60,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Payments', path: '/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [
