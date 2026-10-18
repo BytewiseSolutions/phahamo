@@ -82,6 +82,7 @@ import { MyFees } from './pages/student-fees/my-fees/my-fees';
 import { AnnouncementList } from './pages/announcements/announcement-list/announcement-list';
 import { AnnouncementForm } from './pages/announcements/announcement-form/announcement-form';
 import {NgxEchartsModule} from 'ngx-echarts';
+import { ReportsPage } from './pages/reports/reports-page/reports-page';
 
 @NgModule({
   declarations: [
@@ -158,7 +159,8 @@ import {NgxEchartsModule} from 'ngx-echarts';
     PaymentForm,
     MyFees,
     AnnouncementList,
-    AnnouncementForm
+    AnnouncementForm,
+    ReportsPage
   ],
   imports: [
     BrowserModule,

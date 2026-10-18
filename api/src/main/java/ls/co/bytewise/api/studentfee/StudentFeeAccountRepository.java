@@ -30,4 +30,16 @@ public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAcc
     AND a.term.id = :termId
 """)
     List<Object[]> sumFeesForTerm(@Param("schoolId") Long schoolId, @Param("termId") Long termId);
+
+    @Query("""
+    SELECT a.schoolClass.name,
+           SUM(a.totalFees - a.totalAdjustments),
+           SUM(a.amountPaid),
+           SUM(a.totalFees - a.totalAdjustments - a.amountPaid)
+    FROM StudentFeeAccount a
+    WHERE a.school.id = :schoolId AND a.term.id = :termId
+    GROUP BY a.schoolClass.id, a.schoolClass.name
+    ORDER BY a.schoolClass.name
+""")
+    List<Object[]> getFinancialReport(@Param("schoolId") Long schoolId, @Param("termId") Long termId);
 }

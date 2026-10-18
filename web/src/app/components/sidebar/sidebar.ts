@@ -28,6 +28,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Announcements', path: '/announcements', icon: 'fa-solid fa-bullhorn' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PRINCIPAL: [
@@ -43,6 +44,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Fee Structures', path: '/fees/structures', icon: 'fa-solid fa-money-bill-wave' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Announcements', path: '/announcements', icon: 'fa-solid fa-bullhorn' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   TEACHER: [
@@ -58,6 +60,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Payments', path: '/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
+    { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [

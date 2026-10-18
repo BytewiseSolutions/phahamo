@@ -68,4 +68,13 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByUserId(Long userId);
     long countBySchoolIdAndStatus(Long schoolId, StudentStatus status);
+
+    @Query("""
+    SELECT s.currentClass.name, COUNT(s)
+    FROM Student s
+    WHERE s.school.id = :schoolId AND s.status = 'ACTIVE' AND s.currentClass IS NOT NULL
+    GROUP BY s.currentClass.id, s.currentClass.name
+    ORDER BY s.currentClass.name
+""")
+    List<Object[]> countStudentsByClass(@Param("schoolId") Long schoolId);
 }
