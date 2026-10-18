@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.announcement;
 
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.mail.MailService;
+import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.parent.ParentRepository;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
@@ -13,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class AnnouncementService {
@@ -25,17 +25,20 @@ public class AnnouncementService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final ParentRepository parentRepository;
+    private final MailService mailService;
 
     public AnnouncementService(AnnouncementRepository repository,
                                SchoolClassRepository classRepository,
                                UserRepository userRepository,
                                StudentRepository studentRepository,
-                               ParentRepository parentRepository) {
+                               ParentRepository parentRepository,
+                               MailService mailService) {
         this.repository = repository;
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.parentRepository = parentRepository;
+        this.mailService = mailService;
     }
 
     public List<AnnouncementDto> listForAdmin() {
@@ -94,7 +97,15 @@ public class AnnouncementService {
         a.setAuthor(creator);
         a.setCreatedBy(creator);
         a.setUpdatedBy(creator);
-        return new AnnouncementDto(repository.save(a));
+
+        Announcement saved = repository.save(a);
+
+        if (saved.getStatus() == AnnouncementStatus.PUBLISHED
+                && !saved.getPublishAt().isAfter(Instant.now())) {
+            sendAnnouncementEmails(saved, creator.getSchools().iterator().next().getId());
+        }
+
+        return new AnnouncementDto(saved);
     }
 
     @Transactional
@@ -108,6 +119,43 @@ public class AnnouncementService {
     @Transactional
     public void delete(Long id) {
         repository.delete(require(id));
+    }
+
+    private void sendAnnouncementEmails(Announcement a, Long schoolId) {
+        List<User> recipients = new ArrayList<>();
+
+        if (a.getAudienceType() == AudienceType.ALL) {
+            recipients = userRepository.findAllBySchoolId(schoolId);
+        } else if (a.getAudienceType() == AudienceType.ROLE) {
+            recipients = userRepository.findAllBySchoolIdAndRole(schoolId, a.getTargetRole());
+        } else if (a.getAudienceType() == AudienceType.CLASS) {
+            List<Student> students = studentRepository.findAllBySchoolIdAndCurrentClassId(
+                    schoolId, a.getTargetClass().getId());
+            for (Student s : students) {
+                if (s.getUser() != null) recipients.add(s.getUser());
+                if (s.getParents() != null) {
+                    for (Parent p : s.getParents()) {
+                        if (p.getUser() != null) recipients.add(p.getUser());
+                    }
+                }
+            }
+        } else if (a.getAudienceType() == AudienceType.USER) {
+            if (a.getTargetUser() != null) recipients.add(a.getTargetUser());
+        }
+
+        Map<Long, User> unique = new LinkedHashMap<>();
+        for (User u : recipients) unique.put(u.getId(), u);
+
+        for (User u : unique.values()) {
+            if (u.getEmail() == null || u.getEmail().isBlank()) continue;
+            String body = "Dear " + u.getFirstName() + ",\n\n"
+                    + "A new announcement has been posted:\n\n"
+                    + a.getTitle() + "\n\n"
+                    + a.getBody() + "\n\n"
+                    + "Log in to view more details.\n\n"
+                    + a.getSchool().getName();
+            mailService.send(u.getEmail(), "New Announcement: " + a.getTitle(), body);
+        }
     }
 
     private void applyPayload(Announcement a, AnnouncementPayloadDto dto) {
