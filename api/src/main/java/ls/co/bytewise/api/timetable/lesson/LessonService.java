@@ -9,10 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LessonService {
+
+    private static final long MAX_RANGE_DAYS = 366;
 
     private final LessonRepository lessonRepository;
     private final TimetableRepository timetableRepository;
@@ -60,6 +64,87 @@ public class LessonService {
                 .toList();
     }
 
+    @Transactional
+    public List<LessonDto> getOrCreateLessonsForClassInRange(User requester, Long schoolClassId, LocalDate startDate, LocalDate endDate) {
+        validateRange(startDate, endDate);
+
+        Long schoolId = TenantContext.getSchoolId();
+        List<Timetable> slots = timetableRepository
+                .findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId);
+
+        School school = resolveActiveSchool(requester, schoolId);
+
+        List<Timetable> slotsByDay = slots;
+        LocalDate cursor = startDate;
+        while (!cursor.isAfter(endDate)) {
+            for (Timetable slot : slotsByDay) {
+                if (slot.getDayOfWeek() != cursor.getDayOfWeek()) continue;
+                if (lessonRepository.existsByTimetable_IdAndDateAndSchoolId(slot.getId(), cursor, schoolId)) continue;
+
+                try {
+                    createLesson(requester, school, slot, cursor);
+                } catch (org.springframework.dao.DataIntegrityViolationException ignored) {
+                    // Race condition: another request created it first. Ignore.
+                }
+            }
+            cursor = cursor.plusDays(1);
+        }
+
+        return lessonRepository
+                .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                        schoolClassId, startDate, endDate, schoolId)
+                .stream()
+                .map(LessonDto::new)
+                .toList();
+    }
+
+    @Transactional
+    public List<LessonDto> getOrCreateLessonsForTeacherInRange(User requester, Long teacherId, LocalDate startDate, LocalDate endDate) {
+        validateRange(startDate, endDate);
+
+        Long schoolId = TenantContext.getSchoolId();
+        List<Timetable> slots = timetableRepository
+                .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId);
+
+        School school = resolveActiveSchool(requester, schoolId);
+
+        LocalDate cursor = startDate;
+        while (!cursor.isAfter(endDate)) {
+            for (Timetable slot : slots) {
+                if (slot.getDayOfWeek() != cursor.getDayOfWeek()) continue;
+                if (lessonRepository.existsByTimetable_IdAndDateAndSchoolId(slot.getId(), cursor, schoolId)) continue;
+
+                try {
+                    createLesson(requester, school, slot, cursor);
+                } catch (org.springframework.dao.DataIntegrityViolationException ignored) {
+                }
+            }
+            cursor = cursor.plusDays(1);
+        }
+
+        return lessonRepository
+                .findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                        teacherId, startDate, endDate, schoolId)
+                .stream()
+                .map(LessonDto::new)
+                .toList();
+    }
+
+    private void validateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new LessonExceptions.InvalidLessonException("Start date and end date are required");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new LessonExceptions.InvalidLessonException("End date must be on or after start date");
+        }
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
+        if (days > MAX_RANGE_DAYS) {
+            throw new LessonExceptions.InvalidLessonException(
+                    "Date range cannot exceed " + MAX_RANGE_DAYS + " days. Selected range is " + days + " days."
+            );
+        }
+    }
+
     private Lesson createLesson(User creator, School school, Timetable slot, LocalDate date) {
         Lesson lesson = new Lesson();
         lesson.setTimetable(slot);
@@ -95,26 +180,6 @@ public class LessonService {
         }
 
         return lesson;
-    }
-
-    public List<LessonDto> listForTeacherInRange(Long teacherId, LocalDate startDate, LocalDate endDate) {
-        Long schoolId = TenantContext.getSchoolId();
-        return lessonRepository
-                .findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
-                        teacherId, startDate, endDate, schoolId)
-                .stream()
-                .map(LessonDto::new)
-                .toList();
-    }
-
-    public List<LessonDto> listForClassInRange(Long schoolClassId, LocalDate startDate, LocalDate endDate) {
-        Long schoolId = TenantContext.getSchoolId();
-        return lessonRepository
-                .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
-                        schoolClassId, startDate, endDate, schoolId)
-                .stream()
-                .map(LessonDto::new)
-                .toList();
     }
 
     private School resolveActiveSchool(User requester, Long schoolId) {

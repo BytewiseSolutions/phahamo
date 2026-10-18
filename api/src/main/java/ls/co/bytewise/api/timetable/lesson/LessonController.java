@@ -48,21 +48,24 @@ public class LessonController {
                                   @RequestParam LessonStatus status) {
         return lessonService.updateStatus(currentUser, id, status);
     }
+
     @GetMapping("/teacher/{teacherId}/range")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<LessonDto> getLessonsForTeacherInRange(
+            @AuthenticationPrincipal User currentUser,
             @PathVariable Long teacherId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return lessonService.listForTeacherInRange(teacherId, startDate, endDate);
+        return lessonService.getOrCreateLessonsForTeacherInRange(currentUser, teacherId, startDate, endDate);
     }
 
     @GetMapping("/class/{classId}/range")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<LessonDto> getLessonsForClassInRange(
+            @AuthenticationPrincipal User currentUser,
             @PathVariable Long classId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return lessonService.listForClassInRange(classId, startDate, endDate);
+        return lessonService.getOrCreateLessonsForClassInRange(currentUser, classId, startDate, endDate);
     }
 }

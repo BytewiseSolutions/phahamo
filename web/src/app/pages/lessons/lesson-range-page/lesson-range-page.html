@@ -1,0 +1,119 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Lesson Range View</h1>
+      <p>View every scheduled lesson across a date range — including days nobody has opened.</p>
+    </div>
+  </div>
+
+  <div class="mode-tabs">
+    <button type="button" class="mode-tab" [class.active]="mode === 'class'" (click)="setMode('class')">
+      By Class
+    </button>
+    <button type="button" class="mode-tab" [class.active]="mode === 'teacher'" (click)="setMode('teacher')">
+      By Teacher
+    </button>
+  </div>
+
+  <div class="filters">
+    @if (mode === 'class') {
+      <div class="filter-group">
+        <label>Class</label>
+        <select [(ngModel)]="selectedClassId" (ngModelChange)="loadLessons()" [ngModelOptions]="{ standalone: true }">
+          @for (c of classes; track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+    } @else {
+      <div class="filter-group">
+        <label>Teacher</label>
+        <select [(ngModel)]="selectedTeacherId" (ngModelChange)="loadLessons()" [ngModelOptions]="{ standalone: true }">
+          @for (t of teachers; track t.id) {
+            <option [ngValue]="t.id">{{ t.firstName }} {{ t.lastName }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="filter-group">
+      <label>Quick Range</label>
+      <div class="preset-buttons">
+        <button type="button" class="preset-btn" [class.active]="preset === 'week'" (click)="applyPreset('week')">
+          Week
+        </button>
+        <button type="button" class="preset-btn" [class.active]="preset === 'month'" (click)="applyPreset('month')">
+          Month
+        </button>
+        <button type="button" class="preset-btn" [class.active]="preset === 'quarter'" (click)="applyPreset('quarter')">
+          Quarter
+        </button>
+        <button type="button" class="preset-btn" [class.active]="preset === 'custom'" (click)="applyPreset('custom')">
+          Custom
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>From</label>
+      <input type="date" [(ngModel)]="startDate" (change)="preset = 'custom'; loadLessons()" [ngModelOptions]="{ standalone: true }"/>
+    </div>
+
+    <div class="filter-group">
+      <label>To</label>
+      <input type="date" [(ngModel)]="endDate" (change)="preset = 'custom'; loadLessons()" [ngModelOptions]="{ standalone: true }"/>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading lessons...</div>
+  } @else if (lessons.length === 0) {
+    <div class="empty-state">
+      <h3>No Lessons Found</h3>
+      <p>There are no scheduled lessons in this range for the selected {{ mode === 'class' ? 'class' : 'teacher' }}.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="lessons-table">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Day</th>
+          <th>Period</th>
+          <th>Time</th>
+          @if (mode === 'class') { <th>Teacher</th> } @else { <th>Class</th> }
+          <th>Subject</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (lesson of lessons; track lesson.id) {
+            <tr>
+              <td>{{ formatDate(lesson.date) }}</td>
+              <td>{{ lesson.dayOfWeek }}</td>
+              <td>{{ lesson.periodName }}</td>
+              <td class="time-cell">{{ lesson.periodStartTime.substring(0, 5) }}–{{ lesson.periodEndTime.substring(0, 5) }}</td>
+              @if (mode === 'class') {
+                <td>{{ lesson.teacherName }}</td>
+              } @else {
+                <td>{{ lesson.schoolClassName }}</td>
+              }
+              <td>{{ lesson.subjectName }}</td>
+              <td>
+                <span class="status-badge" [class]="statusClass(lesson.status)">
+                  {{ lesson.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,235 @@
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    padding: 40px;
+  }
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.mode-tab {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mode-tab:hover {
+  color: var(--text-primary);
+}
+
+.mode-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.filter-group label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.filter-group select,
+.filter-group input[type="date"] {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.filter-group select:focus,
+.filter-group input[type="date"]:focus {
+  border-color: var(--primary);
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 4px;
+  height: 40px;
+}
+
+.preset-btn {
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.preset-btn:hover {
+  background: var(--border-light);
+}
+
+.preset-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.lessons-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.lessons-table th,
+.lessons-table td {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.lessons-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lessons-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lessons-table tbody tr:hover {
+  background: var(--background);
+}
+
+.time-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.scheduled {
+  background: var(--background);
+  color: var(--text-secondary);
+}
+
+.status-badge.completed {
+  background: rgb(from var(--success) r g b / 0.12);
+  color: var(--success);
+}
+
+.status-badge.missed {
+  background: rgb(from var(--error) r g b / 0.12);
+  color: var(--error);
+}
+
+.status-badge.cancelled {
+  background: rgb(from var(--text-secondary) r g b / 0.15);
+  color: var(--text-secondary);
+}
+
+.status-badge.substituted {
+  background: rgb(from var(--warning) r g b / 0.12);
+  color: var(--warning);
+}
+
+.error-banner {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgb(from var(--error) r g b / 0.08);
+  border: 1px solid rgb(from var(--error) r g b / 0.25);
+  border-radius: var(--border-radius-md);
+  color: var(--error);
+  font-size: 13px;
+}
+
+.loading-state,
+.empty-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  border: 1px dashed var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.empty-state h3 {
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+}
