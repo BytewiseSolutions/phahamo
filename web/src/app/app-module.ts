@@ -85,6 +85,8 @@ import {NgxEchartsModule} from 'ngx-echarts';
 import { ReportsPage } from './pages/reports/reports-page/reports-page';
 import { LessonRangePage } from './pages/lessons/lesson-range-page/lesson-range-page';
 import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
+import { PromotionPage } from './pages/promotion/promotion-page/promotion-page';
+import { PromotionHistory } from './pages/promotion/promotion-history/promotion-history';
 
 @NgModule({
   declarations: [
@@ -164,7 +166,9 @@ import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
     AnnouncementForm,
     ReportsPage,
     LessonRangePage,
-    RemarksPage
+    RemarksPage,
+    PromotionPage,
+    PromotionHistory
   ],
   imports: [
     BrowserModule,

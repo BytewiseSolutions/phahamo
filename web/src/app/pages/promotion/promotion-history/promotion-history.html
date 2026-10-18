@@ -1,0 +1,55 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h1>Promotion History</h1>
+    <p>Every student move recorded with date, reason, and author.</p>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading history...</div>
+  } @else if (rows.length === 0) {
+    <div class="empty-state">
+      <p>No promotions recorded yet.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="history-table">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Student</th>
+          <th>Admission #</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Status Change</th>
+          <th>Reason</th>
+          <th>By</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (r of rows; track r.id) {
+            <tr>
+              <td class="nowrap">{{ formatDate(r.promotedAt) }}</td>
+              <td>{{ r.studentLastName }} {{ r.studentFirstName }}</td>
+              <td>{{ r.admissionNumber }}</td>
+              <td>{{ r.fromClassName || '—' }}</td>
+              <td>{{ r.toClassName || '—' }}</td>
+              <td>
+                <span class="status-badge" [class.leave]="r.newStatus === 'INACTIVE'">
+                  {{ r.previousStatus }} → {{ r.newStatus }}
+                </span>
+              </td>
+              <td class="reason-cell">{{ r.reason }}</td>
+              <td>{{ r.promotedByName || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>
