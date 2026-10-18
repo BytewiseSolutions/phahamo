@@ -25,7 +25,10 @@
         .attendance table { width: 100%; border-collapse: collapse; }
         .attendance th { background: #f3f4f6; text-align: left; }
         .attendance th, .attendance td { border: 1px solid #ccc; padding: 6px 8px; }
-        .sig-block { margin-top: 60px; }
+        .remark-section { margin-bottom: 16px; }
+        .remark-title { font-weight: bold; color: #444; font-size: 11px; text-transform: uppercase; margin: 12px 0 6px; }
+        .remark-box { border: 1px solid #ccc; padding: 10px; min-height: 60px; background: #fafafa; font-size: 11px; line-height: 1.4; white-space: pre-wrap; }
+        .sig-block { margin-top: 40px; }
         .sig-line { border-top: 1px solid #444; width: 220px; padding-top: 4px; margin-top: 40px; }
         .footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #888; font-size: 9px; }
         .empty { color: #888; font-style: italic; padding: 12px; text-align: center; }
@@ -122,6 +125,16 @@
             <td th:text="${card.attendancePercent} + '%'">0%</td>
         </tr>
     </table>
+</div>
+
+<div class="remark-section">
+    <div class="remark-title">Class Teacher's Remarks</div>
+    <div class="remark-box" th:text="${card.classTeacherRemark != null && !card.classTeacherRemark.isBlank() ? card.classTeacherRemark : ''}"></div>
+</div>
+
+<div class="remark-section">
+    <div class="remark-title">Principal's Remarks</div>
+    <div class="remark-box" th:text="${card.principalRemark != null && !card.principalRemark.isBlank() ? card.principalRemark : ''}"></div>
 </div>
 
 <div class="sig-block">

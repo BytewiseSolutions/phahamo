@@ -7,6 +7,8 @@ import ls.co.bytewise.api.grading.GradeBandRepository;
 import ls.co.bytewise.api.result.TermResult;
 import ls.co.bytewise.api.result.TermResultRepository;
 import ls.co.bytewise.api.result.TermResultStatus;
+import ls.co.bytewise.api.result.remark.Remark;
+import ls.co.bytewise.api.result.remark.RemarkService;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
@@ -30,19 +32,22 @@ public class ReportCardService {
     private final TermResultRepository termResultRepository;
     private final AttendanceRepository attendanceRepository;
     private final GradeBandRepository gradeBandRepository;
+    private final RemarkService remarkService;
 
     public ReportCardService(StudentRepository studentRepository,
                              SchoolClassRepository schoolClassRepository,
                              TermRepository termRepository,
                              TermResultRepository termResultRepository,
                              AttendanceRepository attendanceRepository,
-                             GradeBandRepository gradeBandRepository) {
+                             GradeBandRepository gradeBandRepository,
+                             RemarkService remarkService) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.termRepository = termRepository;
         this.termResultRepository = termResultRepository;
         this.attendanceRepository = attendanceRepository;
         this.gradeBandRepository = gradeBandRepository;
+        this.remarkService = remarkService;
     }
 
     public ReportCardDto buildForStudent(Long studentId, Long termId, User generatedBy) {
@@ -102,6 +107,10 @@ public class ReportCardService {
             dto.setAverageMark(Math.round(avg * 100.0) / 100.0);
             dto.setOverallGrade(overallGradeFor(dto.getAverageMark(), schoolId));
         }
+
+        Remark remark = remarkService.getOrCreate(student, termId, schoolId);
+        dto.setClassTeacherRemark(remark.getClassTeacherRemark());
+        dto.setPrincipalRemark(remark.getPrincipalRemark());
 
         attachAttendance(dto, studentId, schoolId, term);
 

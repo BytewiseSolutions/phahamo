@@ -5,5 +5,6 @@ public enum StudentStatus {
     INACTIVE,
     TRANSFERRED,
     GRADUATED,
-    WITHDRAWN
+    WITHDRAWN,
+    COMPLETED,
 }

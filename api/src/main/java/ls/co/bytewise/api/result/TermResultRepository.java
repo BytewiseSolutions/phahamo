@@ -36,4 +36,7 @@ public interface TermResultRepository extends JpaRepository<TermResult, Long> {
     ORDER BY r.subject.name
 """)
     List<Object[]> getAcademicReport(@Param("schoolId") Long schoolId, @Param("termId") Long termId);
+
+    long countBySchoolClassIdAndTermIdAndSchoolIdAndStatus(
+            Long classId, Long termId, Long schoolId, TermResultStatus status);
 }

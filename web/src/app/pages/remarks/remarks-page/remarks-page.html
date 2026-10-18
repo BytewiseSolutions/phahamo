@@ -1,0 +1,99 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Student Remarks</h1>
+      <p>Write class teacher and principal remarks for each student, per term.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Class</label>
+      <select [(ngModel)]="selectedClassId" (change)="load()" [ngModelOptions]="{ standalone: true }">
+        @for (c of classes; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Term</label>
+      <select [(ngModel)]="selectedTermId" (change)="load()" [ngModelOptions]="{ standalone: true }">
+        @for (t of terms; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading students...</div>
+  } @else if (students.length === 0) {
+    <div class="empty-state">
+      <p>No students in this class.</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="remarks-table">
+        <thead>
+        <tr>
+          <th>Student</th>
+          <th>Class Teacher Remark</th>
+          <th>Principal Remark</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (s of students; track s.studentId) {
+            <tr>
+              <td class="student-cell">
+                <strong>{{ s.studentLastName }} {{ s.studentFirstName }}</strong>
+                <div class="subtitle">{{ s.admissionNumber }}</div>
+              </td>
+
+              <td class="remark-cell">
+                @if (s.locked) {
+                  <div class="locked-box">{{ s.classTeacherRemark || '—' }}</div>
+                } @else if (s.canEditClassTeacherRemark) {
+                  <textarea [(ngModel)]="editing[s.studentId].teacher" rows="3" placeholder="Type a remark..."></textarea>
+                  <button type="button" class="save-button" (click)="saveClassTeacherRemark(s.studentId)">
+                    Save Teacher Remark
+                  </button>
+                } @else {
+                  <div class="readonly-box">{{ s.classTeacherRemark || '—' }}</div>
+                }
+                @if (s.classTeacherRemarkByName) {
+                  <div class="meta">Saved by: {{ s.classTeacherRemarkByName }}</div>
+                }
+              </td>
+
+              <td class="remark-cell">
+                @if (s.locked) {
+                  <div class="locked-box">{{ s.principalRemark || '—' }}</div>
+                } @else if (isPrincipal || isAdmin) {
+                  <textarea
+                    [(ngModel)]="editing[s.studentId].principal"
+                    rows="3"
+                    placeholder="Type a remark..."></textarea>
+                  <button type="button" class="save-button" (click)="savePrincipalRemark(s.studentId)">
+                    Save Principal Remark
+                  </button>
+                } @else {
+                  <div class="readonly-box">{{ s.principalRemark || '—' }}</div>
+                }
+                @if (s.principalRemarkByName) {
+                  <div class="meta">Saved By: {{ s.principalRemarkByName }}</div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

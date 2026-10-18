@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.schoolclass;
 
 import jakarta.validation.Valid;
+import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +60,12 @@ public class SchoolClassController {
     @Secured({"ROLE_TEACHER"})
     public SchoolClassDto getMyClass(@AuthenticationPrincipal User currentUser) {
         return schoolClassService.getMyClass(currentUser);
+    }
+
+    @GetMapping("/my-classes")
+    @Secured({"ROLE_TEACHER"})
+    public List<SchoolClassDto> myClasses(@AuthenticationPrincipal User currentUser) {
+        Long schoolId = TenantContext.getSchoolId();
+        return schoolClassService.listByClassTeacher(currentUser, schoolId);
     }
 }

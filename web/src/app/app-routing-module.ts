@@ -36,6 +36,10 @@ import {StudentFeeDetail} from './pages/student-fees/student-fee-detail/student-
 import {MyFees} from './pages/student-fees/my-fees/my-fees';
 import {AnnouncementList} from './pages/announcements/announcement-list/announcement-list';
 import {ReportsPage} from './pages/reports/reports-page/reports-page';
+import {LessonRangePage} from './pages/lessons/lesson-range-page/lesson-range-page';
+import {RemarksPage} from './pages/remarks/remarks-page/remarks-page';
+import {PromotionPage} from './pages/promotion/promotion-page/promotion-page';
+import {PromotionHistory} from './pages/promotion/promotion-history/promotion-history';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -77,6 +81,10 @@ const routes: Routes = [
       { path: 'my-fees', component: MyFees },
       { path: 'announcements', component: AnnouncementList },
       { path: 'reports', component: ReportsPage },
+      { path: 'lessons/range', component: LessonRangePage },
+      { path: 'remarks', component: RemarksPage },
+      { path: 'students/promote', component: PromotionPage },
+      { path: 'students/promotions/history', component: PromotionHistory },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

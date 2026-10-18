@@ -21,6 +21,8 @@ public class ReportCardDto {
     private String className;
     private String termName;
     private String academicYearName;
+    private String classTeacherRemark;
+    private String principalRemark;
 
     private List<SubjectLineDto> subjects;
     private Double averageMark;

@@ -83,6 +83,10 @@ import { AnnouncementList } from './pages/announcements/announcement-list/announ
 import { AnnouncementForm } from './pages/announcements/announcement-form/announcement-form';
 import {NgxEchartsModule} from 'ngx-echarts';
 import { ReportsPage } from './pages/reports/reports-page/reports-page';
+import { LessonRangePage } from './pages/lessons/lesson-range-page/lesson-range-page';
+import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
+import { PromotionPage } from './pages/promotion/promotion-page/promotion-page';
+import { PromotionHistory } from './pages/promotion/promotion-history/promotion-history';
 
 @NgModule({
   declarations: [
@@ -160,7 +164,11 @@ import { ReportsPage } from './pages/reports/reports-page/reports-page';
     MyFees,
     AnnouncementList,
     AnnouncementForm,
-    ReportsPage
+    ReportsPage,
+    LessonRangePage,
+    RemarksPage,
+    PromotionPage,
+    PromotionHistory
   ],
   imports: [
     BrowserModule,
