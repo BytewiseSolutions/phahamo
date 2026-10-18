@@ -147,4 +147,10 @@ public SchoolClassDto updateClass(User editor, Long id, SchoolClassDto dto) {
                 .orElseThrow(() -> new SchoolClassExceptions.SchoolClassNotFoundException(
                         "You are not assigned as a class teacher"));
     }
+
+    public List<SchoolClassDto> listByClassTeacher(User teacher, Long schoolId) {
+        return schoolClassRepository
+                .findAllByClassTeacherIdAndSchoolId(teacher.getId(), schoolId)
+                .stream().map(SchoolClassDto::new).toList();
+    }
 }

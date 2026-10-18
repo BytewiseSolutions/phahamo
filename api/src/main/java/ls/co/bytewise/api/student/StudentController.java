@@ -58,7 +58,7 @@ public class StudentController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public StudentDto assignClass(@AuthenticationPrincipal User currentUser,
                                   @PathVariable Long id,
-                                  @RequestParam(required = false) Long schoolClassId) {
-        return studentService.assignClass(currentUser, id, schoolClassId);
+                                  @RequestBody StudentClassUpdateDto dto) {
+        return studentService.assignClass(currentUser, id, dto.getSchoolClassId());
     }
 }

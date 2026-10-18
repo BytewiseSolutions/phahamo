@@ -37,6 +37,7 @@ import {MyFees} from './pages/student-fees/my-fees/my-fees';
 import {AnnouncementList} from './pages/announcements/announcement-list/announcement-list';
 import {ReportsPage} from './pages/reports/reports-page/reports-page';
 import {LessonRangePage} from './pages/lessons/lesson-range-page/lesson-range-page';
+import {RemarksPage} from './pages/remarks/remarks-page/remarks-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -79,6 +80,7 @@ const routes: Routes = [
       { path: 'announcements', component: AnnouncementList },
       { path: 'reports', component: ReportsPage },
       { path: 'lessons/range', component: LessonRangePage },
+      { path: 'remarks', component: RemarksPage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }
