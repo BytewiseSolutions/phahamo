@@ -81,6 +81,7 @@ import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
 import { MyFees } from './pages/student-fees/my-fees/my-fees';
 import { AnnouncementList } from './pages/announcements/announcement-list/announcement-list';
 import { AnnouncementForm } from './pages/announcements/announcement-form/announcement-form';
+import {NgxEchartsModule} from 'ngx-echarts';
 
 @NgModule({
   declarations: [
@@ -165,7 +166,10 @@ import { AnnouncementForm } from './pages/announcements/announcement-form/announ
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
-    NgSelectModule
+    NgSelectModule,
+    NgxEchartsModule.forRoot({
+      echarts: () => import('echarts'),
+    }),
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

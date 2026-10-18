@@ -56,21 +56,14 @@ export class MyFees implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.backend.get<StudentFeeAccount>(
-      `/student-fees/me?termId=${this.selectedTermId}`
-    ).subscribe({
+    this.backend.get<StudentFeeAccount>(`/student-fees/me?termId=${this.selectedTermId}`).subscribe({
       next: (acc) => {
-        this.account = acc;
+        this.account = acc;  // null if not generated
         this.loading = false;
       },
       error: (err) => {
-        if (err.status === 404) {
-          this.account = null;
-          this.errorMessage = '';
-        } else {
-          this.errorMessage = err.error?.message || 'Failed to load your fee account.';
-          this.account = null;
-        }
+        this.errorMessage = err.error?.message || 'Failed to load your fee account.';
+        this.account = null;
         this.loading = false;
       }
     });

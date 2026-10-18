@@ -1,6 +1,8 @@
 <div class="dashboard-page">
   <h1>Dashboard</h1>
 
+  <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
+
   @if (isAdmin && stats) {
     <div class="stats-grid">
       <div class="stat-card">
@@ -20,9 +22,107 @@
         <span class="stat-value">{{ stats.feeCollectionRateTerm | number:'1.1-1' }}%</span>
       </div>
     </div>
+
+    <div class="dashboard-graphs-grid">
+      <div class="graph-card">
+        <div echarts [options]="adminAttendanceLineOptions" class="chart-container"></div>
+      </div>
+      <div class="graph-card">
+        <div echarts [options]="adminFeePieOptions" class="chart-container"></div>
+      </div>
+    </div>
   }
 
-  <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
+  @if (isStudent && studentStats) {
+    <div class="student-widgets-grid">
+      <div class="widget-card" (click)="goToTimetable()">
+        <div class="widget-icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Today's Timetable</span>
+          @if (studentStats.todayTimetable.length > 0) {
+            <span class="widget-value">{{ studentStats.todayTimetable.length }} periods scheduled</span>
+          } @else {
+            <span class="widget-value text-muted">No classes today</span>
+          }
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+
+      <div class="widget-card" (click)="goToAttendance()">
+        <div class="widget-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Attendance (This Term)</span>
+          <span class="widget-value">{{ studentStats.attendanceRateTerm | number:'1.1-1' }}% Present</span>
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+
+      <div class="widget-card" (click)="goToResults()">
+        <div class="widget-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Latest Result</span>
+          @if (studentStats.latestResultSubject) {
+            <span class="widget-value">{{ studentStats.latestResultSubject }}: {{ studentStats.latestResultGrade }} ({{ studentStats.latestResultMark }}%)</span>
+          } @else {
+            <span class="widget-value text-muted">No results published yet</span>
+          }
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+
+      <div class="widget-card" (click)="goToFees()">
+        <div class="widget-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Outstanding Balance</span>
+          <span class="widget-value" [class.text-success]="(studentStats.feeBalance || 0) === 0">
+            M {{ (studentStats.feeBalance || 0) | number:'1.2-2' }}
+          </span>
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+    </div>
+
+    <div class="dashboard-graphs">
+      <div class="graph-card">
+        <div echarts [options]="studentAttendanceLineOptions" class="chart-container"></div>
+      </div>
+    </div>
+  }
+
+  @if (isTeacher && teacherStats) {
+    <div class="student-widgets-grid">
+      <div class="widget-card" (click)="goToMyClasses()">
+        <div class="widget-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">My Classes</span>
+          <span class="widget-value">{{ teacherStats.totalClasses }} classes assigned</span>
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+
+      <div class="widget-card" (click)="goToTimetable()">
+        <div class="widget-icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Today's Schedule</span>
+          <span class="widget-value">{{ teacherStats.todayPeriods }} periods scheduled</span>
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+
+      <div class="widget-card" (click)="goToMyClasses()">
+        <div class="widget-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+        <div class="widget-content">
+          <span class="widget-label">Attendance Pending</span>
+          @if (teacherStats.pendingAttendance > 0) {
+            <span class="widget-value text-error">{{ teacherStats.pendingAttendance }} lessons to mark</span>
+          } @else {
+            <span class="widget-value text-success">All caught up!</span>
+          }
+        </div>
+        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+      </div>
+    </div>
+  }
 
   @if (announcements.length > 0) {
     <div class="section">
@@ -43,44 +143,4 @@
       </div>
     </div>
   }
-
-  <p>You're logged in. This is a placeholder — real dashboard content comes next.</p>
-
-  <button type="button" (click)="toggleChangePassword()">
-    {{ showChangePassword ? 'Hide' : 'Change Password' }}
-  </button>
-
-  <button type="button" (click)="openUsers()">
-    Users
-  </button>
-
-  @if (showChangePassword) {
-    <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()">
-      @if (errorMessage) {
-        <p class="error-banner">{{ errorMessage }}</p>
-      }
-      @if (successMessage) {
-        <p class="success-banner">{{ successMessage }}</p>
-      }
-
-      <div class="form-group">
-        <label for="currentPassword">Current Password</label>
-        <input id="currentPassword" type="password" formControlName="currentPassword"/>
-      </div>
-
-      <div class="form-group">
-        <label for="newPassword">New Password</label>
-        <input id="newPassword" type="password" formControlName="newPassword"/>
-      </div>
-
-      <div class="form-group">
-        <label for="confirmPassword">Confirm New Password</label>
-        <input id="confirmPassword" type="password" formControlName="confirmPassword"/>
-      </div>
-
-      <button type="submit">Save New Password</button>
-    </form>
-  }
-
-  <button type="button" (click)="onLogout()">Log out</button>
 </div>

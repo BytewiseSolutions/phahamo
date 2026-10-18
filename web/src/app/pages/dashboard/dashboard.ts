@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
-import { ChangePasswordRequest } from '../../util/auth';
 import { Router } from '@angular/router';
 import { Subscription } from '../../util/subscription';
 import { Announcement } from '../announcements/announcement';
 import { DashboardStats } from './dashboard-stats';
+import { StudentDashboardStats } from './student-dashboard-stats';
+import { EChartsOption } from 'echarts';
+import {TeacherDashboardStats} from './teacher-dashboard-stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,96 +16,134 @@ import { DashboardStats } from './dashboard-stats';
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
-  changePasswordForm: FormGroup;
-  submitted = false;
-  errorMessage = '';
-  successMessage = '';
-  showChangePassword = false;
-
   subscription: Subscription | null = null;
   announcements: Announcement[] = [];
 
   stats: DashboardStats | null = null;
   isAdmin = false;
 
+  studentStats: StudentDashboardStats | null = null;
+  isStudent = false;
+  teacherStats: TeacherDashboardStats | null = null;
+  isTeacher = false;
+
+  adminAttendanceLineOptions: EChartsOption = {};
+  adminFeePieOptions: EChartsOption = {};
+  studentAttendanceLineOptions: EChartsOption = {};
+
   constructor(
     private authService: AuthService,
     private backend: BackendService,
-    private fb: FormBuilder,
     private router: Router
-  ) {
-    this.changePasswordForm = this.fb.group({
-      currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required]
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.isAdmin = this.authService.hasRole('SCHOOL_ADMIN')
       || this.authService.hasRole('SYSTEM_ADMIN')
       || this.authService.hasRole('PRINCIPAL');
 
+    this.isStudent = this.authService.hasRole('STUDENT');
+    this.isTeacher = this.authService.hasRole('TEACHER');
+
     if (this.isAdmin) {
       this.backend.get<DashboardStats>('/dashboard/stats').subscribe({
-        next: (data) => this.stats = data,
-        error: () => this.stats = null
+        next: (data) => this.stats = data
       });
+      this.loadAdminCharts();
+    }
+
+    if (this.isStudent) {
+      this.backend.get<StudentDashboardStats>('/dashboard/student').subscribe({
+        next: (data) => this.studentStats = data
+      });
+      this.loadStudentChart();
     }
 
     this.backend.get<Subscription>('/subscriptions/me').subscribe({
-      next: (sub) => this.subscription = sub,
-      error: () => this.subscription = null
+      next: (sub) => this.subscription = sub
     });
 
     this.backend.get<Announcement[]>('/announcements/feed').subscribe({
       next: (data) => this.announcements = data
     });
-  }
-
-  onLogout(): void {
-    this.authService.logout();
-  }
-
-  toggleChangePassword(): void {
-    this.showChangePassword = !this.showChangePassword;
-    this.errorMessage = '';
-    this.successMessage = '';
-  }
-
-  onChangePassword(): void {
-    this.submitted = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if (this.changePasswordForm.invalid) {
-      this.changePasswordForm.markAllAsTouched();
-      return;
+    if (this.isTeacher) {
+      this.backend.get<TeacherDashboardStats>('/dashboard/teacher').subscribe({
+        next: (data) => this.teacherStats = data,
+        error: () => this.teacherStats = null
+      });
     }
+  }
 
-    const { currentPassword, newPassword, confirmPassword } = this.changePasswordForm.value;
+  private loadAdminCharts(): void {
+    this.backend.get<{ labels: string[], data: number[] }>('/dashboard/admin-attendance-chart').subscribe({
+      next: (res) => {
+        this.adminAttendanceLineOptions = {
+          title: { text: 'Weekly Attendance Trend', left: 'center' },
+          tooltip: { trigger: 'axis' },
+          xAxis: { type: 'category', data: res.labels },
+          yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value} %' } },
+          series: [{
+            name: 'Attendance Rate',
+            type: 'line',
+            data: res.data,
+            smooth: true,
+            itemStyle: { color: '#2563eb' }
+          }]
+        };
+      }
+    });
 
-    if (newPassword !== confirmPassword) {
-      this.errorMessage = 'New passwords do not match.';
-      return;
-    }
-
-    const payload: ChangePasswordRequest = { currentPassword, newPassword };
-
-    this.backend.post<void>('/auth/change-password', payload).subscribe({
-      next: () => {
-        this.successMessage = 'Password changed successfully.';
-        this.changePasswordForm.reset();
-      },
-      error: (err) => {
-        this.errorMessage = err.status === 401
-          ? 'Current password is incorrect.'
-          : 'Something went wrong. Please try again.';
+    this.backend.get<{ expected: number, paid: number }>('/dashboard/admin-fee-chart').subscribe({
+      next: (res) => {
+        const outstanding = Math.max(0, res.expected - res.paid);
+        this.adminFeePieOptions = {
+          title: { text: 'Fee Collection Status', left: 'center' },
+          tooltip: { trigger: 'item', formatter: '{b}: M {c} ({d}%)' },
+          legend: { bottom: 0 },
+          series: [
+            {
+              name: 'Fees',
+              type: 'pie',
+              radius: ['40%', '70%'],
+              avoidLabelOverlap: false,
+              itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+              label: { show: false, position: 'center' },
+              emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
+              labelLine: { show: false },
+              data: [
+                { value: res.paid, name: 'Collected', itemStyle: { color: '#10b981' } },
+                { value: outstanding, name: 'Outstanding', itemStyle: { color: '#ef4444' } }
+              ]
+            }
+          ]
+        };
       }
     });
   }
 
-  protected openUsers(): void {
-    this.router.navigate(['/users']);
+  private loadStudentChart(): void {
+    this.backend.get<{ labels: string[], data: number[] }>('/dashboard/student-attendance-chart').subscribe({
+      next: (res) => {
+        this.studentAttendanceLineOptions = {
+          title: { text: 'My Attendance Trend', left: 'center' },
+          tooltip: { trigger: 'axis' },
+          xAxis: { type: 'category', data: res.labels },
+          yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value} %' } },
+          series: [{
+            name: 'My Attendance',
+            type: 'line',
+            data: res.data,
+            smooth: true,
+            itemStyle: { color: '#10b981' }
+          }]
+        };
+      }
+    });
   }
+
+  goToTimetable(): void { this.router.navigate(['/timetable']); }
+  goToAttendance(): void { this.router.navigate(['/attendance/my']); }
+  goToResults(): void { this.router.navigate(['/results/my']); }
+  goToFees(): void { this.router.navigate(['/my-fees']); }
+  goToMyClasses(): void { this.router.navigate(['/my-classes']); }
 }

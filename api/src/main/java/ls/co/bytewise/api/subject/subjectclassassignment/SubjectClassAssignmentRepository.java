@@ -30,4 +30,5 @@ public interface SubjectClassAssignmentRepository extends JpaRepository<SubjectC
     );
 
     boolean existsBySubjectId(Long subjectId);
+    long countByTeacherIdAndSchoolId(Long teacherId, Long schoolId);
 }

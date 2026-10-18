@@ -297,8 +297,7 @@ public class StudentFeeService {
 
         return accountRepository.findByStudentIdAndTermIdAndSchoolId(student.getId(), termId, schoolId)
                 .map(StudentFeeAccountDto::new)
-                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
-                        "Your fee account hasn't been generated yet. Please contact the school."));
+                .orElse(null);
     }
 
     public byte[] generateReceipt(Long paymentId, User currentUser) {
