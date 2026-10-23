@@ -49,6 +49,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.5.2'
     implementation 'ognl:ognl:3.4.7'
+
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
 }
 
 tasks.named('test') {

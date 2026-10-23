@@ -42,6 +42,7 @@ export class Header implements OnInit {
     '/results': 'Results',
     '/report-cards/email': 'Email Report Cards',
     '/schools': 'Schools',
+    '/import': 'Bulk Import',
     '/subscriptions': 'Subscriptions',
     '/profile': 'Profile',
     '/school-profile': 'School Profile',

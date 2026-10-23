@@ -88,6 +88,7 @@ import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
 import { PromotionPage } from './pages/promotion/promotion-page/promotion-page';
 import { PromotionHistory } from './pages/promotion/promotion-history/promotion-history';
 import { EmailReportCards } from './pages/reports/email-report-cards/email-report-cards';
+import { BulkImport } from './pages/imports/bulk-import/bulk-import';
 
 @NgModule({
   declarations: [
@@ -171,6 +172,7 @@ import { EmailReportCards } from './pages/reports/email-report-cards/email-repor
     PromotionPage,
     PromotionHistory,
     EmailReportCards,
+    BulkImport,
   ],
   imports: [
     BrowserModule,

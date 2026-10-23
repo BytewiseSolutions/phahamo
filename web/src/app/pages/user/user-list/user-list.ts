@@ -184,4 +184,8 @@ export class UserList implements OnInit {
   onView(user: User): void {
     this.router.navigate(['/users', user.id]);
   }
+
+  goToImport(): void {
+    this.router.navigate(['/import']);
+  }
 }

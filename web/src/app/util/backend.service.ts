@@ -91,4 +91,8 @@ export class BackendService {
       responseType: 'blob'
     });
   }
+
+  upload<T>(url: string, formData: FormData): Observable<T> {
+    return this.http.post<T>(this.baseUrl + url, formData);
+  }
 }

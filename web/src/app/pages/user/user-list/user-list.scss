@@ -16,6 +16,11 @@
   color: var(--text-primary);
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .primary-button {
   height: 42px;
   padding: 0 20px;
@@ -29,6 +34,24 @@
 
 .primary-button:hover {
   background: var(--primary-dark);
+}
+
+.secondary-button {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.secondary-button:hover {
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .error-banner {
