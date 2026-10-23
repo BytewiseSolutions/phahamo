@@ -40,6 +40,7 @@ export class Header implements OnInit {
     '/payments': 'Payments',
     '/my-children': 'My Children',
     '/results': 'Results',
+    '/report-cards/email': 'Email Report Cards',
     '/schools': 'Schools',
     '/subscriptions': 'Subscriptions',
     '/profile': 'Profile',
