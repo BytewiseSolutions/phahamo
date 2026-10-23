@@ -87,6 +87,7 @@ import { LessonRangePage } from './pages/lessons/lesson-range-page/lesson-range-
 import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
 import { PromotionPage } from './pages/promotion/promotion-page/promotion-page';
 import { PromotionHistory } from './pages/promotion/promotion-history/promotion-history';
+import { EmailReportCards } from './pages/reports/email-report-cards/email-report-cards';
 
 @NgModule({
   declarations: [
@@ -168,7 +169,8 @@ import { PromotionHistory } from './pages/promotion/promotion-history/promotion-
     LessonRangePage,
     RemarksPage,
     PromotionPage,
-    PromotionHistory
+    PromotionHistory,
+    EmailReportCards,
   ],
   imports: [
     BrowserModule,

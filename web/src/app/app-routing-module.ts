@@ -40,6 +40,7 @@ import {LessonRangePage} from './pages/lessons/lesson-range-page/lesson-range-pa
 import {RemarksPage} from './pages/remarks/remarks-page/remarks-page';
 import {PromotionPage} from './pages/promotion/promotion-page/promotion-page';
 import {PromotionHistory} from './pages/promotion/promotion-history/promotion-history';
+import {EmailReportCards} from './pages/reports/email-report-cards/email-report-cards';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -72,6 +73,7 @@ const routes: Routes = [
       { path: 'examinations', component: ExaminationList },
       { path: 'grading-scale', component: GradeBandList },
       { path: 'results', component: ClassResults },
+      { path: 'report-cards/email', component: EmailReportCards },
       { path: 'attendance/history', component: AttendanceHistory },
       { path: 'attendance/my', component: MyAttendance },
       { path: 'results/my', component: MyResults },
