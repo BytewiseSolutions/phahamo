@@ -8,6 +8,7 @@ import { Timetable } from '../../timetable/timetable';
 import { DayOfWeek } from '../../timetable/day-of-week';
 import { Lesson } from '../../timetable/lesson';
 import { LessonStatus } from '../../timetable/lesson-status';
+import { Teacher } from '../../teacher/teacher';
 
 @Component({
   selector: 'app-my-class-view',
@@ -39,6 +40,11 @@ export class MyClassView implements OnInit {
   customEndDate: string = new Date().toISOString().substring(0, 10);
 
   lessonStatuses = Object.values(LessonStatus);
+
+  substitutionLesson: Lesson | null = null;
+  availableSubstituteTeachers: Teacher[] = [];
+  loadingSubstituteTeachers = false;
+  substitutionError = '';
 
   private userId: number | null = null;
 
@@ -249,10 +255,59 @@ export class MyClassView implements OnInit {
   onLessonStatusChange(lesson: Lesson, status: LessonStatus): void {
     this.errorMessage = '';
 
+    if (status === LessonStatus.SUBSTITUTED) {
+      this.openSubstitutionDialog(lesson);
+      return;
+    }
+
     this.backend.patch<Lesson>(`/lessons/${lesson.id}/status?status=${status}`, {}).subscribe({
       next: () => this.loadLessons(),
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to update lesson status.';
+      }
+    });
+  }
+
+  openSubstitutionDialog(lesson: Lesson): void {
+    this.substitutionLesson = lesson;
+    this.availableSubstituteTeachers = [];
+    this.substitutionError = '';
+    this.loadingSubstituteTeachers = true;
+
+    this.backend.get<Teacher[]>(
+      `/lessons/${lesson.id}/available-substitute-teachers`
+    ).subscribe({
+      next: (teachers) => {
+        this.availableSubstituteTeachers = teachers;
+        this.loadingSubstituteTeachers = false;
+      },
+      error: (err) => {
+        this.substitutionError = err.error?.message || 'Failed to find available teachers.';
+        this.loadingSubstituteTeachers = false;
+      }
+    });
+  }
+
+  closeSubstitutionDialog(): void {
+    this.substitutionLesson = null;
+    this.availableSubstituteTeachers = [];
+    this.substitutionError = '';
+  }
+
+  confirmSubstitution(substituteTeacherUserId: number): void {
+    if (!this.substitutionLesson) return;
+
+    const lessonId = this.substitutionLesson.id;
+    this.backend.patch<Lesson>(
+      `/lessons/${lessonId}/status?status=${LessonStatus.SUBSTITUTED}&substituteTeacherUserId=${substituteTeacherUserId}`,
+      {}
+    ).subscribe({
+      next: () => {
+        this.closeSubstitutionDialog();
+        this.loadLessons();
+      },
+      error: (err) => {
+        this.substitutionError = err.error?.message || 'Failed to substitute lesson.';
       }
     });
   }

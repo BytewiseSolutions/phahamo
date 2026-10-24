@@ -80,6 +80,9 @@ export class TimetablePage implements OnInit {
 
   onDayChange(day: DayOfWeek): void {
     this.activeDay = day;
+    if (this.isTeacher) {
+      this.loadTimetable();
+    }
   }
 
   onViewModeChange(mode: 'class' | 'teacher'): void {
@@ -190,7 +193,7 @@ export class TimetablePage implements OnInit {
 
     let url: string;
     if (this.isTeacher) {
-      url = `/timetable/teacher/${this.userId}`;
+      url = `/timetable/teacher/${this.userId}?date=${this.dateForDay(this.activeDay)}`;
     } else if (this.isStudent) {
       url = '/timetable/my-class';
     } else {
@@ -207,6 +210,18 @@ export class TimetablePage implements OnInit {
         this.loadingTimetable = false;
       }
     });
+  }
+
+  private dateForDay(day: DayOfWeek): string {
+    const today = new Date();
+    const currentDay = today.getDay() === 0 ? 7 : today.getDay();
+    const targetDay = Object.values(DayOfWeek).indexOf(day) + 1;
+    const date = new Date(today);
+    date.setDate(today.getDate() + targetDay - currentDay);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const dayOfMonth = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${dayOfMonth}`;
   }
 
   slotForTeacherView(day: DayOfWeek, periodId: number): Timetable | null {

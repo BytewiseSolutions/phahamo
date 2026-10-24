@@ -133,7 +133,12 @@
                 @for (lesson of lessons; track lesson.id) {
                   <tr>
                     <td>{{ lesson.date | date:'dd MMM yyyy' }}</td>
-                    <td>{{ lesson.periodName }} ({{ lesson.periodStartTime }}–{{ lesson.periodEndTime }})</td>
+                    <td>
+                      {{ lesson.periodName }} ({{ lesson.periodStartTime }}–{{ lesson.periodEndTime }})
+                      @if (lesson.substituteTeacherName) {
+                        <div class="substitution-note">Cover: {{ lesson.substituteTeacherName }}</div>
+                      }
+                    </td>
                     <td>
                       <select [ngModel]="lesson.status" (ngModelChange)="onLessonStatusChange(lesson, $event)">
                         @for (status of lessonStatuses; track status) {
@@ -161,3 +166,13 @@
   }
 
 </div>
+
+<app-lesson-substitution-dialog
+  [visible]="substitutionLesson !== null"
+  [lesson]="substitutionLesson"
+  [teachers]="availableSubstituteTeachers"
+  [loading]="loadingSubstituteTeachers"
+  [errorMessage]="substitutionError"
+  (closed)="closeSubstitutionDialog()"
+  (confirmed)="confirmSubstitution($event)">
+</app-lesson-substitution-dialog>

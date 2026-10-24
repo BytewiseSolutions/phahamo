@@ -13,6 +13,7 @@ export interface Lesson {
   subjectName: string;
   schoolClassName: string;
   teacherName: string;
+  substituteTeacherName: string | null;
   date: string;
   status: LessonStatus;
 }

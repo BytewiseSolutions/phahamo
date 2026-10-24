@@ -9,12 +9,17 @@ import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentR
 import ls.co.bytewise.api.timetable.period.Period;
 import ls.co.bytewise.api.timetable.period.PeriodExceptions;
 import ls.co.bytewise.api.timetable.period.PeriodRepository;
+import ls.co.bytewise.api.timetable.lesson.Lesson;
+import ls.co.bytewise.api.timetable.lesson.LessonRepository;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class TimetableService {
@@ -23,15 +28,18 @@ public class TimetableService {
     private final PeriodRepository periodRepository;
     private final SubjectClassAssignmentRepository assignmentRepository;
     private final StudentRepository studentRepository;
+    private final LessonRepository lessonRepository;
 
     public TimetableService(TimetableRepository timetableRepository,
                             PeriodRepository periodRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
-                            StudentRepository studentRepository) {
+                            StudentRepository studentRepository,
+                            LessonRepository lessonRepository) {
         this.timetableRepository = timetableRepository;
         this.periodRepository = periodRepository;
         this.assignmentRepository = assignmentRepository;
         this.studentRepository = studentRepository;
+        this.lessonRepository = lessonRepository;
     }
 
     @Transactional
@@ -149,9 +157,37 @@ public class TimetableService {
     }
 
     public List<TimetableDto> listByTeacher(Long teacherId) {
+        return listByTeacher(teacherId, null);
+    }
+
+    public List<TimetableDto> listByTeacher(Long teacherId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
-        return timetableRepository.findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId).stream()
-                .map(TimetableDto::new)
+        List<Timetable> regularSlots = timetableRepository
+                .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId);
+
+        if (date == null) {
+            return regularSlots.stream().map(TimetableDto::new).toList();
+        }
+
+        Map<Long, TimetableDto> result = new LinkedHashMap<>();
+        for (Timetable slot : regularSlots.stream()
+                .filter(slot -> slot.getDayOfWeek() == date.getDayOfWeek())
+                .toList()) {
+            Lesson lesson = lessonRepository
+                    .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
+                    .orElse(null);
+            result.put(slot.getId(), new TimetableDto(slot, lesson));
+        }
+
+        for (Lesson lesson : lessonRepository
+                .findAllBySubstituteTeacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
+                        teacherId, date, schoolId)) {
+            result.putIfAbsent(lesson.getTimetable().getId(),
+                    new TimetableDto(lesson.getTimetable(), lesson));
+        }
+
+        return result.values().stream()
+                .sorted(java.util.Comparator.comparing(TimetableDto::getPeriodStartTime))
                 .toList();
     }
 

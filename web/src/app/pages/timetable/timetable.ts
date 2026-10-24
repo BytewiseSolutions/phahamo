@@ -13,6 +13,9 @@ export interface Timetable {
   subjectName: string;
   schoolClassName: string;
   teacherName: string;
+  substituteTeacherName?: string | null;
+  lessonStatus?: string | null;
+  lessonDate?: string | null;
 }
 
 export interface TimetablePayload {

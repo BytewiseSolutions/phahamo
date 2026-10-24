@@ -99,7 +99,12 @@
               <td>{{ lesson.periodName }}</td>
               <td class="time-cell">{{ lesson.periodStartTime.substring(0, 5) }}–{{ lesson.periodEndTime.substring(0, 5) }}</td>
               @if (mode === 'class') {
-                <td>{{ lesson.teacherName }}</td>
+                <td>
+                  {{ lesson.teacherName }}
+                  @if (lesson.substituteTeacherName) {
+                    <div class="substitution-note">Cover: {{ lesson.substituteTeacherName }}</div>
+                  }
+                </td>
               } @else {
                 <td>{{ lesson.schoolClassName }}</td>
               }

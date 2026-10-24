@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/timetable")
@@ -44,8 +46,11 @@ public class TimetableController {
 
     @GetMapping("/teacher/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public List<TimetableDto> listByTeacher(@PathVariable Long id) {
-        return timetableService.listByTeacher(id);
+    public List<TimetableDto> listByTeacher(
+            @PathVariable Long id,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return timetableService.listByTeacher(id, date);
     }
 
     @GetMapping("/class/{id}")

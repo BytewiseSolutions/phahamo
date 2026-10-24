@@ -9,5 +9,6 @@ export interface Lesson {
   subjectName: string;
   schoolClassName: string;
   teacherName: string;
+  substituteTeacherName: string | null;
   status: string;
 }

@@ -48,6 +48,7 @@ import { UserView } from './pages/user/user-view/user-view';
 import { TeacherSubjectList } from './pages/teacher/teacher-subject-list/teacher-subject-list';
 import { TeacherTimetable } from './pages/teacher/teacher-timetable/teacher-timetable';
 import { TeacherLessons } from './pages/teacher/teacher-lessons/teacher-lessons';
+import { LessonSubstitutionDialog } from './pages/lessons/lesson-substitution-dialog/lesson-substitution-dialog';
 import { StudentParentList } from './pages/student/student-parent-list/student-parent-list';
 import { StudentParentForm } from './pages/student/student-parent-form/student-parent-form';
 import { SubscriptionList } from './pages/subscription/subscription-list/subscription-list';
@@ -139,6 +140,7 @@ import { Profile } from './pages/profile/profile/profile';
     TeacherSubjectList,
     TeacherTimetable,
     TeacherLessons,
+    LessonSubstitutionDialog,
     StudentParentList,
     StudentParentForm,
     SubscriptionList,

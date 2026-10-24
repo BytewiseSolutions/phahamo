@@ -2,6 +2,9 @@ package ls.co.bytewise.api.timetable.lesson;
 
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.teacher.Teacher;
+import ls.co.bytewise.api.teacher.TeacherDto;
+import ls.co.bytewise.api.teacher.TeacherRepository;
 import ls.co.bytewise.api.timetable.Timetable;
 import ls.co.bytewise.api.timetable.TimetableRepository;
 import ls.co.bytewise.api.user.User;
@@ -20,10 +23,14 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final TimetableRepository timetableRepository;
+    private final TeacherRepository teacherRepository;
 
-    public LessonService(LessonRepository lessonRepository, TimetableRepository timetableRepository) {
+    public LessonService(LessonRepository lessonRepository,
+                         TimetableRepository timetableRepository,
+                         TeacherRepository teacherRepository) {
         this.lessonRepository = lessonRepository;
         this.timetableRepository = timetableRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     @Transactional
@@ -37,12 +44,14 @@ public class LessonService {
 
         School school = resolveActiveSchool(requester, schoolId);
 
-        return slots.stream()
-                .map(slot -> lessonRepository
-                        .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
-                        .orElseGet(() -> createLesson(requester, school, slot, date)))
-                .map(LessonDto::new)
-                .toList();
+        slots.forEach(slot -> lessonRepository
+                .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
+                .orElseGet(() -> createLesson(requester, school, slot, date)));
+
+        return lessonRepository
+                .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                        schoolClassId, date, date, schoolId)
+                .stream().map(LessonDto::new).toList();
     }
 
     @Transactional
@@ -56,12 +65,17 @@ public class LessonService {
 
         School school = resolveActiveSchool(requester, schoolId);
 
-        return slots.stream()
-                .map(slot -> lessonRepository
-                        .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
-                        .orElseGet(() -> createLesson(requester, school, slot, date)))
-                .map(LessonDto::new)
-                .toList();
+        slots.forEach(slot -> lessonRepository
+                .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
+                .orElseGet(() -> createLesson(requester, school, slot, date)));
+
+        return mergeTeacherLessons(
+                lessonRepository
+                        .findAllByTimetable_Assignment_Teacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
+                                teacherId, date, schoolId),
+                lessonRepository
+                        .findAllBySubstituteTeacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
+                                teacherId, date, schoolId));
     }
 
     @Transactional
@@ -122,12 +136,13 @@ public class LessonService {
             cursor = cursor.plusDays(1);
         }
 
-        return lessonRepository
-                .findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
-                        teacherId, startDate, endDate, schoolId)
-                .stream()
-                .map(LessonDto::new)
-                .toList();
+        return mergeTeacherLessons(
+                lessonRepository
+                        .findAllByTimetable_Assignment_Teacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                                teacherId, startDate, endDate, schoolId),
+                lessonRepository
+                        .findAllBySubstituteTeacher_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                                teacherId, startDate, endDate, schoolId));
     }
 
     private void validateRange(LocalDate startDate, LocalDate endDate) {
@@ -160,13 +175,95 @@ public class LessonService {
         return new LessonDto(getLessonInCurrentSchool(id));
     }
 
+    private List<LessonDto> mergeTeacherLessons(List<Lesson> regularLessons,
+                                                List<Lesson> substituteLessons) {
+        java.util.Map<Long, Lesson> merged = new java.util.LinkedHashMap<>();
+        regularLessons.forEach(lesson -> merged.put(lesson.getId(), lesson));
+        substituteLessons.forEach(lesson -> merged.putIfAbsent(lesson.getId(), lesson));
+        return merged.values().stream().map(LessonDto::new).toList();
+    }
+
     @Transactional
-    public LessonDto updateStatus(User editor, Long id, LessonStatus newStatus) {
+    public LessonDto updateStatus(User editor, Long id, LessonStatus newStatus,
+                                  Long substituteTeacherUserId) {
         Lesson lesson = getLessonInCurrentSchool(id);
+
+        if (newStatus == LessonStatus.SUBSTITUTED) {
+            if (substituteTeacherUserId == null) {
+                throw new LessonExceptions.InvalidLessonException(
+                        "A substitute teacher is required for a substituted lesson");
+            }
+
+            Long schoolId = TenantContext.getSchoolId();
+            Teacher substitute = teacherRepository.findByUserIdAndSchoolId(
+                            substituteTeacherUserId, schoolId)
+                    .orElseThrow(() -> new LessonExceptions.InvalidLessonException(
+                            "Substitute teacher not found"));
+
+            Long usualTeacherId = lesson.getTimetable().getAssignment().getTeacher() != null
+                    ? lesson.getTimetable().getAssignment().getTeacher().getId() : null;
+            if (substitute.getUser().getId().equals(usualTeacherId)) {
+                throw new LessonExceptions.InvalidLessonException(
+                        "The usual teacher cannot substitute their own lesson");
+            }
+
+            boolean recurringConflict = timetableRepository.existsOverlappingForTeacher(
+                    schoolId,
+                    lesson.getDate().getDayOfWeek(),
+                    substituteTeacherUserId,
+                    lesson.getTimetable().getPeriod().getStartTime(),
+                    lesson.getTimetable().getPeriod().getEndTime(),
+                    -1L);
+            boolean substitutionConflict = lessonRepository.existsOverlappingSubstitution(
+                    schoolId,
+                    lesson.getDate(),
+                    substituteTeacherUserId,
+                    lesson.getTimetable().getPeriod().getStartTime(),
+                    lesson.getTimetable().getPeriod().getEndTime(),
+                    lesson.getId());
+
+            if (recurringConflict || substitutionConflict) {
+                throw new LessonExceptions.InvalidLessonException(
+                        "This teacher is not free during the lesson period");
+            }
+
+            lesson.setSubstituteTeacher(substitute.getUser());
+        } else {
+            lesson.setSubstituteTeacher(null);
+        }
+
         lesson.setStatus(newStatus);
         lesson.setUpdatedBy(editor);
         Lesson saved = lessonRepository.save(lesson);
         return new LessonDto(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeacherDto> getAvailableSubstituteTeachers(Long lessonId) {
+        Lesson lesson = getLessonInCurrentSchool(lessonId);
+        Long schoolId = TenantContext.getSchoolId();
+        Long usualTeacherId = lesson.getTimetable().getAssignment().getTeacher() != null
+                ? lesson.getTimetable().getAssignment().getTeacher().getId() : null;
+
+        return teacherRepository.findAllBySchoolId(schoolId).stream()
+                .filter(teacher -> teacher.getUser() != null)
+                .filter(teacher -> !teacher.getUser().getId().equals(usualTeacherId))
+                .filter(teacher -> !timetableRepository.existsOverlappingForTeacher(
+                        schoolId,
+                        lesson.getDate().getDayOfWeek(),
+                        teacher.getUser().getId(),
+                        lesson.getTimetable().getPeriod().getStartTime(),
+                        lesson.getTimetable().getPeriod().getEndTime(),
+                        -1L))
+                .filter(teacher -> !lessonRepository.existsOverlappingSubstitution(
+                        schoolId,
+                        lesson.getDate(),
+                        teacher.getUser().getId(),
+                        lesson.getTimetable().getPeriod().getStartTime(),
+                        lesson.getTimetable().getPeriod().getEndTime(),
+                        lesson.getId()))
+                .map(TeacherDto::new)
+                .toList();
     }
 
     private Lesson getLessonInCurrentSchool(Long id) {
