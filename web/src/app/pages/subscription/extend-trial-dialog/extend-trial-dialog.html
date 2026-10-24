@@ -1,0 +1,46 @@
+@if (visible && school) {
+  <div class="dialog-overlay" (click)="onOverlayClick($event)">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>Extend Trial — {{ school.schoolName }}</h2>
+      </div>
+
+      <div class="dialog-body">
+        <p class="hint">Current ends at: {{ formatDate(school.endsAt) }}</p>
+
+        <label class="field-label">Quick select</label>
+        <div class="day-chips">
+          @for (d of dayOptions; track d) {
+            <button
+              type="button"
+              class="chip"
+              [class.active]="customDays === null && selectedDays === d"
+              (click)="chooseDays(d)">
+              +{{ d }} days
+            </button>
+          }
+        </div>
+
+        <label class="field-label">Or custom days</label>
+        <input
+          type="number"
+          min="1"
+          class="custom-input"
+          placeholder="Enter days"
+          [(ngModel)]="customDays"
+          [ngModelOptions]="{ standalone: true }"/>
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" [disabled]="saving" (click)="close()">Cancel</button>
+        <button type="button" class="primary-button" [disabled]="saving" (click)="submit()">
+          {{ saving ? 'Extending...' : 'Extend by ' + effectiveDays + ' days' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

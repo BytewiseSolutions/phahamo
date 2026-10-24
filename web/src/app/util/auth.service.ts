@@ -60,6 +60,7 @@ export class AuthService {
       next: () => this.completeLogout(),
       error: () => this.completeLogout()
     });
+    localStorage.removeItem('activeSchoolId');
   }
 
   private completeLogout(): void {

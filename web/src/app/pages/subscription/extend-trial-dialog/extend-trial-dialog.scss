@@ -1,0 +1,126 @@
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+  z-index: 2000;
+}
+
+.dialog-content {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+}
+
+.dialog-header h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dialog-body {
+  margin-bottom: 20px;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin: 12px 0 8px;
+}
+
+.day-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 14px;
+  border-radius: var(--border-radius-md);
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.custom-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.custom-input:focus {
+  border-color: var(--primary);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.primary-button,
+.secondary-button {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.primary-button {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.secondary-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.error-banner {
+  padding: 10px 14px;
+  margin-top: 12px;
+  background: rgb(from var(--error) r g b / 0.08);
+  border: 1px solid rgb(from var(--error) r g b / 0.25);
+  border-radius: var(--border-radius-md);
+  color: var(--error);
+  font-size: 12px;
+}

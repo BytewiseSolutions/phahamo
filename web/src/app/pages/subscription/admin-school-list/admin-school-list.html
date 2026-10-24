@@ -1,0 +1,97 @@
+<div class="admin-schools-page">
+
+  <div class="page-header">
+    <h1>Schools</h1>
+    <p>Manage every school's trial and subscription.</p>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search by school name or email..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onFiltersChanged()"
+        [ngModelOptions]="{ standalone: true }"/>
+    </div>
+
+    <select class="status-filter"
+            [(ngModel)]="statusFilter"
+            (ngModelChange)="onFiltersChanged()"
+            [ngModelOptions]="{ standalone: true }">
+      @for (s of statusOptions; track s) {
+        <option [value]="s">{{ s === 'ALL' ? 'All statuses' : s }}</option>
+      }
+    </select>
+
+    @if (hasFilters) {
+      <button type="button" class="clear-filters" (click)="clearFilters()">Clear</button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Loading schools...</div>
+  } @else if (schools.length === 0) {
+    <div class="empty-state">
+      <p>No schools match these filters.</p>
+    </div>
+  } @else {
+    <table class="schools-table">
+      <thead>
+      <tr>
+        <th>School</th>
+        <th>Contact</th>
+        <th>Plan</th>
+        <th>Status</th>
+        <th>Ends</th>
+        <th>Days Left</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (school of filteredSchools; track school.schoolId) {
+          <tr>
+            <td>{{ school.schoolName }}</td>
+            <td>{{ school.contactEmail }}</td>
+            <td>{{ school.plan }}</td>
+            <td>
+              <span class="status-badge" [class]="statusBadgeClass(school.status)">
+                {{ school.status }}
+              </span>
+            </td>
+            <td>{{ formatDate(school.endsAt) }}</td>
+            <td>{{ school.daysRemaining === null ? '—' : school.daysRemaining }}</td>
+            <td class="actions-cell">
+              <button type="button" class="link-button edit" (click)="openExtendDialog(school)">Extend Trial</button>
+              <button type="button" class="link-button edit" (click)="openActivateDialog(school)">Activate</button>
+              @if (school.status !== 'SUSPENDED') {
+                <button type="button" class="link-button danger" (click)="onSuspend(school)">Suspend</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <app-extend-trial-dialog
+    [visible]="showExtendDialog"
+    [school]="selectedSchool"
+    (closed)="onDialogClosed()"
+    (saved)="onActionCompleted()">
+  </app-extend-trial-dialog>
+
+  <app-activate-subscription-dialog
+    [visible]="showActivateDialog"
+    [school]="selectedSchool"
+    (closed)="onDialogClosed()"
+    (saved)="onActionCompleted()">
+  </app-activate-subscription-dialog>
+
+</div>

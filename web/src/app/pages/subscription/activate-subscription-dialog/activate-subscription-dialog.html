@@ -1,0 +1,42 @@
+@if (visible && school) {
+  <div class="dialog-overlay" (click)="onOverlayClick($event)">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>Activate Subscription — {{ school.schoolName }}</h2>
+      </div>
+
+      <div class="dialog-body">
+        <label class="field-label">Plan</label>
+        <select class="select-input"
+                [(ngModel)]="selectedPlan"
+                [ngModelOptions]="{ standalone: true }">
+          @for (p of planOptions; track p.value) {
+            <option [value]="p.value">{{ p.label }}</option>
+          }
+        </select>
+
+        @if (showMonths) {
+          <label class="field-label">Duration</label>
+          <select class="select-input"
+                  [(ngModel)]="selectedMonths"
+                  [ngModelOptions]="{ standalone: true }">
+            @for (m of monthOptions; track m) {
+              <option [value]="m">{{ m }} {{ m === 1 ? 'month' : 'months' }}</option>
+            }
+          </select>
+        }
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" [disabled]="saving" (click)="close()">Cancel</button>
+        <button type="button" class="primary-button" [disabled]="saving" (click)="submit()">
+          {{ saving ? 'Activating...' : 'Activate' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

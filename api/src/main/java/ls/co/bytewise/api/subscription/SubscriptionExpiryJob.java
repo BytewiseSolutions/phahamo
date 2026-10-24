@@ -16,7 +16,7 @@ public class SubscriptionExpiryJob {
         this.subscriptionService = subscriptionService;
     }
 
-    @Scheduled(cron = "0 0 2 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void expireSubscriptions() {
         log.info("Running subscription expiry check");
         subscriptionService.runExpiryCheck();

@@ -1,9 +1,6 @@
 package ls.co.bytewise.api.config;
 
-import ls.co.bytewise.api.security.ApiAuthenticationEntryPoint;
-import ls.co.bytewise.api.security.JwtAuthenticationFilter;
-import ls.co.bytewise.api.security.OAuth2SuccessHandler;
-import ls.co.bytewise.api.security.TenantFilter;
+import ls.co.bytewise.api.security.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,11 +22,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final TenantFilter tenantFilter;
+    private final SubscriptionAccessFilter subscriptionAccessFilter;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          TenantFilter tenantFilter) {
+                          TenantFilter tenantFilter,
+                          SubscriptionAccessFilter subscriptionAccessFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.tenantFilter = tenantFilter;
+        this.subscriptionAccessFilter = subscriptionAccessFilter;
     }
 
     @Bean
@@ -60,8 +60,9 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                 )
 
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(tenantFilter, JwtAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(tenantFilter, JwtAuthenticationFilter.class)
+            .addFilterAfter(subscriptionAccessFilter, TenantFilter.class);
 
         return http.build();
     }

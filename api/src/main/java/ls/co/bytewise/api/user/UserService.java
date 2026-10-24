@@ -17,6 +17,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
@@ -152,6 +153,11 @@ public class UserService {
         return userRepository.findAllBySchoolIdAndRole(schoolId, UserRole.PARENT).stream()
                 .map(UserDto::new)
                 .toList();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public UserDto createUserInNewTransaction(User creator, UserDto dto) {
+        return createUser(creator, dto);
     }
 
     @Transactional

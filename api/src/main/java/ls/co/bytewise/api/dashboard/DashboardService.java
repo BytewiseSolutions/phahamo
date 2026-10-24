@@ -3,12 +3,17 @@ package ls.co.bytewise.api.dashboard;
 import ls.co.bytewise.api.attendance.AttendanceRepository;
 import ls.co.bytewise.api.attendance.AttendanceStatus;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.student.StudentStatus;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountRepository;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
+import ls.co.bytewise.api.subscription.Subscription;
+import ls.co.bytewise.api.subscription.SubscriptionRepository;
+import ls.co.bytewise.api.subscription.SubscriptionService;
+import ls.co.bytewise.api.subscription.SubscriptionStatus;
 import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.timetable.Timetable;
@@ -22,8 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +45,9 @@ public class DashboardService {
     private final TimetableRepository timetableRepository;
     private final SubjectClassAssignmentRepository assignmentRepository;
     private final LessonRepository lessonRepository;
+    private final SchoolRepository schoolRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionService subscriptionService;
 
 
     public DashboardService(StudentRepository studentRepository,
@@ -47,7 +57,11 @@ public class DashboardService {
                             TermRepository termRepository,
                             TimetableRepository timetableRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
-                            LessonRepository lessonRepository) {
+                            LessonRepository lessonRepository,
+                            SchoolRepository schoolRepository,
+                            SubscriptionRepository subscriptionRepository,
+                            SubscriptionService subscriptionService
+                            ) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
         this.attendanceRepository = attendanceRepository;
@@ -56,6 +70,42 @@ public class DashboardService {
         this.timetableRepository = timetableRepository;
         this.assignmentRepository = assignmentRepository;
         this.lessonRepository = lessonRepository;
+        this.schoolRepository = schoolRepository;
+        this.subscriptionRepository = subscriptionRepository;
+        this.subscriptionService = subscriptionService;
+    }
+
+    public SystemDashboardStats getSystemStats() {
+        SystemDashboardStats stats = new SystemDashboardStats();
+
+        stats.setTotalSchools(schoolRepository.count());
+        stats.setTotalUsers(userRepository.count());
+
+        List<Subscription> subs = subscriptionRepository.findAll();
+        Instant now = Instant.now();
+        Instant sevenDaysFromNow = now.plus(7, ChronoUnit.DAYS);
+
+        long active = 0, trial = 0, suspended = 0, expiring = 0;
+
+        for (Subscription sub : subs) {
+            SubscriptionStatus effective = subscriptionService.computeEffectiveStatus(sub);
+
+            if (effective == SubscriptionStatus.SUSPENDED) suspended++;
+            else if (effective == SubscriptionStatus.ACTIVE) active++;
+            else if (effective == SubscriptionStatus.TRIAL) trial++;
+
+            if (sub.getEndsAt() != null
+                    && sub.getEndsAt().isAfter(now)
+                    && sub.getEndsAt().isBefore(sevenDaysFromNow)) {
+                expiring++;
+            }
+        }
+
+        stats.setActiveSchools(active);
+        stats.setTrialSchools(trial);
+        stats.setSuspendedSchools(suspended);
+        stats.setExpiringSoonSchools(expiring);
+        return stats;
     }
 
     @Transactional(readOnly = true)

@@ -3,7 +3,51 @@
 
   <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
 
-  @if (isAdmin && stats) {
+  @if (isSystemAdmin) {
+    <div class="school-picker-card">
+      <label class="picker-label">View as school</label>
+      <select class="picker-select"
+              [(ngModel)]="selectedSchoolId"
+              (ngModelChange)="onSchoolSelected()"
+              [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="null">— All Schools (Platform Overview) —</option>
+        @for (s of schoolsForPicker; track s.schoolId) {
+          <option [ngValue]="s.schoolId">{{ s.schoolName }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  @if (isSystemAdmin && !selectedSchoolId && systemStats) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Schools</span>
+        <span class="stat-value">{{ systemStats.totalSchools }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active Schools</span>
+        <span class="stat-value">{{ systemStats.activeSchools }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Trial Schools</span>
+        <span class="stat-value">{{ systemStats.trialSchools }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Suspended</span>
+        <span class="stat-value">{{ systemStats.suspendedSchools }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Expiring in 7 Days</span>
+        <span class="stat-value">{{ systemStats.expiringSoonSchools }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Total Users</span>
+        <span class="stat-value">{{ systemStats.totalUsers }}</span>
+      </div>
+    </div>
+  }
+
+  @if (stats) {
     <div class="stats-grid">
       <div class="stat-card">
         <span class="stat-label">Total Students</span>

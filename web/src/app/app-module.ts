@@ -88,6 +88,12 @@ import { RemarksPage } from './pages/remarks/remarks-page/remarks-page';
 import { PromotionPage } from './pages/promotion/promotion-page/promotion-page';
 import { PromotionHistory } from './pages/promotion/promotion-history/promotion-history';
 import { EmailReportCards } from './pages/reports/email-report-cards/email-report-cards';
+import { BulkImport } from './pages/imports/bulk-import/bulk-import';
+import { AdminSchoolList } from './pages/subscription/admin-school-list/admin-school-list';
+import { ExtendTrialDialog } from './pages/subscription/extend-trial-dialog/extend-trial-dialog';
+import { ActivateSubscriptionDialog } from './pages/subscription/activate-subscription-dialog/activate-subscription-dialog';
+import { SubscriptionExpired } from './pages/subscription/subscription-expired/subscription-expired';
+import {SubscriptionInterceptor} from './util/subscription.interceptor';
 
 @NgModule({
   declarations: [
@@ -171,6 +177,11 @@ import { EmailReportCards } from './pages/reports/email-report-cards/email-repor
     PromotionPage,
     PromotionHistory,
     EmailReportCards,
+    BulkImport,
+    AdminSchoolList,
+    ExtendTrialDialog,
+    ActivateSubscriptionDialog,
+    SubscriptionExpired,
   ],
   imports: [
     BrowserModule,
@@ -186,7 +197,8 @@ import { EmailReportCards } from './pages/reports/email-report-cards/email-repor
   providers: [
     provideBrowserGlobalErrorListeners(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: UnauthorizedInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: UnauthorizedInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: SubscriptionInterceptor, multi: true }
   ],
   bootstrap: [App]
 })

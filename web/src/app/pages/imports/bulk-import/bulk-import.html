@@ -1,0 +1,221 @@
+<div class="bulk-import-page">
+
+  <div class="back-link-row">
+    <button type="button" class="back-link" (click)="goToUsers()">
+      <i class="fa-solid fa-arrow-left"></i>
+      Go to Users
+    </button>
+  </div>
+
+  <div class="page-header">
+    <h1>Bulk Import</h1>
+    <p>Add many students or teachers at once from a spreadsheet. Each person gets a login account automatically.</p>
+  </div>
+
+  <div class="tabs">
+    <button type="button"
+            class="tab"
+            [class.active]="importType === ImportType.Students"
+            [disabled]="previewing || importing"
+            (click)="setType(ImportType.Students)">
+      Students
+    </button>
+    <button type="button"
+            class="tab"
+            [class.active]="importType === ImportType.Teachers"
+            [disabled]="previewing || importing"
+            (click)="setType(ImportType.Teachers)">
+      Teachers
+    </button>
+  </div>
+
+  <div class="step-card">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <h3>Download the template</h3>
+      <p>Fill in the spreadsheet, save as Excel Workbook (.xlsx), then upload below.</p>
+      <button type="button" class="secondary-button" (click)="downloadTemplate()">
+        <i class="fa-solid fa-download"></i>
+        Download {{ importType === ImportType.Students ? 'Student' : 'Teacher' }} Template
+      </button>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <h3>Upload your completed file</h3>
+      <div class="file-input-row">
+        <input type="file"
+               accept=".xlsx"
+               id="import-file"
+               (change)="onFileSelected($event)"
+               [disabled]="previewing || importing"/>
+        <span class="file-name">
+          @if (selectedFileName) {
+            {{ selectedFileName }}
+          } @else {
+            No file selected
+          }
+        </span>
+      </div>
+
+      <button type="button"
+              class="primary-button"
+              [disabled]="!selectedFile || previewing || importing"
+              (click)="previewImport()">
+        @if (previewing) {
+          <span class="spinner"></span> Parsing...
+        } @else {
+          Preview Import
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (preview) {
+    <div class="step-card">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h3>Review the preview</h3>
+
+        <div class="summary-stats">
+          <div class="stat success">
+            <span class="value">{{ preview.summary.validCount }}</span>
+            <span class="label">Valid</span>
+          </div>
+          <div class="stat error">
+            <span class="value">{{ preview.summary.invalidCount }}</span>
+            <span class="label">Invalid</span>
+          </div>
+          <div class="stat info">
+            <span class="value">{{ preview.summary.totalRows }}</span>
+            <span class="label">Total</span>
+          </div>
+        </div>
+
+        @if (preview.validRows.length > 0) {
+          <h4 class="section-heading success">Ready to import ({{ preview.validRows.length }})</h4>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Row</th>
+              <th>Name</th>
+              <th>Email</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (row of preview.validRows; track row.rowNumber) {
+                <tr class="valid-row">
+                  <td>{{ row.rowNumber }}</td>
+                  <td>{{ row.firstName }} {{ row.lastName }}</td>
+                  <td>{{ row.email }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (preview.invalidRows.length > 0) {
+          <h4 class="section-heading error">Skipped ({{ preview.invalidRows.length }})</h4>
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Row</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Reason</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (row of preview.invalidRows; track row.rowNumber) {
+                <tr class="invalid-row">
+                  <td>{{ row.rowNumber }}</td>
+                  <td>{{ row.firstName || '—' }} {{ row.lastName || '' }}</td>
+                  <td>{{ row.email || '—' }}</td>
+                  <td class="reason">{{ row.reason }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <div class="actions-row">
+          <button type="button"
+                  class="primary-button"
+                  [disabled]="preview.summary.validCount === 0 || importing"
+                  (click)="confirmImport()">
+            @if (importing) {
+              <span class="spinner"></span> Importing...
+            } @else {
+              Import {{ preview.summary.validCount }} {{ importType === ImportType.Students ? 'Student' : 'Teacher' }}{{ preview.summary.validCount === 1 ? '' : 's' }}
+            }
+          </button>
+          <button type="button"
+                  class="secondary-button"
+                  [disabled]="importing"
+                  (click)="reset()">
+            Start Over
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (finalResult) {
+    <div class="step-card final">
+      <div class="step-number">✓</div>
+      <div class="step-content">
+        <h3>Import complete</h3>
+        <div class="summary-stats">
+          <div class="stat success">
+            <span class="value">{{ finalResult.summary.addedCount }}</span>
+            <span class="label">Added</span>
+          </div>
+          <div class="stat error">
+            <span class="value">{{ finalResult.summary.skippedCount }}</span>
+            <span class="label">Skipped</span>
+          </div>
+        </div>
+        <p class="hint">Welcome emails with temporary passwords have been sent to all added users.</p>
+
+        @if (finalResult.validRows.length > 0) {
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>{{ importType === ImportType.Students ? 'Admission No.' : 'Employee No.' }}</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (row of finalResult.validRows; track row.rowNumber) {
+                <tr>
+                  <td>{{ row.firstName }} {{ row.lastName }}</td>
+                  <td>{{ row.email }}</td>
+                  <td>{{ row.generatedId || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <div class="actions-row">
+          <button type="button" class="primary-button" (click)="goToUsers()">
+            Go to Users
+          </button>
+          <button type="button" class="secondary-button" (click)="reset()">
+            Import Another File
+          </button>
+        </div>
+
+        <p class="hint">Redirecting to Users in a moment...</p>
+      </div>
+    </div>
+  }
+
+</div>
