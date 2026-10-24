@@ -68,12 +68,11 @@ export class AcademicYearList implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.post<AcademicYear>(
+    this.backend.postSilently<AcademicYear>(
       '/academic-years',
       newAcademicYear
     ).subscribe({
       next: () => {
-        this.successMessage = 'Academic year created.';
         this.showCreateForm = false;
         this.loadAcademicYears();
       },

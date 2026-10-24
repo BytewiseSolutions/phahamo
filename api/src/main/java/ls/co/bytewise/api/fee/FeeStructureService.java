@@ -8,6 +8,7 @@ import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
+import ls.co.bytewise.api.studentfee.StudentFeeAccountService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,17 +23,20 @@ public class FeeStructureService {
     private final SchoolClassRepository schoolClassRepository;
     private final TermRepository termRepository;
     private final AcademicYearRepository academicYearRepository;
+    private final StudentFeeAccountService feeAccountService;
 
     public FeeStructureService(FeeStructureRepository feeStructureRepository,
                                AnnualFeeRepository annualFeeRepository,
                                SchoolClassRepository schoolClassRepository,
                                TermRepository termRepository,
-                               AcademicYearRepository academicYearRepository) {
+                               AcademicYearRepository academicYearRepository,
+                               StudentFeeAccountService feeAccountService) {
         this.feeStructureRepository = feeStructureRepository;
         this.annualFeeRepository = annualFeeRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.termRepository = termRepository;
         this.academicYearRepository = academicYearRepository;
+        this.feeAccountService = feeAccountService;
     }
 
     public List<FeeStructureDto> listStructures(Long classId, Long termId) {
@@ -108,6 +112,7 @@ public class FeeStructureService {
         }
 
         FeeStructure saved = feeStructureRepository.save(structure);
+        feeAccountService.synchronizeClassTerm(saved.getSchoolClass().getId(), saved.getTerm().getId(), creator);
         return new FeeStructureDto(saved);
     }
 
@@ -137,6 +142,7 @@ public class FeeStructureService {
 
         structure.setUpdatedBy(editor);
         FeeStructure saved = feeStructureRepository.save(structure);
+        feeAccountService.synchronizeClassTerm(saved.getSchoolClass().getId(), saved.getTerm().getId(), editor);
         return new FeeStructureDto(saved);
     }
 

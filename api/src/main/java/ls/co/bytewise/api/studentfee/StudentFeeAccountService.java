@@ -18,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -62,6 +61,13 @@ public class StudentFeeAccountService {
         if (schoolClass == null) {
             throw new StudentFeeExceptions.InvalidFeeOperationException(
                     "Student " + student.getAdmissionNumber() + " has no current class");
+        }
+
+        if (feeStructureRepository
+                .findAllBySchoolClassIdAndTermIdAndSchoolId(schoolClass.getId(), termId, schoolId)
+                .isEmpty()) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException(
+                    "No fee structure is configured for this class and term");
         }
 
         accountRepository.findByStudentIdAndTermIdAndSchoolId(studentId, termId, schoolId)
@@ -130,20 +136,98 @@ public class StudentFeeAccountService {
 
     @Transactional
     public List<StudentFeeAccountDto> generateForClass(Long classId, Long termId, User creator) {
+        synchronizeClassTerm(classId, termId, creator);
+        return listForClass(classId, termId);
+    }
+
+    @Transactional
+    public void synchronizeStudentAccounts(Student student, User creator) {
+        if (student.getStatus() != ls.co.bytewise.api.student.StudentStatus.ACTIVE
+                || student.getCurrentClass() == null) {
+            return;
+        }
+
         Long schoolId = TenantContext.getSchoolId();
+        feeStructureRepository
+                .findAllBySchoolClassIdAndSchoolId(student.getCurrentClass().getId(), schoolId)
+                .forEach(structure -> synchronizeStudentTerm(student, structure, creator));
+    }
 
-        List<Student> students = studentRepository
-                .findAllBySchoolIdAndCurrentClassId(schoolId, classId);
+    @Transactional
+    public void synchronizeClassTerm(Long classId, Long termId, User creator) {
+        Long schoolId = TenantContext.getSchoolId();
+        FeeStructure structure = feeStructureRepository
+                .findAllBySchoolClassIdAndTermIdAndSchoolId(classId, termId, schoolId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new StudentFeeExceptions.InvalidFeeOperationException(
+                        "No fee structure is configured for this class and term"));
 
-        List<StudentFeeAccountDto> results = new ArrayList<>();
-        for (Student s : students) {
-            try {
-                results.add(generateForStudent(s.getId(), termId, creator));
-            } catch (StudentFeeExceptions.InvalidFeeOperationException ignored) {
+        studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, classId).stream()
+                .filter(student -> student.getStatus() == ls.co.bytewise.api.student.StudentStatus.ACTIVE)
+                .forEach(student -> synchronizeStudentTerm(student, structure, creator));
+    }
 
+    private void synchronizeStudentTerm(Student student, FeeStructure structure, User creator) {
+        Long schoolId = TenantContext.getSchoolId();
+        StudentFeeAccount account = accountRepository
+                .findByStudentIdAndTermIdAndSchoolId(
+                        student.getId(), structure.getTerm().getId(), schoolId)
+                .orElse(null);
+
+        if (account == null) {
+            account = new StudentFeeAccount();
+            account.setSchool(student.getSchool());
+            account.setStudent(student);
+            account.setTerm(structure.getTerm());
+            account.setSchoolClass(student.getCurrentClass());
+            account.setCreatedBy(creator);
+        } else if (!account.getPayments().isEmpty()) {
+            return;
+        }
+
+        account.setUpdatedBy(creator);
+        account.getLines().clear();
+        for (FeeItem item : structure.getItems()) {
+            StudentFeeLine line = new StudentFeeLine();
+            line.setAccount(account);
+            line.setName(item.getName());
+            line.setAmount(item.getAmount());
+            line.setMandatory(item.getMandatory());
+            line.setDescription(item.getDescription());
+            line.setFromAnnualFee(false);
+            line.setSchool(account.getSchool());
+            line.setCreatedBy(creator);
+            line.setUpdatedBy(creator);
+            account.getLines().add(line);
+        }
+
+        AcademicYear academicYear = structure.getTerm().getAcademicYear();
+        if (academicYear != null && isFirstTermOfYear(
+                structure.getTerm(), academicYear, schoolId)) {
+            List<AnnualFee> annualFees = annualFeeRepository
+                    .findAllBySchoolClassIdAndAcademicYearIdAndSchoolId(
+                            student.getCurrentClass().getId(), academicYear.getId(), schoolId);
+            for (AnnualFee annualFee : annualFees) {
+                StudentFeeLine line = new StudentFeeLine();
+                line.setAccount(account);
+                line.setName(annualFee.getName());
+                line.setAmount(annualFee.getAmount());
+                line.setMandatory(true);
+                line.setDescription(annualFee.getDescription());
+                line.setFromAnnualFee(true);
+                line.setSchool(account.getSchool());
+                line.setCreatedBy(creator);
+                line.setUpdatedBy(creator);
+                account.getLines().add(line);
             }
         }
-        return results;
+
+        account.setTotalFees(account.getLines().stream()
+                .mapToDouble(StudentFeeLine::getAmount).sum());
+        account.setTotalAdjustments(account.getAdjustments().stream()
+                .mapToDouble(StudentFeeAdjustment::getAmount).sum());
+        accountRepository.save(account);
     }
 
     public StudentFeeAccountDto getAccount(Long studentId, Long termId) {

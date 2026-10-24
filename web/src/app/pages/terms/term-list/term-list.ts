@@ -72,9 +72,8 @@ export class TermList implements OnChanges {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.post<Term>('/terms', payload).subscribe({
+    this.backend.postSilently<Term>('/terms', payload).subscribe({
       next: () => {
-        this.successMessage = 'Term created.';
         this.showForm = false;
         this.loadTerms();
       },

@@ -231,7 +231,7 @@ public class TimetableService {
 
         if (student.getCurrentClass() == null) {
             throw new TimetableExceptions.TimetableNotFoundException(
-                    "Student has no current class assigned");
+                    "Your class has not been assigned yet. Please contact the school administrator.");
         }
 
         return listByClass(student.getCurrentClass().getId());

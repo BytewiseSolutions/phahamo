@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.student;
 
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
+import ls.co.bytewise.api.studentfee.StudentFeeAccountService;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.user.User;
@@ -17,11 +18,14 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
+    private final StudentFeeAccountService feeAccountService;
 
     public StudentService(StudentRepository studentRepository,
-                          SchoolClassRepository schoolClassRepository) {
+                           SchoolClassRepository schoolClassRepository,
+                           StudentFeeAccountService feeAccountService) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
+        this.feeAccountService = feeAccountService;
     }
 
     @Transactional
@@ -46,6 +50,7 @@ public class StudentService {
         }
 
         Student saved = studentRepository.save(student);
+        feeAccountService.synchronizeStudentAccounts(saved, creator);
         return new StudentDto(saved);
     }
 
@@ -74,6 +79,7 @@ public class StudentService {
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
+        feeAccountService.synchronizeStudentAccounts(saved, editor);
         return new StudentDto(saved);
     }
 
@@ -100,6 +106,7 @@ public class StudentService {
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
+        feeAccountService.synchronizeStudentAccounts(saved, editor);
         return new StudentDto(saved);
     }
 
@@ -114,7 +121,9 @@ public class StudentService {
 
         student.setStatus(StudentStatus.ACTIVE);
         student.setUpdatedBy(editor);
-        return new StudentDto(studentRepository.save(student));
+        Student saved = studentRepository.save(student);
+        feeAccountService.synchronizeStudentAccounts(saved, editor);
+        return new StudentDto(saved);
     }
 
     private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {

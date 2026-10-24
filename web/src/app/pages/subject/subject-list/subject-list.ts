@@ -68,9 +68,8 @@ export class SubjectList implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.backend.post<Subject>('/subjects', newSubject).subscribe({
+    this.backend.postSilently<Subject>('/subjects', newSubject).subscribe({
       next: () => {
-        this.successMessage = 'Subject created.';
         this.showCreateForm = false;
         this.loadSubjects();
       },

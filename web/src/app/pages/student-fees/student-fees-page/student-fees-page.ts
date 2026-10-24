@@ -235,9 +235,9 @@ export class StudentFeesPage implements OnInit {
     if (!this.selectedClassId || !this.selectedTermId) return;
 
     const confirmed = await this.confirmDialog.confirm({
-      title: 'Generate Fee Accounts',
-      message: 'Create fee accounts for all students in this class? Students with existing accounts will be skipped.',
-      confirmText: 'Generate',
+      title: 'Sync Fee Accounts',
+      message: 'Create missing accounts and update unpaid accounts using the current fee structure?',
+      confirmText: 'Sync',
       danger: false
     });
     if (!confirmed) return;

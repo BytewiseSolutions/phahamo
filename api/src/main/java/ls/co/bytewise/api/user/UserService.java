@@ -127,7 +127,11 @@ public class UserService {
             teacherService.createProfileFor(creator, saved, dto.getTeacher());
         }
 
-        sendWelcomeEmail(saved.getEmail(), saved.getFirstName(), temporaryPassword);
+        sendWelcomeEmail(
+                saved.getEmail(),
+                saved.getFirstName(),
+                temporaryPassword,
+                school != null ? school.getName() : "School Management System");
 
         return new UserDto(saved);
     }
@@ -315,13 +319,16 @@ public class UserService {
     }
 
     @Async
-    private void sendWelcomeEmail(String toEmail, String firstName, String temporaryPassword) {
+    private void sendWelcomeEmail(String toEmail,
+                                  String firstName,
+                                  String temporaryPassword,
+                                  String schoolName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Your School Management System account");
+        message.setSubject("Your " + schoolName + " account");
         message.setText(
                 "Hi " + firstName + ",\n\n" +
-                        "An account has been created for you on the School Management System.\n\n" +
+                        "An account has been created for you on " + schoolName + ".\n\n" +
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +

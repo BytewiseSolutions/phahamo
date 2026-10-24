@@ -59,7 +59,7 @@ export class StudentParentList implements OnChanges {
   onParentCreated(payload: ParentPayload): void {
     this.errorMessage = '';
 
-    this.backend.post<StudentParent>(`/students/${this.studentId}/parents`, payload).subscribe({
+    this.backend.postSilently<StudentParent>(`/students/${this.studentId}/parents`, payload).subscribe({
       next: () => {
         this.showCreateForm = false;
         this.loadParents();

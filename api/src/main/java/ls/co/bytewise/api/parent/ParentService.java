@@ -127,7 +127,11 @@ public class ParentService {
         student.setUpdatedBy(creator);
         studentRepository.save(student);
 
-        sendWelcomeEmail(savedUser.getEmail(), savedUser.getFirstName(), temporaryPassword);
+        sendWelcomeEmail(
+                savedUser.getEmail(),
+                savedUser.getFirstName(),
+                temporaryPassword,
+                student.getSchool().getName());
 
         return new StudentParentDto(savedParent);
     }
@@ -233,13 +237,16 @@ public class ParentService {
         return password.toString();
     }
 
-    private void sendWelcomeEmail(String toEmail, String firstName, String temporaryPassword) {
+    private void sendWelcomeEmail(String toEmail,
+                                  String firstName,
+                                  String temporaryPassword,
+                                  String schoolName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Your School Management System account");
+        message.setSubject("Your " + schoolName + " account");
         message.setText(
                 "Hi " + firstName + ",\n\n" +
-                        "An account has been created for you on the School Management System.\n\n" +
+                        "An account has been created for you on " + schoolName + ".\n\n" +
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
