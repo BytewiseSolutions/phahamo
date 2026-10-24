@@ -5,6 +5,8 @@ import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { SchoolClass } from '../../class/class';
 import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
+import {FeeReminderResult} from '../fee-reminder-result';
+import {SendReminderRequest} from '../send-reminder-request';
 
 type StatusFilter = 'all' | 'owing' | 'paid';
 
@@ -29,6 +31,10 @@ export class StudentFeesPage implements OnInit {
   generating = false;
   errorMessage = '';
 
+  selectedAccountIds = new Set<number>();
+  sending = false;
+  lastResult: FeeReminderResult | null = null;
+
   constructor(
     private backend: BackendService,
     private router: Router,
@@ -39,6 +45,135 @@ export class StudentFeesPage implements OnInit {
     this.loadFilters();
   }
 
+  toggleSelection(accountId: number): void {
+    if (this.selectedAccountIds.has(accountId)) {
+      this.selectedAccountIds.delete(accountId);
+    } else {
+      this.selectedAccountIds.add(accountId);
+    }
+  }
+
+  isSelected(accountId: number): boolean {
+    return this.selectedAccountIds.has(accountId);
+  }
+
+  get sendableCount(): number {
+    return this.filteredAccounts.filter(a => a.balance > 0 && a.hasEmailParent).length;
+  }
+
+  get selectedCount(): number {
+    return this.selectedAccountIds.size;
+  }
+
+  get allSelected(): boolean {
+    return this.sendableCount > 0 && this.selectedAccountIds.size === this.sendableCount;
+  }
+
+  toggleAll(): void {
+    if (this.allSelected) {
+      this.selectedAccountIds.clear();
+    } else {
+      this.filteredAccounts
+        .filter(a => a.balance > 0 && a.hasEmailParent)
+        .forEach(a => this.selectedAccountIds.add(a.id));
+    }
+  }
+
+  async sendSelected(): Promise<void> {
+    if (this.selectedAccountIds.size === 0) return;
+
+    const count = this.selectedAccountIds.size;
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Send Fee Reminders',
+      message: `Send reminder emails to ${count} selected ${count === 1 ? 'parent' : 'parents'}?\n\nEach email shows the student name and outstanding balance.`,
+      confirmText: `Send ${count}`,
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.sending = true;
+    this.errorMessage = '';
+    this.lastResult = null;
+
+    const payload: SendReminderRequest = {
+      accountIds: Array.from(this.selectedAccountIds)
+    };
+
+    this.backend.postSilently<FeeReminderResult>('/fee-reminders/send-selected', payload).subscribe({
+      next: (result) => {
+        this.lastResult = result;
+        this.sending = false;
+        this.selectedAccountIds.clear();
+        this.load();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to send reminders.';
+        this.sending = false;
+      }
+    });
+  }
+
+  async sendAllOwing(): Promise<void> {
+    if (!this.selectedTermId) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Send Reminders to All Owing',
+      message: `Send reminder emails to every parent of a student with an outstanding balance this term?\n\nStudents without parent email addresses will be skipped and listed.`,
+      confirmText: 'Send All',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.sending = true;
+    this.errorMessage = '';
+    this.lastResult = null;
+
+    this.backend.postSilently<FeeReminderResult>(
+      `/fee-reminders/send-all?termId=${this.selectedTermId}`, {}
+    ).subscribe({
+      next: (result) => {
+        this.lastResult = result;
+        this.sending = false;
+        this.load();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to send reminders.';
+        this.sending = false;
+      }
+    });
+  }
+
+  formatLastSent(value: string | null): string {
+    if (!value) return 'Never';
+    try {
+      const date = new Date(value);
+      const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 30) return `${days} days ago`;
+      return date.toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+    } catch {
+      return value;
+    }
+  }
+
+  lastSentTone(value: string | null): 'ok' | 'warn' | 'danger' {
+    if (!value) return 'ok';
+    try {
+      const days = Math.floor((Date.now() - new Date(value).getTime()) / (1000 * 60 * 60 * 24));
+      if (days < 3) return 'danger';
+      if (days < 7) return 'warn';
+      return 'ok';
+    } catch {
+      return 'ok';
+    }
+  }
+
+  get parentsWithoutEmail(): any[] {
+    return this.filteredAccounts.filter(a => !a.hasEmailParent);
+  }
   get filteredAccounts(): StudentFeeAccount[] {
     if (this.statusFilter === 'owing') {
       return this.accounts.filter(a => a.balance > 0);
@@ -81,6 +216,7 @@ export class StudentFeesPage implements OnInit {
         this.accounts = rows.sort((a, b) =>
           a.admissionNumber.localeCompare(b.admissionNumber, undefined, { numeric: true })
         );
+        this.selectedAccountIds.clear();
         this.loading = false;
       },
       error: (err) => {

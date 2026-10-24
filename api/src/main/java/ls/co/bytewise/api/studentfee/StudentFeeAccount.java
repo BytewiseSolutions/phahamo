@@ -16,6 +16,7 @@ import ls.co.bytewise.api.term.Term;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,12 @@ public class StudentFeeAccount extends SchoolScopedEntity {
 
     @Column(nullable = false)
     private Double amountPaid = 0.0;
+
+    @Column(name = "last_reminder_sent_at")
+    private Instant lastReminderSentAt;
+
+    @Column(name = "last_reminder_amount")
+    private Double lastReminderAmount;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentFeeLine> lines = new ArrayList<>();

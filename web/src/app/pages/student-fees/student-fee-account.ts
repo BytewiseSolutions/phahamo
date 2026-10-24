@@ -20,4 +20,8 @@ export interface StudentFeeAccount {
   lines: StudentFeeLine[];
   adjustments: StudentFeeAdjustment[];
   payments: StudentFeePayment[];
+  lastReminderSentAt: string | null;
+  lastReminderAmount: number | null;
+  hasEmailParent: boolean;
+  parents: { fullName: string; email: string | null; phone: string | null; hasEmail: boolean }[];
 }
