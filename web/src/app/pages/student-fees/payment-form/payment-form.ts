@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
-import { PaymentPayload } from '../payment-payload';
+import { StudentFeePaymentInput } from '../student-fee-payment';
 import { StudentFeeAccount } from '../student-fee-account';
 import { PaymentMethodType } from '../../../util/payment-method';
 
@@ -72,7 +72,7 @@ export class PaymentForm implements OnChanges {
       return;
     }
 
-    const payload: PaymentPayload = {
+    const payload: StudentFeePaymentInput = {
       amount: this.amount,
       method: this.method,
       reference: this.reference?.trim() || undefined,

@@ -5,6 +5,7 @@ import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
+import ls.co.bytewise.api.studentfee.reminder.FeeStatementRenderer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +26,18 @@ public class FeeStatementService {
     }
 
     @Transactional
-    public FeeStatementResultDto emailForAccount(Long accountId) {
+    public BulkFeeEmailResultDto emailForAccount(Long accountId) {
         Long schoolId = TenantContext.getSchoolId();
         StudentFeeAccount account = accountRepository.findByIdAndSchoolId(accountId, schoolId)
                 .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Account not found"));
 
-        FeeStatementResultDto result = new FeeStatementResultDto();
+        BulkFeeEmailResultDto result = new BulkFeeEmailResultDto();
         sendOne(account, result);
         return result;
     }
 
     @Transactional
-    public FeeStatementResultDto emailAllOutstanding(Long termId) {
+    public BulkFeeEmailResultDto emailAllOutstanding(Long termId) {
         Long schoolId = TenantContext.getSchoolId();
 
         List<StudentFeeAccount> accounts = accountRepository
@@ -45,22 +46,18 @@ public class FeeStatementService {
                 .filter(a -> a.getBalance() != null && a.getBalance() > 0)
                 .toList();
 
-        FeeStatementResultDto result = new FeeStatementResultDto();
+        BulkFeeEmailResultDto result = new BulkFeeEmailResultDto();
         for (StudentFeeAccount acc : accounts) {
             sendOne(acc, result);
         }
         return result;
     }
 
-    private void sendOne(StudentFeeAccount account, FeeStatementResultDto result) {
+    private void sendOne(StudentFeeAccount account, BulkFeeEmailResultDto result) {
         Student student = account.getStudent();
         School school = account.getSchool();
-        String displayName = student.getUser().getFullName()
-                + " (" + student.getAdmissionNumber() + ")";
-
         if (account.getBalance() == null || account.getBalance() <= 0) {
             result.setSkippedPaidCount(result.getSkippedPaidCount() + 1);
-            result.getSkippedPaid().add(displayName + " — balance is 0");
             return;
         }
 
@@ -72,7 +69,6 @@ public class FeeStatementService {
 
         if (parentsWithEmail.isEmpty()) {
             result.setSkippedNoEmailCount(result.getSkippedNoEmailCount() + 1);
-            result.getSkippedNoEmail().add(displayName + " — no parent email");
             return;
         }
 
@@ -82,7 +78,6 @@ public class FeeStatementService {
             pdf = FeeStatementRenderer.render(accountDto, school, LocalDate.now());
         } catch (Exception e) {
             result.setFailedCount(result.getFailedCount() + 1);
-            result.getFailed().add(displayName + " — PDF render failed: " + e.getMessage());
             return;
         }
 
@@ -108,8 +103,6 @@ public class FeeStatementService {
                 anySent = true;
             } catch (Exception e) {
                 result.setFailedCount(result.getFailedCount() + 1);
-                result.getFailed().add(
-                        parent.getUser().getEmail() + " (" + displayName + ") — " + e.getMessage());
             }
         }
 

@@ -4,7 +4,7 @@ import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { StudentFeeAccount } from '../student-fee-account';
 import { StudentFeeAdjustment } from '../student-fee-adjustment';
-import {FeeStatementResult} from '../fee-statement-result';
+import {BulkFeeEmailResult} from '../bulk-fee-email-result';
 
 type Tab = 'breakdown' | 'adjustments' | 'payments';
 
@@ -27,7 +27,7 @@ export class StudentFeeDetail implements OnInit {
   accountId: number | null = null;
 
   sendingStatement = false;
-  statementResult: FeeStatementResult | null = null;
+  statementResult: BulkFeeEmailResult | null = null;
 
   constructor(
     private backend: BackendService,
@@ -130,7 +130,7 @@ export class StudentFeeDetail implements OnInit {
     this.statementResult = null;
     this.errorMessage = '';
 
-    this.backend.postSilently<FeeStatementResult>(
+    this.backend.postSilently<BulkFeeEmailResult>(
       `/fee-statements/account/${this.accountId}/email`, {}
     ).subscribe({
       next: (result) => {

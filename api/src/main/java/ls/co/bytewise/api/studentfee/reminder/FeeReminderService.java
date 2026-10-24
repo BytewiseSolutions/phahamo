@@ -1,9 +1,10 @@
-package ls.co.bytewise.api.studentfee;
+package ls.co.bytewise.api.studentfee.reminder;
 
 import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
+import ls.co.bytewise.api.studentfee.*;
 import ls.co.bytewise.api.term.Term;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +73,7 @@ public class FeeReminderService {
     }
 
     @Transactional
-    public FeeReminderResultDto sendToAll(Long termId) {
+    public BulkFeeEmailResultDto sendToAll(Long termId) {
         Long schoolId = TenantContext.getSchoolId();
 
         List<StudentFeeAccount> accounts = accountRepository
@@ -85,7 +86,7 @@ public class FeeReminderService {
     }
 
     @Transactional
-    public FeeReminderResultDto sendToSelected(List<Long> accountIds) {
+    public BulkFeeEmailResultDto sendToSelected(List<Long> accountIds) {
         Long schoolId = TenantContext.getSchoolId();
 
         if (accountIds == null || accountIds.isEmpty()) {
@@ -102,18 +103,14 @@ public class FeeReminderService {
         return sendToAccounts(accounts);
     }
 
-    private FeeReminderResultDto sendToAccounts(List<StudentFeeAccount> accounts) {
-        FeeReminderResultDto result = new FeeReminderResultDto();
+    private BulkFeeEmailResultDto sendToAccounts(List<StudentFeeAccount> accounts) {
+        BulkFeeEmailResultDto result = new BulkFeeEmailResultDto();
         Instant now = Instant.now();
 
         for (StudentFeeAccount acc : accounts) {
             Student student = acc.getStudent();
-            String displayName = student.getUser().getFullName()
-                    + " (" + student.getAdmissionNumber() + ")";
-
             if (acc.getBalance() == null || acc.getBalance() <= 0) {
                 result.setSkippedPaidCount(result.getSkippedPaidCount() + 1);
-                result.getSkippedPaid().add(displayName + " — balance is 0");
                 continue;
             }
 
@@ -125,7 +122,6 @@ public class FeeReminderService {
 
             if (parentsWithEmail.isEmpty()) {
                 result.setSkippedNoEmailCount(result.getSkippedNoEmailCount() + 1);
-                result.getSkippedNoEmail().add(displayName + " — no parent email");
                 continue;
             }
 
@@ -140,8 +136,6 @@ public class FeeReminderService {
                     anySent = true;
                 } catch (Exception e) {
                     result.setFailedCount(result.getFailedCount() + 1);
-                    result.getFailed().add(
-                            parent.getUser().getEmail() + " (" + displayName + ") — " + e.getMessage());
                 }
             }
 

@@ -15,12 +15,12 @@ public class FeeStatementController {
     }
 
     @PostMapping("/account/{accountId}/email")
-    public FeeStatementResultDto emailForAccount(@PathVariable Long accountId) {
+    public BulkFeeEmailResultDto emailForAccount(@PathVariable Long accountId) {
         return statementService.emailForAccount(accountId);
     }
 
     @PostMapping("/term/{termId}/email-all")
-    public FeeStatementResultDto emailAllOutstanding(@PathVariable Long termId) {
+    public BulkFeeEmailResultDto emailAllOutstanding(@PathVariable Long termId) {
         return statementService.emailAllOutstanding(termId);
     }
 }

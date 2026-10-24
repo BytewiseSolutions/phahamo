@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { AdjustmentType } from '../adjustment-type';
-import { AdjustmentPayload } from '../adjustment-payload';
+import { StudentFeeAdjustmentInput } from '../student-fee-adjustment';
 import { StudentFeeAccount } from '../student-fee-account';
 
 @Component({
@@ -72,7 +72,7 @@ export class AdjustmentForm implements OnChanges {
       return;
     }
 
-    const payload: AdjustmentPayload = {
+    const payload: StudentFeeAdjustmentInput = {
       type: this.type,
       amount: this.amount,
       reason: this.reason.trim()

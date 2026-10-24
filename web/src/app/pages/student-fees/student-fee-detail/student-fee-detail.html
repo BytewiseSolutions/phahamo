@@ -48,16 +48,6 @@
           <span class="label">Failed</span>
         </div>
       </div>
-      @if (statementResult.skippedNoEmail.length > 0) {
-        <div class="result-list">
-          <strong>Parents without email:</strong>
-          <ul>
-            @for (name of statementResult.skippedNoEmail; track name) {
-              <li>{{ name }}</li>
-            }
-          </ul>
-        </div>
-      }
     </div>
   }
 

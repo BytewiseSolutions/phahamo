@@ -1,7 +1,8 @@
-package ls.co.bytewise.api.studentfee;
+package ls.co.bytewise.api.studentfee.reminder;
 
 import lombok.Getter;
 import lombok.Setter;
+import ls.co.bytewise.api.studentfee.ParentContactDto;
 
 import java.time.Instant;
 import java.util.List;
