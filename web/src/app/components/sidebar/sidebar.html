@@ -36,6 +36,9 @@
           >
             <i [class]="link.icon"></i>
             <span class="sidebar-label" [class.hidden]="collapsed">{{ link.label }}</span>
+            @if (link.path === '/messages' && unreadMessages > 0) {
+              <span class="sidebar-badge">{{ unreadMessages }}</span>
+            }
           </a>
         </li>
       }

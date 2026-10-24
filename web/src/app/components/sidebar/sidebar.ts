@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../util/auth.service';
+import { MessageUnreadService } from '../../util/message-unread.service';
 
 interface SidebarLink {
   label: string;
@@ -15,6 +16,7 @@ const COMMON_LINKS: SidebarLink[] = [
 const ROLE_LINKS: Record<string, SidebarLink[]> = {
   SCHOOL_ADMIN: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
+    { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },
@@ -37,6 +39,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
   ],
   PRINCIPAL: [
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
+    { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },
@@ -57,6 +60,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
   ],
   TEACHER: [
     { label: 'My Classes', path: '/my-classes', icon: 'fa-solid fa-chalkboard-user' },
+    { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Grades', path: '/grades', icon: 'fa-solid fa-square-poll-vertical' },
     { label: 'Results', path: '/results', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Email Report Cards', path: '/report-cards/email', icon: 'fa-solid fa-envelope' },
@@ -67,6 +71,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Profile', path: '/profile', icon: 'fa-solid fa-user' },
   ],
   FINANCE_OFFICER: [
+    { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Fees', path: '/student-fees', icon: 'fa-solid fa-money-check-dollar' },
     { label: 'Payments', path: '/student-fees/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
@@ -74,12 +79,13 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [
-    { label: 'My Children', path: '/my-children', icon: 'fa-solid fa-child' },
-    { label: 'Attendance', path: '/attendance', icon: 'fa-solid fa-clipboard-check' },
-    { label: 'Results', path: '/results', icon: 'fa-solid fa-file-lines' },
-    { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
+    { label: 'My Children', path: '/parent/children', icon: 'fa-solid fa-child' },
+    { label: 'Attendance', path: '/parent/attendance', icon: 'fa-solid fa-clipboard-check' },
+    { label: 'Results', path: '/parent/results', icon: 'fa-solid fa-file-lines' },
+    { label: 'Fees', path: '/parent/fees', icon: 'fa-solid fa-money-check-dollar' },
   ],
   STUDENT: [
+    { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'My Attendance', path: '/attendance/my', icon: 'fa-solid fa-clipboard-check' },
     { label: 'My Results', path: '/results/my', icon: 'fa-solid fa-graduation-cap' },
@@ -107,13 +113,23 @@ export class Sidebar implements OnInit {
   collapsed = false;
   mobileOpen = false;
   schoolName = '';
+  unreadMessages = 0;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private messageUnreadService: MessageUnreadService
+  ) {}
 
   ngOnInit(): void {
     this.roles = this.authService.getRoles();
     this.links = this.buildLinks(this.roles);
     this.schoolName = this.authService.getSchoolName();
+
+    if (this.roles.some(role => ['SCHOOL_ADMIN', 'PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'STUDENT'].includes(role))) {
+      this.messageUnreadService.unread$.subscribe(count => this.unreadMessages = count);
+      this.messageUnreadService.refresh();
+    }
 
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {

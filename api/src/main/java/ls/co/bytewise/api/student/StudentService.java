@@ -92,12 +92,29 @@ public class StudentService {
             student.setCurrentClass(null);
         } else {
             student.setCurrentClass(resolveClass(schoolClassId, schoolId));
+            // Assigning a student to a current class re-enrols them in the school.
+            // This also restores students previously marked as COMPLETED.
+            student.setStatus(StudentStatus.ACTIVE);
         }
 
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
         return new StudentDto(saved);
+    }
+
+    @Transactional
+    public StudentDto reactivate(User editor, Long studentId) {
+        Student student = findOrThrow(studentId);
+
+        if (student.getCurrentClass() == null) {
+            throw new StudentExceptions.InvalidStudentOperationException(
+                    "Assign the student to a class before reactivating them");
+        }
+
+        student.setStatus(StudentStatus.ACTIVE);
+        student.setUpdatedBy(editor);
+        return new StudentDto(studentRepository.save(student));
     }
 
     private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {

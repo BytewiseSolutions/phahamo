@@ -97,6 +97,9 @@
               </span>
             </td>
             <td class="actions">
+              @if (student.status === 'COMPLETED') {
+                <button type="button" class="link-button" (click)="onReactivate(student)">Reactivate</button>
+              }
               <button type="button" class="link-button" (click)="onTransferClick(student)">Transfer</button>
               <button type="button" class="link-button delete" (click)="onRemove(student)">Remove</button>
             </td>

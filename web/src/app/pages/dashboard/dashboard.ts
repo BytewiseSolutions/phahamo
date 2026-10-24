@@ -12,6 +12,7 @@ import {SystemDashboardStats} from './system-dashboard-stats';
 import { StudentFeePayment } from '../student-fees/student-fee-payment';
 import { UpcomingExam } from './upcoming-exam';
 import { Birthday } from './birthday';
+import { MessageUnreadService } from '../../util/message-unread.service';
 import { FinanceDashboardStats } from './finance-dashboard-stats';
 
 @Component({
@@ -32,6 +33,7 @@ export class Dashboard implements OnInit {
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
   isFinanceOfficer = false;
+  isParent = false;
   financeStats: FinanceDashboardStats | null = null;
   isStaff = false;
 
@@ -49,11 +51,13 @@ export class Dashboard implements OnInit {
   upcomingExamsLoaded = false;
   birthdays: Birthday[] = [];
   birthdaysLoaded = false;
+  unreadMessages = 0;
 
   constructor(
     private authService: AuthService,
     private backend: BackendService,
-    private router: Router
+    private router: Router,
+    private messageUnreadService: MessageUnreadService
   ) {}
 
   ngOnInit(): void {
@@ -65,6 +69,7 @@ export class Dashboard implements OnInit {
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
     this.isFinanceOfficer = this.authService.hasRole('FINANCE_OFFICER');
+    this.isParent = this.authService.hasRole('PARENT');
     this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
     if (this.isSystemAdmin) {
@@ -96,7 +101,7 @@ export class Dashboard implements OnInit {
       this.loadRecentPayments();
     }
 
-    if (!this.isSystemAdmin) {
+    if (!this.isSystemAdmin && !this.isParent) {
       this.backend.get<Subscription>('/subscriptions/me').subscribe({
         next: (sub) => this.subscription = sub,
         error: () => {}
@@ -116,6 +121,11 @@ export class Dashboard implements OnInit {
 
     if (this.isStaff && !this.isAdmin && !this.isStudent) {
       this.loadBirthdays();
+    }
+
+    if (this.isStaff || this.isStudent) {
+      this.messageUnreadService.unread$.subscribe(count => this.unreadMessages = count);
+      this.messageUnreadService.refresh();
     }
   }
 
@@ -302,6 +312,7 @@ export class Dashboard implements OnInit {
   goToAssessment(assessmentId: number): void { this.router.navigate(['/grades', assessmentId, 'marks']); }
   goToTeacherAttendance(): void { this.router.navigate(['/my-classes']); }
   goToAnnouncements(): void { this.router.navigate(['/announcements']); }
+  goToMessages(): void { this.router.navigate(['/messages']); }
   goToMyClasses(): void { this.router.navigate(['/my-classes']); }
 
   get showUpcomingExams(): boolean {

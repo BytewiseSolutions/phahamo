@@ -1,0 +1,174 @@
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    color: var(--text-primary);
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.child,
+.payment {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.child div {
+    display: grid;
+    gap: .3rem;
+}
+
+.filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-secondary);
+}
+
+.filter-group select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-md);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+}
+
+.filter-group select:focus {
+    border-color: var(--primary);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats div {
+    padding: 1rem;
+    background: var(--background);
+    border-radius: 8px;
+}
+
+.stats strong,
+.stats span {
+    display: block;
+}
+
+.stats strong {
+    font-size: 1.35rem;
+    margin-bottom: .25rem;
+}
+
+.attendance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px;
+    background: var(--background);
+    border-radius: var(--border-radius-md);
+    text-align: center;
+}
+
+.summary-item.highlight {
+    background: rgb(from var(--primary) r g b / .08);
+    border: 1px solid rgb(from var(--primary) r g b / .25);
+}
+
+.summary-item .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-secondary);
+}
+
+.summary-item .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: .75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.error {
+    color: var(--danger);
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 700px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .filters,
+    .attendance-summary,
+    .stats {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+}

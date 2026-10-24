@@ -1,0 +1,136 @@
+<section class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>{{ section === 'children' ? 'My Children' : (section | titlecase) }}</h1>
+      <p>Information for the children linked to your parent account.</p>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error">{{ errorMessage }}</div>
+  }
+
+  @if (section === 'children') {
+    <div class="card">
+      @if (children.length === 0) {
+        <div class="empty">No children are linked to your account yet.</div>
+      } @else {
+        @for (child of children; track child.id) {
+          <div class="child">
+            <div>
+              <strong>{{ child.name }}</strong>
+              <span>{{ child.admissionNumber }} · {{ child.className || 'No class' }}</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  @if (section !== 'children') {
+    <div class="card">
+      <div class="filters">
+        <div class="filter-group">
+          <label for="child">Child</label>
+          <select id="child" [(ngModel)]="selectedChildId" (ngModelChange)="load()">
+            @for (child of children; track child.id) {
+              <option [ngValue]="child.id">{{ child.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="term">Term</label>
+          <select id="term" [(ngModel)]="selectedTermId" (ngModelChange)="load()">
+            @for (term of terms; track term.id) {
+              <option [ngValue]="term.id">{{ term.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="empty">Loading...</div>
+      }
+
+      @if (!loading && section === 'attendance' && attendance) {
+        <div class="attendance-summary">
+          <div class="summary-item highlight">
+            <span class="label">Attendance</span>
+            <span class="value">{{ attendance.summary.presentPercent }}%</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Total Records</span>
+            <span class="value">{{ attendance.summary.total }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Present</span>
+            <span class="value">{{ attendance.summary.present }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Absent</span>
+            <span class="value">{{ attendance.summary.absent }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Late</span>
+            <span class="value">{{ attendance.summary.late }}</span>
+          </div>
+        </div>
+      }
+
+      @if (!loading && section === 'results' && results.length > 0) {
+        <table>
+          <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Mark</th>
+            <th>Grade</th>
+            <th>Remark</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (result of results; track result.subjectName) {
+              <tr>
+                <td>{{ result.subjectName }}</td>
+                <td>{{ result.finalMark }}%</td>
+                <td>{{ result.grade || '—' }}</td>
+                <td>{{ result.remark || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (!loading && section === 'fees' && fees) {
+        <div class="stats">
+          <div>
+            <strong>{{ formatAmount(fees.totalFees) }}</strong>
+            <span>Total fees</span>
+          </div>
+          <div>
+            <strong>{{ formatAmount(fees.amountPaid) }}</strong>
+            <span>Paid</span>
+          </div>
+          <div>
+            <strong>{{ formatAmount(fees.balance) }}</strong>
+            <span>Outstanding</span>
+          </div>
+        </div>
+
+        <h3>Payments</h3>
+        @for (payment of fees.payments; track payment.id) {
+          <div class="payment">
+            <span>{{ formatDate(payment.paidAt) }} · {{ payment.method }}</span>
+            <strong>{{ formatAmount(payment.amount) }}</strong>
+          </div>
+        }
+      }
+
+      @if (!loading && section !== 'children' &&
+        ((section === 'results' && results.length === 0) || (section === 'fees' && !fees))) {
+        <div class="empty">No {{ section }} available for this term.</div>
+      }
+    </div>
+  }
+</section>
