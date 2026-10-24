@@ -65,6 +65,7 @@ import { AssessmentForm } from './pages/grade/assessment-form/assessment-form';
 import { MarkEntry } from './pages/grade/mark-entry/mark-entry';
 import { ExaminationList } from './pages/examination/examination-list/examination-list';
 import { ExaminationForm } from './pages/examination/examination-form/examination-form';
+import { ExaminationDetail } from './pages/examination/examination-detail/examination-detail';
 import { GradeBandList } from './pages/grading/grade-band-list/grade-band-list';
 import { GradeBandForm } from './pages/grading/grade-band-form/grade-band-form';
 import { ClassResults } from './pages/results/class-results/class-results';
@@ -80,6 +81,7 @@ import { StudentFeeDetail } from './pages/student-fees/student-fee-detail/studen
 import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-form';
 import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
 import { MyFees } from './pages/student-fees/my-fees/my-fees';
+import { PaymentHistory } from './pages/student-fees/payment-history/payment-history';
 import { AnnouncementList } from './pages/announcements/announcement-list/announcement-list';
 import { AnnouncementForm } from './pages/announcements/announcement-form/announcement-form';
 import {NgxEchartsModule} from 'ngx-echarts';
@@ -157,6 +159,7 @@ import { Profile } from './pages/profile/profile/profile';
     MarkEntry,
     ExaminationList,
     ExaminationForm,
+    ExaminationDetail,
     GradeBandList,
     GradeBandForm,
     ClassResults,
@@ -172,6 +175,7 @@ import { Profile } from './pages/profile/profile/profile';
     AdjustmentForm,
     PaymentForm,
     MyFees,
+    PaymentHistory,
     AnnouncementList,
     AnnouncementForm,
     ReportsPage,

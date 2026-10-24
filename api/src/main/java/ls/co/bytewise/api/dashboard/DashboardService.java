@@ -9,6 +9,10 @@ import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.student.StudentStatus;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountRepository;
+import ls.co.bytewise.api.studentfee.StudentFeePaymentDto;
+import ls.co.bytewise.api.studentfee.StudentFeePaymentRepository;
+import ls.co.bytewise.api.examination.Examination;
+import ls.co.bytewise.api.examination.ExaminationRepository;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
 import ls.co.bytewise.api.subscription.Subscription;
 import ls.co.bytewise.api.subscription.SubscriptionRepository;
@@ -25,6 +29,7 @@ import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -33,6 +38,8 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -48,6 +55,8 @@ public class DashboardService {
     private final SchoolRepository schoolRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionService subscriptionService;
+    private final StudentFeePaymentRepository paymentRepository;
+    private final ExaminationRepository examinationRepository;
 
 
     public DashboardService(StudentRepository studentRepository,
@@ -60,7 +69,9 @@ public class DashboardService {
                             LessonRepository lessonRepository,
                             SchoolRepository schoolRepository,
                             SubscriptionRepository subscriptionRepository,
-                            SubscriptionService subscriptionService
+                            SubscriptionService subscriptionService,
+                            StudentFeePaymentRepository paymentRepository,
+                            ExaminationRepository examinationRepository
                             ) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
@@ -73,6 +84,8 @@ public class DashboardService {
         this.schoolRepository = schoolRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.subscriptionService = subscriptionService;
+        this.paymentRepository = paymentRepository;
+        this.examinationRepository = examinationRepository;
     }
 
     public SystemDashboardStats getSystemStats() {
@@ -132,6 +145,60 @@ public class DashboardService {
         }
 
         return stats;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentFeePaymentDto> getRecentPayments() {
+        Long schoolId = TenantContext.getSchoolId();
+        return paymentRepository.findAllBySchoolIdOrderByPaidAtDescIdDesc(schoolId, PageRequest.of(0, 5))
+                .stream()
+                .map(StudentFeePaymentDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UpcomingExamDto> getUpcomingExams(User currentUser) {
+        Long schoolId = TenantContext.getSchoolId();
+        LocalDate fromDate = LocalDate.now();
+        LocalDate toDate = fromDate.plusDays(7);
+
+        Long classId = null;
+        List<Examination> examinations;
+        if (currentUser != null && currentUser.hasRole(UserRole.STUDENT)) {
+            classId = studentRepository.findByUserId(currentUser.getId())
+                    .filter(student -> student.getSchool().getId().equals(schoolId))
+                    .map(student -> student.getCurrentClass() == null ? null : student.getCurrentClass().getId())
+                    .orElse(null);
+
+            if (classId == null) {
+                return List.of();
+            }
+            examinations = examinationRepository.findUpcomingBySchoolClass(
+                    schoolId, classId, fromDate, toDate);
+        } else {
+            examinations = examinationRepository.findUpcomingBySchool(schoolId, fromDate, toDate);
+        }
+
+        Long studentClassId = classId;
+        return examinations.stream()
+                .map(examination -> toUpcomingExam(examination, studentClassId))
+                .toList();
+    }
+
+    private UpcomingExamDto toUpcomingExam(Examination examination, Long classId) {
+        String subjects = examination.getSubjectClasses().stream()
+                .filter(link -> classId == null || link.getSchoolClass().getId().equals(classId))
+                .map(link -> link.getSubject().getName())
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        return new UpcomingExamDto(
+                examination.getId(),
+                examination.getName(),
+                subjects.isBlank() ? "—" : subjects,
+                examination.getStartDate(),
+                examination.getEndDate());
     }
 
     @Transactional(readOnly = true)

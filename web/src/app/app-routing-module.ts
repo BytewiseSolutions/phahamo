@@ -25,6 +25,7 @@ import {PaymentMethodList} from './pages/payment-method/payment-method-list/paym
 import {GradeList} from './pages/grade/grade-list/grade-list';
 import {MarkEntry} from './pages/grade/mark-entry/mark-entry';
 import {ExaminationList} from './pages/examination/examination-list/examination-list';
+import {ExaminationDetail} from './pages/examination/examination-detail/examination-detail';
 import {GradeBandList} from './pages/grading/grade-band-list/grade-band-list';
 import {ClassResults} from './pages/results/class-results/class-results';
 import {AttendanceHistory} from './pages/attendance/attendance-history/attendance-history';
@@ -34,6 +35,7 @@ import {FeesPage} from './pages/fees/fees-page/fees-page';
 import {StudentFeesPage} from './pages/student-fees/student-fees-page/student-fees-page';
 import {StudentFeeDetail} from './pages/student-fees/student-fee-detail/student-fee-detail';
 import {MyFees} from './pages/student-fees/my-fees/my-fees';
+import {PaymentHistory} from './pages/student-fees/payment-history/payment-history';
 import {AnnouncementList} from './pages/announcements/announcement-list/announcement-list';
 import {ReportsPage} from './pages/reports/reports-page/reports-page';
 import {LessonRangePage} from './pages/lessons/lesson-range-page/lesson-range-page';
@@ -79,6 +81,7 @@ const routes: Routes = [
       { path: 'grades', component: GradeList },
       { path: 'grades/:id/marks', component: MarkEntry },
       { path: 'examinations', component: ExaminationList },
+      { path: 'examinations/:id', component: ExaminationDetail },
       { path: 'grading-scale', component: GradeBandList },
       { path: 'results', component: ClassResults },
       { path: 'report-cards/email', component: EmailReportCards },
@@ -87,6 +90,7 @@ const routes: Routes = [
       { path: 'results/my', component: MyResults },
       { path: 'fees/structures', component: FeesPage },
       { path: 'student-fees', component: StudentFeesPage },
+      { path: 'student-fees/payments', component: PaymentHistory },
       { path: 'student-fees/:accountId', component: StudentFeeDetail },
       { path: 'my-fees', component: MyFees },
       { path: 'announcements', component: AnnouncementList },

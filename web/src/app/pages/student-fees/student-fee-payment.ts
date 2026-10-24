@@ -9,6 +9,7 @@ export interface StudentFeePayment {
   balanceAfter: number;
   receivedById?: number;
   receivedByName?: string;
+  studentName?: string;
 }
 
 export type StudentFeePaymentInput = Pick<

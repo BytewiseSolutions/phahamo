@@ -75,6 +75,38 @@
         <div echarts [options]="adminFeePieOptions" class="chart-container"></div>
       </div>
     </div>
+
+    <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+      <div class="recent-payments-header">
+        <div>
+          <h2>Recent Payments</h2>
+          <p>Latest fee payments recorded</p>
+        </div>
+        <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
+      </div>
+
+      @if (recentPaymentsLoading) {
+        <div class="recent-payments-empty">Loading payments...</div>
+      } @else if (recentPayments.length === 0) {
+        <div class="recent-payments-empty">No payments recorded yet.</div>
+      } @else {
+        <div class="recent-payments-list">
+          @for (payment of recentPayments; track payment.id) {
+            <div class="recent-payment-row">
+              <div class="payment-student">
+                <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
+                <div>
+                  <strong>{{ payment.studentName || 'Unknown student' }}</strong>
+                  <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+              <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
+              <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
+            </div>
+          }
+        </div>
+      }
+    </section>
   }
 
   @if (isStudent && studentStats) {
@@ -166,6 +198,41 @@
         <i class="fa-solid fa-chevron-right widget-arrow"></i>
       </div>
     </div>
+  }
+
+  @if (showUpcomingExams) {
+    <section class="upcoming-exams-card">
+      <div class="upcoming-exams-header">
+        <div>
+          <h2>Upcoming Exams</h2>
+          <p>Exams happening in the next 7 days</p>
+        </div>
+        <i class="fa-solid fa-calendar-days upcoming-exams-icon"></i>
+      </div>
+
+      @if (upcomingExams.length === 0) {
+        <div class="upcoming-exams-empty">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>No upcoming exams</span>
+        </div>
+      } @else {
+        <div class="upcoming-exams-list">
+          @for (exam of upcomingExams; track exam.examId) {
+            <button type="button" class="upcoming-exam-row" (click)="goToExam(exam.examId)">
+              <span class="exam-date">
+                <strong>{{ exam.date | date:'dd' }}</strong>
+                <span>{{ exam.date | date:'MMM' }}</span>
+              </span>
+              <span class="exam-details">
+                <strong>{{ exam.name }}</strong>
+                <span>{{ exam.subjectName }} · {{ exam.date | date:'dd MMM' }}–{{ exam.endDate | date:'dd MMM yyyy' }}</span>
+              </span>
+              <i class="fa-solid fa-chevron-right exam-arrow"></i>
+            </button>
+          }
+        </div>
+      }
+    </section>
   }
 
   @if (announcements.length > 0) {

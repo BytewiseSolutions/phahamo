@@ -9,6 +9,8 @@ import { StudentDashboardStats } from './student-dashboard-stats';
 import { EChartsOption } from 'echarts';
 import {TeacherDashboardStats} from './teacher-dashboard-stats';
 import {SystemDashboardStats} from './system-dashboard-stats';
+import { StudentFeePayment } from '../student-fees/student-fee-payment';
+import { UpcomingExam } from './upcoming-exam';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,6 +38,10 @@ export class Dashboard implements OnInit {
   adminAttendanceLineOptions: EChartsOption = {};
   adminFeePieOptions: EChartsOption = {};
   studentAttendanceLineOptions: EChartsOption = {};
+  recentPayments: StudentFeePayment[] = [];
+  recentPaymentsLoading = false;
+  upcomingExams: UpcomingExam[] = [];
+  upcomingExamsLoaded = false;
 
   constructor(
     private authService: AuthService,
@@ -60,6 +66,8 @@ export class Dashboard implements OnInit {
         next: (data) => this.stats = data
       });
       this.loadAdminCharts();
+      this.loadRecentPayments();
+      this.loadUpcomingExams();
     }
 
     if (this.isStudent) {
@@ -67,6 +75,7 @@ export class Dashboard implements OnInit {
         next: (data) => this.studentStats = data
       });
       this.loadStudentChart();
+      this.loadUpcomingExams();
     }
 
     if (!this.isSystemAdmin) {
@@ -111,6 +120,9 @@ export class Dashboard implements OnInit {
       this.announcements = [];
       this.adminAttendanceLineOptions = {};
       this.adminFeePieOptions = {};
+      this.recentPayments = [];
+      this.upcomingExams = [];
+      this.upcomingExamsLoaded = false;
       localStorage.removeItem('activeSchoolId');
       return;
     }
@@ -126,9 +138,44 @@ export class Dashboard implements OnInit {
       next: (data) => this.stats = data
     });
     this.loadAdminCharts();
+    this.loadRecentPayments();
+    this.loadUpcomingExams();
 
     this.backend.get<Announcement[]>('/announcements/feed').subscribe({
       next: (data) => this.announcements = data
+    });
+  }
+
+  private loadRecentPayments(): void {
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+
+    this.recentPaymentsLoading = true;
+    this.backend.get<StudentFeePayment[]>('/dashboard/recent-payments').subscribe({
+      next: (payments) => {
+        this.recentPayments = payments;
+        this.recentPaymentsLoading = false;
+      },
+      error: () => {
+        this.recentPayments = [];
+        this.recentPaymentsLoading = false;
+      }
+    });
+  }
+
+  private loadUpcomingExams(): void {
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+    if (!this.isAdmin && !this.isStudent) return;
+
+    this.upcomingExamsLoaded = false;
+    this.backend.get<UpcomingExam[]>('/dashboard/upcoming-exams').subscribe({
+      next: (exams) => {
+        this.upcomingExams = exams;
+        this.upcomingExamsLoaded = true;
+      },
+      error: () => {
+        this.upcomingExams = [];
+        this.upcomingExamsLoaded = true;
+      }
     });
   }
 
@@ -203,5 +250,12 @@ export class Dashboard implements OnInit {
   goToAttendance(): void { this.router.navigate(['/attendance/my']); }
   goToResults(): void { this.router.navigate(['/results/my']); }
   goToFees(): void { this.router.navigate(['/my-fees']); }
+  goToPaymentHistory(): void { this.router.navigate(['/student-fees/payments']); }
+  goToExam(examId: number): void { this.router.navigate(['/examinations', examId]); }
   goToMyClasses(): void { this.router.navigate(['/my-classes']); }
+
+  get showUpcomingExams(): boolean {
+    return this.upcomingExamsLoaded
+      && (this.isStudent || (this.isAdmin && (!this.isSystemAdmin || this.selectedSchoolId !== null)));
+  }
 }

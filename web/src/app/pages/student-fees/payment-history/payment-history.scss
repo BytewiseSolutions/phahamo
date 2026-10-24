@@ -1,0 +1,96 @@
+.payment-history-page {
+  padding: 20px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 6px;
+  color: var(--text-primary);
+  font-size: 24px;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.payments-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.payments-table th,
+.payments-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.payments-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.payments-table .date-column { min-width: 120px; }
+.payments-table .student-column { min-width: 170px; }
+.payments-table .amount-column { min-width: 120px; }
+.payments-table .method-column { min-width: 110px; }
+.payments-table .reference-column { min-width: 130px; }
+.payments-table .recorded-column { min-width: 170px; }
+
+.payments-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.payments-table .num {
+  text-align: right;
+}
+
+.payments-table .amount {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagination-label,
+.page-number {
+  white-space: nowrap;
+}
+
+.pagination button {
+  height: 36px;
+  padding: 0 14px;
+}

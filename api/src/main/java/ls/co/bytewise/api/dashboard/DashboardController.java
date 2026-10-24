@@ -1,11 +1,14 @@
 package ls.co.bytewise.api.dashboard;
 
+import ls.co.bytewise.api.studentfee.StudentFeePaymentDto;
 import ls.co.bytewise.api.user.User;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -21,6 +24,18 @@ public class DashboardController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public DashboardStatsDto getAdminStats() {
         return dashboardService.getAdminStats();
+    }
+
+    @GetMapping("/recent-payments")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public List<StudentFeePaymentDto> getRecentPayments() {
+        return dashboardService.getRecentPayments();
+    }
+
+    @GetMapping("/upcoming-exams")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_STUDENT"})
+    public List<UpcomingExamDto> getUpcomingExams(@AuthenticationPrincipal User currentUser) {
+        return dashboardService.getUpcomingExams(currentUser);
     }
 
     @GetMapping("/student")
