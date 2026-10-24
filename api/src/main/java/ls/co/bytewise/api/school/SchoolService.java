@@ -125,6 +125,10 @@ public class SchoolService {
         school.setCurrency(dto.getSchoolCurrency());
         school.setTimezone(dto.getSchoolTimezone());
 
+        if (dto.getAbsenceAlertsEnabled() != null) {
+            school.setAbsenceAlertsEnabled(dto.getAbsenceAlertsEnabled());
+        }
+
         School saved = schoolRepository.save(school);
         return new SchoolDto(saved);
     }

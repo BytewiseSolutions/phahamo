@@ -40,6 +40,9 @@ public class School extends BaseEntity {
     @Column(nullable = false)
     private String timezone = "Africa/Maseru";
 
+    @Column(name = "absence_alerts_enabled", nullable = false)
+    private boolean absenceAlertsEnabled = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "logo_file_id")
     private DataFile logo;

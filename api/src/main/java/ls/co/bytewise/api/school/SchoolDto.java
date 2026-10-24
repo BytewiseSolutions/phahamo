@@ -31,6 +31,8 @@ public class SchoolDto extends BaseDto {
 
     private String schoolTimezone;
 
+    private Boolean absenceAlertsEnabled;
+
     private Long schoolLogoId;
 
     public SchoolDto(School school) {
@@ -43,6 +45,7 @@ public class SchoolDto extends BaseDto {
         this.schoolTermStructure = school.getTermStructure();
         this.schoolCurrency = school.getCurrency();
         this.schoolTimezone = school.getTimezone();
+        this.absenceAlertsEnabled = school.isAbsenceAlertsEnabled();
 
         if (school.getLogo() != null) {
             this.schoolLogoId = school.getLogo().getId();

@@ -9,6 +9,7 @@ export interface School {
   schoolTermStructure: TermStructure;
   schoolCurrency: Currency;
   schoolTimezone: string;
+  absenceAlertsEnabled: boolean;
   schoolLogoId: number | null;
 }
 
@@ -29,6 +30,7 @@ export interface SchoolProfileUpdateRequest {
   schoolTermStructure: TermStructure;
   schoolCurrency: Currency;
   schoolTimezone: string;
+  absenceAlertsEnabled: boolean;
 }
 
 export enum TermStructure {
