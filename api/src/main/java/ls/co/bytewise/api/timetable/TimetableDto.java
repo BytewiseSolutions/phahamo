@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.time.LocalDate;
+import ls.co.bytewise.api.timetable.lesson.Lesson;
+import ls.co.bytewise.api.timetable.lesson.LessonStatus;
 
 @Getter
 @Setter
@@ -35,6 +38,10 @@ public class TimetableDto extends BaseDto {
 
     private String teacherName;
 
+    private String substituteTeacherName;
+    private LessonStatus lessonStatus;
+    private LocalDate lessonDate;
+
     public TimetableDto(Timetable timetable) {
         super(timetable);
         this.dayOfWeek = timetable.getDayOfWeek();
@@ -50,6 +57,17 @@ public class TimetableDto extends BaseDto {
 
         if (timetable.getAssignment().getTeacher() != null) {
             this.teacherName = timetable.getAssignment().getTeacher().getFullName();
+        }
+    }
+
+    public TimetableDto(Timetable timetable, Lesson lesson) {
+        this(timetable);
+        if (lesson != null) {
+            this.lessonStatus = lesson.getStatus();
+            this.lessonDate = lesson.getDate();
+            if (lesson.getSubstituteTeacher() != null) {
+                this.substituteTeacherName = lesson.getSubstituteTeacher().getFullName();
+            }
         }
     }
 }

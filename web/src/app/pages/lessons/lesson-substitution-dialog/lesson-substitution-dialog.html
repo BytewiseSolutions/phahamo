@@ -1,0 +1,52 @@
+@if (visible) {
+  <div class="dialog-backdrop">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="substitution-title">
+      <div class="dialog-header">
+        <h2 id="substitution-title">Choose Covering Teacher</h2>
+        <span class="dialog-icon" aria-hidden="true">↔</span>
+      </div>
+
+      <div class="dialog-body">
+        @if (lesson) {
+          <div class="lesson-summary">
+            <div class="lesson-subject">{{ lesson.subjectName }}</div>
+            <div class="lesson-class">{{ lesson.schoolClassName }}</div>
+            <div class="lesson-details">
+              {{ lesson.date | date:'dd MMM yyyy' }} · {{ lesson.periodName }}
+              <span>{{ lesson.periodStartTime }}–{{ lesson.periodEndTime }}</span>
+            </div>
+          </div>
+        }
+
+        @if (errorMessage) {
+          <div class="error-message" role="alert">{{ errorMessage }}</div>
+        }
+
+        @if (loading) {
+          <div class="loading-message">Finding available teachers...</div>
+        } @else if (teachers.length === 0) {
+          <div class="empty-message">No teachers are free during this period.</div>
+        } @else {
+          <label class="field-label" for="substitute-teacher">Covering teacher</label>
+          <select id="substitute-teacher" class="teacher-select" [(ngModel)]="selectedTeacherUserId">
+            <option [ngValue]="null">Select a teacher</option>
+            @for (teacher of teachers; track teacher.id) {
+              <option [ngValue]="teacher.userId">
+                {{ teacher.firstName }} {{ teacher.lastName }}
+              </option>
+            }
+          </select>
+        }
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" (click)="closed.emit()">Cancel</button>
+        <button type="button" class="primary-button"
+                [disabled]="loading || selectedTeacherUserId == null || teachers.length === 0"
+                (click)="confirm()">
+          Confirm
+        </button>
+      </div>
+    </section>
+  </div>
+}

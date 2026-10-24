@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import ls.co.bytewise.api.common.SchoolScopedEntity;
+import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.timetable.Timetable;
 
 import java.time.LocalDate;
@@ -24,4 +25,8 @@ public class Lesson extends SchoolScopedEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LessonStatus status = LessonStatus.SCHEDULED;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "substitute_teacher_id")
+    private User substituteTeacher;
 }

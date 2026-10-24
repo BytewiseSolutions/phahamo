@@ -51,7 +51,12 @@
               <div class="period-time">{{ lesson.periodStartTime }}–{{ lesson.periodEndTime }}</div>
             </td>
             <td>{{ lesson.subjectName }}</td>
-            <td>{{ lesson.schoolClassName }}</td>
+            <td>
+              {{ lesson.schoolClassName }}
+              @if (lesson.substituteTeacherName) {
+                <div class="substitution-note">Cover: {{ lesson.substituteTeacherName }}</div>
+              }
+            </td>
             <td>
               <select
                 class="status-select"
@@ -68,5 +73,16 @@
         }
       </tbody>
     </table>
-  </div>
+</div>
+
 }
+
+<app-lesson-substitution-dialog
+  [visible]="substitutionLesson !== null"
+  [lesson]="substitutionLesson"
+  [teachers]="availableSubstituteTeachers"
+  [loading]="loadingSubstituteTeachers"
+  [errorMessage]="substitutionError"
+  (closed)="closeSubstitutionDialog()"
+  (confirmed)="confirmSubstitution($event)">
+</app-lesson-substitution-dialog>

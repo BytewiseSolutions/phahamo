@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import ls.co.bytewise.api.teacher.TeacherDto;
 
 @RestController
 @RequestMapping("/api/lessons")
@@ -45,8 +46,15 @@ public class LessonController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_TEACHER"})
     public LessonDto updateStatus(@AuthenticationPrincipal User currentUser,
                                   @PathVariable Long id,
-                                  @RequestParam LessonStatus status) {
-        return lessonService.updateStatus(currentUser, id, status);
+                                  @RequestParam LessonStatus status,
+                                  @RequestParam(required = false) Long substituteTeacherUserId) {
+        return lessonService.updateStatus(currentUser, id, status, substituteTeacherUserId);
+    }
+
+    @GetMapping("/{id}/available-substitute-teachers")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<TeacherDto> getAvailableSubstituteTeachers(@PathVariable Long id) {
+        return lessonService.getAvailableSubstituteTeachers(id);
     }
 
     @GetMapping("/teacher/{teacherId}/range")

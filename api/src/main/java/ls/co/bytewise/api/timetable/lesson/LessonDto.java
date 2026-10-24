@@ -26,6 +26,8 @@ public class LessonDto extends BaseDto {
     private String schoolClassName;
     private String teacherName;
 
+    private String substituteTeacherName;
+
     @NotNull
     private LocalDate date;
 
@@ -43,6 +45,10 @@ public class LessonDto extends BaseDto {
 
         if (lesson.getTimetable().getAssignment().getTeacher() != null) {
             this.teacherName = lesson.getTimetable().getAssignment().getTeacher().getFullName();
+        }
+
+        if (lesson.getSubstituteTeacher() != null) {
+            this.substituteTeacherName = lesson.getSubstituteTeacher().getFullName();
         }
 
         this.date = lesson.getDate();
