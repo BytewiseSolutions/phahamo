@@ -79,10 +79,10 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
   ],
   PARENT: [
-    { label: 'My Children', path: '/my-children', icon: 'fa-solid fa-child' },
-    { label: 'Attendance', path: '/attendance', icon: 'fa-solid fa-clipboard-check' },
-    { label: 'Results', path: '/results', icon: 'fa-solid fa-file-lines' },
-    { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
+    { label: 'My Children', path: '/parent/children', icon: 'fa-solid fa-child' },
+    { label: 'Attendance', path: '/parent/attendance', icon: 'fa-solid fa-clipboard-check' },
+    { label: 'Results', path: '/parent/results', icon: 'fa-solid fa-file-lines' },
+    { label: 'Fees', path: '/parent/fees', icon: 'fa-solid fa-money-check-dollar' },
   ],
   STUDENT: [
     { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },

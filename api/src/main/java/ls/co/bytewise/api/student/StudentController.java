@@ -61,4 +61,11 @@ public class StudentController {
                                   @RequestBody StudentClassUpdateDto dto) {
         return studentService.assignClass(currentUser, id, dto.getSchoolClassId());
     }
+
+    @PutMapping("/{id}/reactivate")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentDto reactivate(@AuthenticationPrincipal User currentUser,
+                                 @PathVariable Long id) {
+        return studentService.reactivate(currentUser, id);
+    }
 }

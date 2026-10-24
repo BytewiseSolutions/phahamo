@@ -49,6 +49,7 @@ import {AdminSchoolList} from './pages/subscription/admin-school-list/admin-scho
 import {systemAdminGuard} from './util/system-admin.guard';
 import {Profile} from './pages/profile/profile/profile';
 import {MessagesPage} from './pages/messages/messages-page/messages-page';
+import {ParentPortal} from './pages/parent/parent-portal/parent-portal';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -102,6 +103,10 @@ const routes: Routes = [
       { path: 'students/promotions/history', component: PromotionHistory },
       { path: 'profile', component: Profile },
       { path: 'messages', component: MessagesPage },
+      { path: 'parent/children', component: ParentPortal, data: { section: 'children' } },
+      { path: 'parent/attendance', component: ParentPortal, data: { section: 'attendance' } },
+      { path: 'parent/results', component: ParentPortal, data: { section: 'results' } },
+      { path: 'parent/fees', component: ParentPortal, data: { section: 'fees' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

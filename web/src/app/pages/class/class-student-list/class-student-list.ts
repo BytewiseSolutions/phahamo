@@ -228,6 +228,28 @@ export class ClassStudentList implements OnChanges, OnDestroy {
     });
   }
 
+  async onReactivate(student: Student): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Reactivate Student',
+      message: `Reactivate "${student.firstName} ${student.lastName}" as an active student?`,
+      confirmText: 'Reactivate'
+    });
+
+    if (!confirmed) return;
+
+    this.errorMessage = '';
+
+    this.backend.put(`/students/${student.id}/reactivate`, {}).subscribe({
+      next: () => {
+        this.loadStudents();
+        this.successDialog.show({ message: 'Student reactivated.' });
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to reactivate student.';
+      }
+    });
+  }
+
   async onRemoveSelected(): Promise<void> {
     const count = this.selectedForRemoval.length;
     if (count === 0) return;

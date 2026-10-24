@@ -33,6 +33,7 @@ export class Dashboard implements OnInit {
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
   isFinanceOfficer = false;
+  isParent = false;
   financeStats: FinanceDashboardStats | null = null;
   isStaff = false;
 
@@ -68,6 +69,7 @@ export class Dashboard implements OnInit {
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
     this.isFinanceOfficer = this.authService.hasRole('FINANCE_OFFICER');
+    this.isParent = this.authService.hasRole('PARENT');
     this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
     if (this.isSystemAdmin) {
@@ -99,7 +101,7 @@ export class Dashboard implements OnInit {
       this.loadRecentPayments();
     }
 
-    if (!this.isSystemAdmin) {
+    if (!this.isSystemAdmin && !this.isParent) {
       this.backend.get<Subscription>('/subscriptions/me').subscribe({
         next: (sub) => this.subscription = sub,
         error: () => {}

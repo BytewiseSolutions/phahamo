@@ -99,6 +99,7 @@ import { SubscriptionExpired } from './pages/subscription/subscription-expired/s
 import {SubscriptionInterceptor} from './util/subscription.interceptor';
 import { Profile } from './pages/profile/profile/profile';
 import { MessagesPage } from './pages/messages/messages-page/messages-page';
+import { ParentPortal } from './pages/parent/parent-portal/parent-portal';
 
 @NgModule({
   declarations: [
@@ -192,6 +193,7 @@ import { MessagesPage } from './pages/messages/messages-page/messages-page';
     SubscriptionExpired,
     Profile,
     MessagesPage,
+    ParentPortal,
   ],
   imports: [
     BrowserModule,
