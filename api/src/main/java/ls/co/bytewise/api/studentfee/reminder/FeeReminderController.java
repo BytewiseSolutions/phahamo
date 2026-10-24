@@ -1,5 +1,7 @@
-package ls.co.bytewise.api.studentfee;
+package ls.co.bytewise.api.studentfee.reminder;
 
+import ls.co.bytewise.api.studentfee.BulkFeeEmailResultDto;
+import ls.co.bytewise.api.studentfee.SendReminderRequest;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +24,12 @@ public class FeeReminderController {
     }
 
     @PostMapping("/send-all")
-    public FeeReminderResultDto sendAll(@RequestParam Long termId) {
+    public BulkFeeEmailResultDto sendAll(@RequestParam Long termId) {
         return feeReminderService.sendToAll(termId);
     }
 
     @PostMapping("/send-selected")
-    public FeeReminderResultDto sendSelected(@RequestBody SendReminderRequest request) {
+    public BulkFeeEmailResultDto sendSelected(@RequestBody SendReminderRequest request) {
         return feeReminderService.sendToSelected(request.getAccountIds());
     }
 }

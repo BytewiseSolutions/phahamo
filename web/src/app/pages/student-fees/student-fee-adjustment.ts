@@ -9,3 +9,8 @@ export interface StudentFeeAdjustment {
   approvedByName?: string;
   appliedAt: string;
 }
+
+export type StudentFeeAdjustmentInput = Pick<
+  StudentFeeAdjustment,
+  'type' | 'amount' | 'reason'
+>;

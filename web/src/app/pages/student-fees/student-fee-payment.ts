@@ -6,6 +6,12 @@ export interface StudentFeePayment {
   method: PaymentMethodType;
   reference?: string;
   paidAt: string;
+  balanceAfter: number;
   receivedById?: number;
   receivedByName?: string;
 }
+
+export type StudentFeePaymentInput = Pick<
+  StudentFeePayment,
+  'amount' | 'method' | 'reference' | 'paidAt'
+>;

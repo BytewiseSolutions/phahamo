@@ -7,6 +7,12 @@
     </div>
     <div class="header-actions">
       <button type="button" class="secondary-button"
+              (click)="sendStatementsAllOwing()"
+              [disabled]="!selectedTermId || sendingStatements || loading">
+        {{ sendingStatements ? 'Sending...' : 'Email Statements to All Owing' }}
+      </button>
+
+      <button type="button" class="secondary-button"
               (click)="sendAllOwing()"
               [disabled]="!selectedTermId || sending || loading">
         {{ sending ? 'Sending...' : 'Send Reminders to All Owing' }}
@@ -45,16 +51,30 @@
         </div>
       </div>
 
-      @if (lastResult.skippedNoEmail.length > 0) {
-        <div class="result-list">
-          <strong>Skipped — no parent email:</strong>
-          <ul>
-            @for (name of lastResult.skippedNoEmail; track name) {
-              <li>{{ name }}</li>
-            }
-          </ul>
+    </div>
+  }
+
+  @if (lastStatementResult) {
+    <div class="result-banner">
+      <h3>Fee Statements Sent</h3>
+      <div class="result-stats">
+        <div class="stat success">
+          <span class="value">{{ lastStatementResult.sentCount }}</span>
+          <span class="label">Sent</span>
         </div>
-      }
+        <div class="stat warning">
+          <span class="value">{{ lastStatementResult.skippedNoEmailCount }}</span>
+          <span class="label">No email</span>
+        </div>
+        <div class="stat info">
+          <span class="value">{{ lastStatementResult.skippedPaidCount }}</span>
+          <span class="label">Already paid</span>
+        </div>
+        <div class="stat error">
+          <span class="value">{{ lastStatementResult.failedCount }}</span>
+          <span class="label">Failed</span>
+        </div>
+      </div>
     </div>
   }
 
@@ -187,40 +207,6 @@
       </table>
     </div>
 
-    @if (parentsWithoutEmail.length > 0) {
-      <div class="no-email-section">
-        <h3>Parents without email ({{ parentsWithoutEmail.length }})</h3>
-        <p class="hint">These students won't receive reminder emails. Contact them by phone or in person.</p>
-
-        <table class="data-table">
-          <thead>
-          <tr>
-            <th>Student</th>
-            <th>Admission #</th>
-            <th class="num">Balance</th>
-            <th>Parent(s)</th>
-          </tr>
-          </thead>
-          <tbody>
-            @for (a of parentsWithoutEmail; track a.id) {
-              <tr>
-                <td>{{ a.studentLastName }} {{ a.studentFirstName }}</td>
-                <td>{{ a.admissionNumber }}</td>
-                <td class="num">{{ formatAmount(a.balance) }}</td>
-                <td>
-                  @for (p of a.parents; track p.fullName) {
-                    <div>
-                      {{ p.fullName }}
-                      @if (p.phone) { · {{ p.phone }} }
-                    </div>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
   }
 
 </div>

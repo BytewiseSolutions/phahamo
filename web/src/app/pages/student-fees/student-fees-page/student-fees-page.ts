@@ -5,7 +5,7 @@ import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { SchoolClass } from '../../class/class';
 import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
-import {FeeReminderResult} from '../fee-reminder-result';
+import {BulkFeeEmailResult} from '../bulk-fee-email-result';
 import {SendReminderRequest} from '../send-reminder-request';
 
 type StatusFilter = 'all' | 'owing' | 'paid';
@@ -33,7 +33,10 @@ export class StudentFeesPage implements OnInit {
 
   selectedAccountIds = new Set<number>();
   sending = false;
-  lastResult: FeeReminderResult | null = null;
+  lastResult: BulkFeeEmailResult | null = null;
+
+  sendingStatements = false;
+  lastStatementResult: BulkFeeEmailResult | null = null;
 
   constructor(
     private backend: BackendService,
@@ -99,7 +102,7 @@ export class StudentFeesPage implements OnInit {
       accountIds: Array.from(this.selectedAccountIds)
     };
 
-    this.backend.postSilently<FeeReminderResult>('/fee-reminders/send-selected', payload).subscribe({
+    this.backend.postSilently<BulkFeeEmailResult>('/fee-reminders/send-selected', payload).subscribe({
       next: (result) => {
         this.lastResult = result;
         this.sending = false;
@@ -128,7 +131,7 @@ export class StudentFeesPage implements OnInit {
     this.errorMessage = '';
     this.lastResult = null;
 
-    this.backend.postSilently<FeeReminderResult>(
+    this.backend.postSilently<BulkFeeEmailResult>(
       `/fee-reminders/send-all?termId=${this.selectedTermId}`, {}
     ).subscribe({
       next: (result) => {
@@ -171,9 +174,6 @@ export class StudentFeesPage implements OnInit {
     }
   }
 
-  get parentsWithoutEmail(): any[] {
-    return this.filteredAccounts.filter(a => !a.hasEmailParent);
-  }
   get filteredAccounts(): StudentFeeAccount[] {
     if (this.statusFilter === 'owing') {
       return this.accounts.filter(a => a.balance > 0);
@@ -261,6 +261,36 @@ export class StudentFeesPage implements OnInit {
 
   openDetail(account: StudentFeeAccount): void {
     this.router.navigate(['/student-fees', account.id]);
+  }
+
+  async sendStatementsAllOwing(): Promise<void> {
+    if (!this.selectedTermId) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Email Fee Statements',
+      message: `Email PDF fee statements to every parent of a student with an outstanding balance this term?\n\nStudents without parent email addresses will be skipped and listed.`,
+      confirmText: 'Send All',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.sendingStatements = true;
+    this.errorMessage = '';
+    this.lastStatementResult = null;
+
+    this.backend.postSilently<BulkFeeEmailResult>(
+      `/fee-statements/term/${this.selectedTermId}/email-all`, {}
+    ).subscribe({
+      next: (result) => {
+        this.lastStatementResult = result;
+        this.sendingStatements = false;
+        this.load();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to send statements.';
+        this.sendingStatements = false;
+      }
+    });
   }
 
   formatAmount(value: number | null | undefined): string {

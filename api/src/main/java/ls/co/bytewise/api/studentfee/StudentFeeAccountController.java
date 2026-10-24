@@ -19,11 +19,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/student-fees")
 @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-public class StudentFeeController {
+public class StudentFeeAccountController {
 
-    private final StudentFeeService feeService;
+    private final StudentFeeAccountService feeService;
 
-    public StudentFeeController(StudentFeeService feeService) {
+    public StudentFeeAccountController(StudentFeeAccountService feeService) {
         this.feeService = feeService;
     }
 
@@ -66,7 +66,7 @@ public class StudentFeeController {
     @PostMapping("/{accountId}/adjustments")
     public StudentFeeAccountDto addAdjustment(@AuthenticationPrincipal User currentUser,
                                               @PathVariable Long accountId,
-                                              @RequestBody AdjustmentPayloadDto dto) {
+                                              @RequestBody StudentFeeAdjustmentDto dto) {
         return feeService.addAdjustment(accountId, dto, currentUser);
     }
 
@@ -90,7 +90,7 @@ public class StudentFeeController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER"})
     public StudentFeeAccountDto recordPayment(@AuthenticationPrincipal User currentUser,
                                               @PathVariable Long accountId,
-                                              @RequestBody PaymentPayloadDto dto) {
+                                              @RequestBody StudentFeePaymentDto dto) {
         return feeService.recordPayment(accountId, dto, currentUser);
     }
 

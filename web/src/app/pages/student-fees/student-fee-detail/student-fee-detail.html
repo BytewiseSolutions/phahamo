@@ -5,16 +5,50 @@
       <i class="fa-solid fa-arrow-left"></i> Back to Student Fees
     </button>
 
-    @if (account) {
-      <h1>{{ account.studentLastName }} {{ account.studentFirstName }}</h1>
-      <p>{{ account.admissionNumber }} — {{ account.className }} — {{ account.termName }} — {{ account.academicYearName }}</p>
-    } @else {
-      <h1>Fee Account</h1>
-    }
+    <div class="page-header-row">
+      <div class="page-header-info">
+        @if (account) {
+          <h1>{{ account.studentLastName }} {{ account.studentFirstName }}</h1>
+          <p>{{ account.admissionNumber }} — {{ account.className }} — {{ account.termName }} — {{ account.academicYearName }}</p>
+        } @else {
+          <h1>Fee Account</h1>
+        }
+      </div>
+
+      @if (account) {
+        <div class="header-actions">
+          <button type="button" class="primary-button"
+                  (click)="emailStatement()"
+                  [disabled]="sendingStatement">
+            {{ sendingStatement ? 'Sending...' : 'Email Statement' }}
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
   @if (errorMessage) {
     <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (statementResult) {
+    <div class="result-banner">
+      <h3>Statement Emailed</h3>
+      <div class="result-stats">
+        <div class="stat success">
+          <span class="value">{{ statementResult.sentCount }}</span>
+          <span class="label">Sent</span>
+        </div>
+        <div class="stat warning">
+          <span class="value">{{ statementResult.skippedNoEmailCount }}</span>
+          <span class="label">No email</span>
+        </div>
+        <div class="stat error">
+          <span class="value">{{ statementResult.failedCount }}</span>
+          <span class="label">Failed</span>
+        </div>
+      </div>
+    </div>
   }
 
   @if (loading) {

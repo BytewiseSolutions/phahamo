@@ -310,3 +310,117 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.page-header-info {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+}
+
+.header-actions {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding-top: 4px;
+}
+
+.primary-button {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: var(--border-radius-md);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-dark);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.result-banner {
+  padding: 20px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.result-stats .stat {
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  text-align: center;
+
+  .value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+  }
+
+  &.success { background: rgb(from var(--success) r g b / 0.1); .value { color: var(--success); } }
+  &.warning { background: rgb(from var(--warning) r g b / 0.1); .value { color: var(--warning); } }
+  &.error { background: rgb(from var(--error) r g b / 0.1); .value { color: var(--error); } }
+}
+
+.result-list {
+  margin-top: 12px;
+  font-size: 13px;
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+}

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class StudentFeeService {
+public class StudentFeeAccountService {
 
     private final StudentFeeAccountRepository accountRepository;
     private final StudentRepository studentRepository;
@@ -30,13 +30,13 @@ public class StudentFeeService {
     private final StudentFeePaymentRepository paymentRepository;
     private final MailService mailService;
 
-    public StudentFeeService(StudentFeeAccountRepository accountRepository,
-                             StudentRepository studentRepository,
-                             TermRepository termRepository,
-                             FeeStructureRepository feeStructureRepository,
-                             AnnualFeeRepository annualFeeRepository,
-                             StudentFeePaymentRepository paymentRepository,
-                             MailService mailService) {
+    public StudentFeeAccountService(StudentFeeAccountRepository accountRepository,
+                                    StudentRepository studentRepository,
+                                    TermRepository termRepository,
+                                    FeeStructureRepository feeStructureRepository,
+                                    AnnualFeeRepository annualFeeRepository,
+                                    StudentFeePaymentRepository paymentRepository,
+                                    MailService mailService) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -167,7 +167,7 @@ public class StudentFeeService {
     }
 
     @Transactional
-    public StudentFeeAccountDto addAdjustment(Long accountId, AdjustmentPayloadDto dto, User approver) {
+    public StudentFeeAccountDto addAdjustment(Long accountId, StudentFeeAdjustmentDto dto, User approver) {
         StudentFeeAccount account = requireAccount(accountId);
 
         if (dto.getType() == null) {
@@ -257,7 +257,7 @@ public class StudentFeeService {
     }
 
     @Transactional
-    public StudentFeeAccountDto recordPayment(Long accountId, PaymentPayloadDto dto, User receivedBy) {
+    public StudentFeeAccountDto recordPayment(Long accountId, StudentFeePaymentDto dto, User receivedBy) {
         StudentFeeAccount account = requireAccount(accountId);
         Student student = account.getStudent();
 

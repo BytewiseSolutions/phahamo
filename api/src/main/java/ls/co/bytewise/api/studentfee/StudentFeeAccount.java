@@ -56,6 +56,9 @@ public class StudentFeeAccount extends SchoolScopedEntity {
     @Column(name = "last_reminder_sent_at")
     private Instant lastReminderSentAt;
 
+    @Column(name = "last_statement_sent_at")
+    private Instant lastStatementSentAt;
+
     @Column(name = "last_reminder_amount")
     private Double lastReminderAmount;
 

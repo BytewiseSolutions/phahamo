@@ -4,6 +4,7 @@ import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { StudentFeeAccount } from '../student-fee-account';
 import { StudentFeeAdjustment } from '../student-fee-adjustment';
+import {BulkFeeEmailResult} from '../bulk-fee-email-result';
 
 type Tab = 'breakdown' | 'adjustments' | 'payments';
 
@@ -24,6 +25,9 @@ export class StudentFeeDetail implements OnInit {
   showAdjustmentForm = false;
   showPaymentForm = false;
   accountId: number | null = null;
+
+  sendingStatement = false;
+  statementResult: BulkFeeEmailResult | null = null;
 
   constructor(
     private backend: BackendService,
@@ -107,6 +111,36 @@ export class StudentFeeDetail implements OnInit {
       next: () => this.load(),
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to remove adjustment.';
+      }
+    });
+  }
+
+  async emailStatement(): Promise<void> {
+    if (!this.account || !this.accountId) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Email Fee Statement',
+      message: `Email a PDF fee statement to all parents of ${this.account.studentFirstName} ${this.account.studentLastName} with an email address?`,
+      confirmText: 'Send',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.sendingStatement = true;
+    this.statementResult = null;
+    this.errorMessage = '';
+
+    this.backend.postSilently<BulkFeeEmailResult>(
+      `/fee-statements/account/${this.accountId}/email`, {}
+    ).subscribe({
+      next: (result) => {
+        this.statementResult = result;
+        this.sendingStatement = false;
+        this.load();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to email statement.';
+        this.sendingStatement = false;
       }
     });
   }
