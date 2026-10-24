@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.MonthDay;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -178,6 +179,36 @@ public class DashboardService {
                 .stream()
                 .map(StudentFeePaymentDto::new)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public FinanceDashboardStatsDto getFinanceStats() {
+        Long schoolId = TenantContext.getSchoolId();
+        FinanceDashboardStatsDto stats = new FinanceDashboardStatsDto();
+
+        Term currentTerm = getCurrentTerm(schoolId);
+        if (currentTerm != null) {
+            List<Object[]> feeResults = feeAccountRepository.sumFeesForTerm(schoolId, currentTerm.getId());
+            if (feeResults != null && !feeResults.isEmpty() && feeResults.get(0) != null) {
+                Object[] row = feeResults.get(0);
+                double collected = row[1] == null ? 0.0 : ((Number) row[1]).doubleValue();
+                double expected = row[0] == null ? 0.0 : ((Number) row[0]).doubleValue();
+                stats.setFeesCollectedThisTerm(collected);
+                stats.setTotalOutstanding(Math.max(0.0, expected - collected));
+            }
+        }
+
+        LocalDate today = LocalDate.now();
+        ZoneId zone = ZoneId.systemDefault();
+        Instant from = today.atStartOfDay(zone).toInstant();
+        Instant to = today.plusDays(1).atStartOfDay(zone).toInstant();
+        List<Object[]> paymentResults = paymentRepository.summarizePaymentsBetween(schoolId, from, to);
+        if (paymentResults != null && !paymentResults.isEmpty() && paymentResults.get(0) != null) {
+            Object[] row = paymentResults.get(0);
+            stats.setPaymentsRecordedToday(row[0] == null ? 0 : ((Number) row[0]).longValue());
+        }
+
+        return stats;
     }
 
     @Transactional(readOnly = true)

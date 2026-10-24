@@ -178,6 +178,55 @@
     </div>
   }
 
+  @if (isFinanceOfficer && financeStats) {
+    <div class="stats-grid finance-dashboard-grid">
+      <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
+        <span class="stat-label">Fees Collected This Term</span>
+        <span class="stat-value">M {{ financeStats.feesCollectedThisTerm | number:'1.2-2' }}</span>
+      </div>
+      <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
+        <span class="stat-label">Total Outstanding</span>
+        <span class="stat-value text-error">M {{ financeStats.totalOutstanding | number:'1.2-2' }}</span>
+      </div>
+      <div class="stat-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+        <span class="stat-label">Payments Recorded Today</span>
+        <span class="stat-value">{{ financeStats.paymentsRecordedToday }}</span>
+      </div>
+    </div>
+
+    <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+      <div class="recent-payments-header">
+        <div>
+          <h2>Recent Payments</h2>
+          <p>Latest fee payments recorded</p>
+        </div>
+        <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
+      </div>
+
+      @if (recentPaymentsLoading) {
+        <div class="recent-payments-empty">Loading payments...</div>
+      } @else if (recentPayments.length === 0) {
+        <div class="recent-payments-empty">No payments recorded yet.</div>
+      } @else {
+        <div class="recent-payments-list">
+          @for (payment of recentPayments; track payment.id) {
+            <div class="recent-payment-row">
+              <div class="payment-student">
+                <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
+                <div>
+                  <strong>{{ payment.studentName || 'Unknown student' }}</strong>
+                  <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+              <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
+              <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
   @if (isTeacher && teacherStats) {
     <div class="teacher-dashboard-grid">
       <section class="teacher-action-card" (click)="goToTimetable()">

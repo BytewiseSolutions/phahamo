@@ -27,9 +27,15 @@ public class DashboardController {
     }
 
     @GetMapping("/recent-payments")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER"})
     public List<StudentFeePaymentDto> getRecentPayments() {
         return dashboardService.getRecentPayments();
+    }
+
+    @GetMapping("/finance")
+    @Secured("ROLE_FINANCE_OFFICER")
+    public FinanceDashboardStatsDto getFinanceStats() {
+        return dashboardService.getFinanceStats();
     }
 
     @GetMapping("/upcoming-exams")

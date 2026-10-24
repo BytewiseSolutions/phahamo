@@ -12,6 +12,7 @@ import {SystemDashboardStats} from './system-dashboard-stats';
 import { StudentFeePayment } from '../student-fees/student-fee-payment';
 import { UpcomingExam } from './upcoming-exam';
 import { Birthday } from './birthday';
+import { FinanceDashboardStats } from './finance-dashboard-stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +31,8 @@ export class Dashboard implements OnInit {
   isStudent = false;
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
+  isFinanceOfficer = false;
+  financeStats: FinanceDashboardStats | null = null;
   isStaff = false;
 
   systemStats: SystemDashboardStats | null = null;
@@ -61,6 +64,7 @@ export class Dashboard implements OnInit {
     this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
+    this.isFinanceOfficer = this.authService.hasRole('FINANCE_OFFICER');
     this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
     if (this.isSystemAdmin) {
@@ -83,6 +87,13 @@ export class Dashboard implements OnInit {
       this.loadStudentChart();
       this.loadUpcomingExams();
       this.loadBirthdays();
+    }
+
+    if (this.isFinanceOfficer) {
+      this.backend.get<FinanceDashboardStats>('/dashboard/finance').subscribe({
+        next: (data) => this.financeStats = data
+      });
+      this.loadRecentPayments();
     }
 
     if (!this.isSystemAdmin) {
@@ -282,6 +293,7 @@ export class Dashboard implements OnInit {
   goToResults(): void { this.router.navigate(['/results/my']); }
   goToFees(): void { this.router.navigate(['/my-fees']); }
   goToPaymentHistory(): void { this.router.navigate(['/student-fees/payments']); }
+  goToFeeAccounts(): void { this.router.navigate(['/student-fees']); }
   goToExam(examId: number): void { this.router.navigate(['/examinations', examId]); }
   goToExaminations(): void { this.router.navigate(['/examinations']); }
   goToUsers(): void { this.router.navigate(['/users']); }
