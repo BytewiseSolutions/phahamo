@@ -49,13 +49,26 @@
 
   @if (stats) {
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
         <span class="stat-label">Total Students</span>
         <span class="stat-value">{{ stats.totalStudents }}</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
         <span class="stat-label">Total Teachers</span>
         <span class="stat-value">{{ stats.totalTeachers }}</span>
+      </div>
+      <div class="stat-card" (click)="goToAttendanceHistory()" role="link" tabindex="0">
+        <span class="stat-label">Today's Attendance Rate</span>
+        <span class="stat-value">{{ stats.attendanceRateToday | number:'1.1-1' }}%</span>
+      </div>
+      <div class="stat-card" (click)="goToTimetable()" role="link" tabindex="0">
+        <span class="stat-label">Lessons Changed Today</span>
+        <span class="stat-value">{{ stats.lessonsCancelledToday + stats.lessonsSubstitutedToday }}</span>
+        <span class="stat-note">{{ stats.lessonsCancelledToday }} cancelled · {{ stats.lessonsSubstitutedToday }} substituted</span>
+      </div>
+      <div class="stat-card" (click)="goToExaminations()" role="link" tabindex="0">
+        <span class="stat-label">Exams in Next 7 Days</span>
+        <span class="stat-value">{{ stats.upcomingExamsCount }}</span>
       </div>
       <div class="stat-card">
         <span class="stat-label">Attendance Rate (Term)</span>
@@ -166,37 +179,101 @@
   }
 
   @if (isTeacher && teacherStats) {
-    <div class="student-widgets-grid">
-      <div class="widget-card" (click)="goToMyClasses()">
-        <div class="widget-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">My Classes</span>
-          <span class="widget-value">{{ teacherStats.totalClasses }} classes assigned</span>
+    <div class="teacher-dashboard-grid">
+      <section class="teacher-action-card" (click)="goToTimetable()">
+        <div class="teacher-action-header">
+          <div>
+            <h2>My Lessons Today</h2>
+            <p>{{ teacherStats.todayPeriods }} lesson{{ teacherStats.todayPeriods === 1 ? '' : 's' }} scheduled</p>
+          </div>
+          <i class="fa-solid fa-calendar-days teacher-action-icon"></i>
         </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
+        @if (teacherStats.todayLessons.length === 0) {
+          <div class="teacher-empty">No lessons scheduled today.</div>
+        } @else {
+          <div class="teacher-task-list">
+            @for (lesson of teacherStats.todayLessons; track lesson.id) {
+              <div class="teacher-task-row">
+                <span class="task-time">{{ lesson.periodStartTime }}</span>
+                <div>
+                  <strong>{{ lesson.subjectName }}</strong>
+                  <span>{{ lesson.schoolClassName }} · {{ lesson.periodName }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
 
-      <div class="widget-card" (click)="goToTimetable()">
-        <div class="widget-icon"><i class="fa-solid fa-calendar-days"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Today's Schedule</span>
-          <span class="widget-value">{{ teacherStats.todayPeriods }} periods scheduled</span>
+      <section class="teacher-action-card" (click)="goToTeacherAttendance()">
+        <div class="teacher-action-header">
+          <div>
+            <h2>Attendance to Mark</h2>
+            @if (teacherStats.pendingAttendance > 0) {
+              <p class="text-error">{{ teacherStats.pendingAttendance }} lesson{{ teacherStats.pendingAttendance === 1 ? '' : 's' }} pending</p>
+            } @else {
+              <p class="text-success">All caught up for today</p>
+            }
+          </div>
+          <i class="fa-solid fa-clipboard-check teacher-action-icon"></i>
         </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
+        <div class="teacher-action-summary">
+          {{ teacherStats.pendingAttendance > 0 ? 'Open My Classes to mark attendance.' : 'No attendance actions remaining.' }}
+        </div>
+      </section>
 
-      <div class="widget-card" (click)="goToMyClasses()">
-        <div class="widget-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Attendance Pending</span>
-          @if (teacherStats.pendingAttendance > 0) {
-            <span class="widget-value text-error">{{ teacherStats.pendingAttendance }} lessons to mark</span>
-          } @else {
-            <span class="widget-value text-success">All caught up!</span>
-          }
+      <section class="teacher-action-card" (click)="goToGrades()">
+        <div class="teacher-action-header">
+          <div>
+            <h2>Marks to Complete</h2>
+            @if (teacherStats.missingMarks > 0) {
+              <p class="text-error">{{ teacherStats.missingMarks }} missing mark{{ teacherStats.missingMarks === 1 ? '' : 's' }}</p>
+            } @else {
+              <p class="text-success">All marks are complete</p>
+            }
+          </div>
+          <i class="fa-solid fa-graduation-cap teacher-action-icon"></i>
         </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
+        @if (teacherStats.assessmentsMissingMarks.length === 0) {
+          <div class="teacher-empty">No assessments need marks.</div>
+        } @else {
+          <div class="teacher-task-list">
+            @for (task of teacherStats.assessmentsMissingMarks; track task.id) {
+              <button type="button" class="teacher-task-row task-button" (click)="$event.stopPropagation(); goToAssessment(task.id)">
+                <div>
+                  <strong>{{ task.name }}</strong>
+                  <span>{{ task.subjectName }} · {{ task.className }}</span>
+                </div>
+                <b>{{ task.missingMarks }}</b>
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="teacher-action-card" (click)="goToAnnouncements()">
+        <div class="teacher-action-header">
+          <div>
+            <h2>Recent Announcements</h2>
+            <p>Updates for your school</p>
+          </div>
+          <i class="fa-solid fa-bullhorn teacher-action-icon"></i>
+        </div>
+        @if (announcements.length === 0) {
+          <div class="teacher-empty">No recent announcements.</div>
+        } @else {
+          <div class="teacher-task-list">
+            @for (announcement of announcements.slice(0, 3); track announcement.id) {
+              <div class="teacher-task-row announcement-task">
+                <div>
+                  <strong>{{ announcement.title }}</strong>
+                  <span>{{ announcement.publishAt | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
     </div>
   }
 

@@ -2,6 +2,9 @@ package ls.co.bytewise.api.dashboard;
 
 import ls.co.bytewise.api.attendance.AttendanceRepository;
 import ls.co.bytewise.api.attendance.AttendanceStatus;
+import ls.co.bytewise.api.assessment.Assessment;
+import ls.co.bytewise.api.assessment.AssessmentRepository;
+import ls.co.bytewise.api.assessment.mark.MarkRepository;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -23,8 +26,10 @@ import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.timetable.Timetable;
 import ls.co.bytewise.api.timetable.TimetableDto;
 import ls.co.bytewise.api.timetable.TimetableRepository;
-import ls.co.bytewise.api.timetable.lesson.LessonRepository;
 import ls.co.bytewise.api.timetable.lesson.LessonStatus;
+import ls.co.bytewise.api.timetable.lesson.LessonDto;
+import ls.co.bytewise.api.timetable.lesson.LessonRepository;
+import ls.co.bytewise.api.timetable.lesson.LessonService;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -52,12 +57,15 @@ public class DashboardService {
     private final TermRepository termRepository;
     private final TimetableRepository timetableRepository;
     private final SubjectClassAssignmentRepository assignmentRepository;
-    private final LessonRepository lessonRepository;
     private final SchoolRepository schoolRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionService subscriptionService;
     private final StudentFeePaymentRepository paymentRepository;
     private final ExaminationRepository examinationRepository;
+    private final LessonService lessonService;
+    private final AssessmentRepository assessmentRepository;
+    private final MarkRepository markRepository;
+    private final LessonRepository lessonRepository;
 
 
     public DashboardService(StudentRepository studentRepository,
@@ -67,12 +75,15 @@ public class DashboardService {
                             TermRepository termRepository,
                             TimetableRepository timetableRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
-                            LessonRepository lessonRepository,
                             SchoolRepository schoolRepository,
                             SubscriptionRepository subscriptionRepository,
                             SubscriptionService subscriptionService,
                             StudentFeePaymentRepository paymentRepository,
-                            ExaminationRepository examinationRepository
+                            ExaminationRepository examinationRepository,
+                            LessonService lessonService,
+                            AssessmentRepository assessmentRepository,
+                            MarkRepository markRepository,
+                            LessonRepository lessonRepository
                             ) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
@@ -81,12 +92,15 @@ public class DashboardService {
         this.termRepository = termRepository;
         this.timetableRepository = timetableRepository;
         this.assignmentRepository = assignmentRepository;
-        this.lessonRepository = lessonRepository;
         this.schoolRepository = schoolRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.subscriptionService = subscriptionService;
         this.paymentRepository = paymentRepository;
         this.examinationRepository = examinationRepository;
+        this.lessonService = lessonService;
+        this.assessmentRepository = assessmentRepository;
+        this.markRepository = markRepository;
+        this.lessonRepository = lessonRepository;
     }
 
     public SystemDashboardStats getSystemStats() {
@@ -129,6 +143,15 @@ public class DashboardService {
 
         stats.setTotalStudents(studentRepository.countBySchoolIdAndStatus(schoolId, StudentStatus.ACTIVE));
         stats.setTotalTeachers(userRepository.countActiveByRoleAndSchool(UserRole.TEACHER, schoolId));
+
+        LocalDate today = LocalDate.now();
+        stats.setAttendanceRateToday(calculateAttendanceRate(schoolId, today));
+        stats.setLessonsCancelledToday(lessonRepository.countBySchoolIdAndDateAndStatus(
+                schoolId, today, LessonStatus.CANCELLED));
+        stats.setLessonsSubstitutedToday(lessonRepository.countBySchoolIdAndDateAndStatus(
+                schoolId, today, LessonStatus.SUBSTITUTED));
+        stats.setUpcomingExamsCount(examinationRepository.findUpcomingBySchool(
+                schoolId, today, today.plusDays(7)).size());
 
         Term currentTerm = getCurrentTerm(schoolId);
         if (currentTerm != null) {
@@ -411,6 +434,20 @@ public class DashboardService {
         return 0.0;
     }
 
+    private double calculateAttendanceRate(Long schoolId, LocalDate date) {
+        List<Object[]> results = attendanceRepository.getAttendanceSummary(
+                schoolId, date, date, null, AttendanceStatus.PRESENT);
+
+        if (results == null || results.isEmpty() || results.get(0) == null) {
+            return 0.0;
+        }
+
+        Object[] row = results.get(0);
+        long total = row[0] != null ? ((Number) row[0]).longValue() : 0;
+        long present = row[1] != null ? ((Number) row[1]).longValue() : 0;
+        return total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+    }
+
     private Term getCurrentTerm(Long schoolId) {
         LocalDate today = LocalDate.now();
         return termRepository.findBySchoolIdOrderByStartDateDesc(schoolId).stream()
@@ -431,24 +468,44 @@ public class DashboardService {
         long classes = assignmentRepository.countByTeacherIdAndSchoolId(currentUser.getId(), schoolId);
         stats.setTotalClasses(classes);
 
-        DayOfWeek today = LocalDate.now().getDayOfWeek();
-        List<Timetable> todaysSlots = timetableRepository
-                .findAllByAssignment_Teacher_IdAndSchoolId(currentUser.getId(), schoolId)
-                .stream()
-                .filter(t -> t.getDayOfWeek() == today)
-                .toList();
-        stats.setTodayPeriods(todaysSlots.size());
-
         LocalDate todayDate = LocalDate.now();
-        long pending = 0;
-        for (Timetable slot : todaysSlots) {
-            boolean exists = lessonRepository.existsByTimetableIdAndDateAndStatus(
-                    slot.getId(), todayDate, LessonStatus.COMPLETED);
-            if (!exists) {
-                pending++;
+        List<LessonDto> todayLessons = lessonService
+                .getOrCreateLessonsForTeacherAndDate(currentUser, currentUser.getId(), todayDate);
+        stats.setTodayLessons(todayLessons);
+        stats.setTodayPeriods(todayLessons.size());
+        stats.setPendingAttendance(todayLessons.stream()
+                .filter(lesson -> lesson.getStatus() == LessonStatus.SCHEDULED
+                        || lesson.getStatus() == LessonStatus.SUBSTITUTED)
+                .count());
+
+        Term currentTerm = getCurrentTerm(schoolId);
+        if (currentTerm != null) {
+            List<TeacherAssessmentTaskDto> missingMarkTasks = new ArrayList<>();
+            for (Assessment assessment : assessmentRepository
+                    .findAllByAssignment_Teacher_IdAndSchoolIdOrderByDateDesc(currentUser.getId(), schoolId)) {
+                if (!assessment.getTerm().getId().equals(currentTerm.getId())) continue;
+
+                Long classId = assessment.getAssignment().getSchoolClass().getId();
+                long activeStudents = studentRepository.countBySchoolIdAndCurrentClassIdAndStatus(
+                        schoolId, classId, StudentStatus.ACTIVE);
+                long markedStudents = markRepository.countByAssessmentIdAndScoreIsNotNull(assessment.getId());
+                long missingMarks = Math.max(0, activeStudents - markedStudents);
+
+                if (missingMarks > 0) {
+                    missingMarkTasks.add(new TeacherAssessmentTaskDto(
+                            assessment.getId(),
+                            assessment.getName(),
+                            assessment.getAssignment().getSubject().getName(),
+                            assessment.getAssignment().getSchoolClass().getName(),
+                            assessment.getDate(),
+                            missingMarks));
+                }
             }
+            stats.setAssessmentsMissingMarks(missingMarkTasks);
+            stats.setMissingMarks(missingMarkTasks.stream()
+                    .mapToLong(TeacherAssessmentTaskDto::getMissingMarks)
+                    .sum());
         }
-        stats.setPendingAttendance(pending);
 
         return stats;
     }

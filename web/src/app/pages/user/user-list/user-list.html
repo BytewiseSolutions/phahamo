@@ -2,12 +2,14 @@
   <div class="page-header">
     <h1>Users</h1>
     <div class="header-actions">
-      <button type="button" class="secondary-button" (click)="goToImport()">
-        Import Users
-      </button>
-      <button type="button" class="primary-button" (click)="toggleCreateForm()">
-        + Add User
-      </button>
+      @if (canManageUsers) {
+        <button type="button" class="secondary-button" (click)="goToImport()">
+          Import Users
+        </button>
+        <button type="button" class="primary-button" (click)="toggleCreateForm()">
+          + Add User
+        </button>
+      }
     </div>
   </div>
 
@@ -88,11 +90,13 @@
             </td>
             <td class="actions-cell">
               <button type="button" class="link-button view" (click)="onView(user)">View</button>
-              <button type="button" class="link-button edit" (click)="onEdit(user)">Edit</button>
-              @if (user.status === 'ACTIVE') {
-                <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
-              } @else {
-                <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
+              @if (canManageUsers) {
+                <button type="button" class="link-button edit" (click)="onEdit(user)">Edit</button>
+                @if (user.status === 'ACTIVE') {
+                  <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
+                } @else {
+                  <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
+                }
               }
             </td>
           </tr>

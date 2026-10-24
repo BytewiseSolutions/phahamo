@@ -617,3 +617,148 @@
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(29, 73, 82, 0.08);
 }
+
+.stat-card[role="link"] {
+  cursor: pointer;
+}
+
+.stat-card[role="link"]:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.stat-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.teacher-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.teacher-action-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.teacher-action-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.teacher-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.teacher-action-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.teacher-action-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.teacher-action-icon {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.teacher-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teacher-task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.teacher-task-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.teacher-task-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.teacher-task-row span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.task-time {
+  flex: 0 0 58px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.task-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.task-button b {
+  margin-left: auto;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.teacher-action-summary,
+.teacher-empty {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.teacher-empty {
+  padding: 12px 0 4px;
+}
+
+.announcement-task {
+  padding-bottom: 0;
+}
+
+.text-success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+@media (max-width: 850px) {
+  .teacher-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

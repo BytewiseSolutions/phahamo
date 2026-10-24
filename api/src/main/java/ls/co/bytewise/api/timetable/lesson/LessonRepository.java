@@ -50,4 +50,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     boolean existsByTimetableIdAndDateAndStatus(Long timetableId, LocalDate date, LessonStatus status);
 
     boolean existsByTimetable_IdAndDateAndSchoolId(Long timetableId, LocalDate date, Long schoolId);
+
+    long countBySchoolIdAndDateAndStatus(Long schoolId, LocalDate date, LessonStatus status);
 }

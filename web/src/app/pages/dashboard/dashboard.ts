@@ -283,6 +283,13 @@ export class Dashboard implements OnInit {
   goToFees(): void { this.router.navigate(['/my-fees']); }
   goToPaymentHistory(): void { this.router.navigate(['/student-fees/payments']); }
   goToExam(examId: number): void { this.router.navigate(['/examinations', examId]); }
+  goToExaminations(): void { this.router.navigate(['/examinations']); }
+  goToUsers(): void { this.router.navigate(['/users']); }
+  goToAttendanceHistory(): void { this.router.navigate(['/attendance/history']); }
+  goToGrades(): void { this.router.navigate(['/grades']); }
+  goToAssessment(assessmentId: number): void { this.router.navigate(['/grades', assessmentId, 'marks']); }
+  goToTeacherAttendance(): void { this.router.navigate(['/my-classes']); }
+  goToAnnouncements(): void { this.router.navigate(['/announcements']); }
   goToMyClasses(): void { this.router.navigate(['/my-classes']); }
 
   get showUpcomingExams(): boolean {

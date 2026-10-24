@@ -13,6 +13,8 @@ public interface MarkRepository extends JpaRepository<Mark, Long> {
 
     Optional<Mark> findByAssessmentIdAndStudentId(Long assessmentId, Long studentId);
 
+    long countByAssessmentIdAndScoreIsNotNull(Long assessmentId);
+
     @Query("SELECT MAX(m.score) FROM Mark m WHERE m.assessment.id = :assessmentId")
     Double findMaxScoreByAssessmentId(@Param("assessmentId") Long assessmentId);
 
