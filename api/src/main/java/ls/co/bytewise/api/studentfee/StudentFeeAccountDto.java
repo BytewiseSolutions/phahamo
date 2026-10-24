@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ls.co.bytewise.api.parent.Parent;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -34,10 +35,12 @@ public class StudentFeeAccountDto extends BaseDto {
     private List<StudentFeeAdjustmentDto> adjustments;
     private List<StudentFeePaymentDto> payments;
 
-    private java.time.Instant lastReminderSentAt;
+    private Instant lastReminderSentAt;
+    private Instant lastStatementSentAt;
     private Double lastReminderAmount;
     private boolean hasEmailParent;
     private java.util.List<ParentContactDto> parents;
+
 
     public StudentFeeAccountDto(StudentFeeAccount acc) {
         super(acc);
@@ -66,6 +69,7 @@ public class StudentFeeAccountDto extends BaseDto {
 
         this.lastReminderSentAt = acc.getLastReminderSentAt();
         this.lastReminderAmount = acc.getLastReminderAmount();
+        this.lastStatementSentAt = acc.getLastStatementSentAt();
 
         List<ParentContactDto> parentList = new java.util.ArrayList<>();
         boolean anyEmail = false;

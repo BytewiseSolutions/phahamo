@@ -7,6 +7,7 @@ import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
 import {FeeReminderResult} from '../fee-reminder-result';
 import {SendReminderRequest} from '../send-reminder-request';
+import {FeeStatementResult} from '../fee-statement-result';
 
 type StatusFilter = 'all' | 'owing' | 'paid';
 
@@ -34,6 +35,9 @@ export class StudentFeesPage implements OnInit {
   selectedAccountIds = new Set<number>();
   sending = false;
   lastResult: FeeReminderResult | null = null;
+
+  sendingStatements = false;
+  lastStatementResult: FeeStatementResult | null = null;
 
   constructor(
     private backend: BackendService,
@@ -261,6 +265,36 @@ export class StudentFeesPage implements OnInit {
 
   openDetail(account: StudentFeeAccount): void {
     this.router.navigate(['/student-fees', account.id]);
+  }
+
+  async sendStatementsAllOwing(): Promise<void> {
+    if (!this.selectedTermId) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Email Fee Statements',
+      message: `Email PDF fee statements to every parent of a student with an outstanding balance this term?\n\nStudents without parent email addresses will be skipped and listed.`,
+      confirmText: 'Send All',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.sendingStatements = true;
+    this.errorMessage = '';
+    this.lastStatementResult = null;
+
+    this.backend.postSilently<FeeStatementResult>(
+      `/fee-statements/term/${this.selectedTermId}/email-all`, {}
+    ).subscribe({
+      next: (result) => {
+        this.lastStatementResult = result;
+        this.sendingStatements = false;
+        this.load();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to send statements.';
+        this.sendingStatements = false;
+      }
+    });
   }
 
   formatAmount(value: number | null | undefined): string {

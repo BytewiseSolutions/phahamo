@@ -24,4 +24,5 @@ export interface StudentFeeAccount {
   lastReminderAmount: number | null;
   hasEmailParent: boolean;
   parents: { fullName: string; email: string | null; phone: string | null; hasEmail: boolean }[];
+  lastStatementSentAt: string | null;
 }
