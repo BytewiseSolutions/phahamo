@@ -19,17 +19,23 @@ export class UpgradeBanner {
     if (this.subscription.status === 'CANCELLED') return false;
     if (this.subscription.daysRemaining < 0) return false;
     if (this.subscription.status === 'EXPIRED') return true;
+    if (this.subscription.status === 'SUSPENDED') return true;
     return this.subscription.daysRemaining <= 25;
   }
 
   get isExpired(): boolean {
-    return this.subscription?.status === 'EXPIRED';
+    return this.subscription?.status === 'EXPIRED'
+      || this.subscription?.status === 'SUSPENDED';
   }
 
   get message(): string {
     if (!this.subscription) return '';
 
-    if (this.isExpired) {
+    if (this.subscription.status === 'SUSPENDED') {
+      return 'Your school account has been suspended. Contact the system administrator.';
+    }
+
+    if (this.subscription.status === 'EXPIRED') {
       return 'Your subscription has expired.';
     }
 

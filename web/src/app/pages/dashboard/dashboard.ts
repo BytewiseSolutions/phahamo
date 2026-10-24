@@ -8,6 +8,7 @@ import { DashboardStats } from './dashboard-stats';
 import { StudentDashboardStats } from './student-dashboard-stats';
 import { EChartsOption } from 'echarts';
 import {TeacherDashboardStats} from './teacher-dashboard-stats';
+import {SystemDashboardStats} from './system-dashboard-stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +28,11 @@ export class Dashboard implements OnInit {
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
 
+  systemStats: SystemDashboardStats | null = null;
+  isSystemAdmin = false;
+  selectedSchoolId: number | null = null;
+  schoolsForPicker: { schoolId: number; schoolName: string }[] = [];
+
   adminAttendanceLineOptions: EChartsOption = {};
   adminFeePieOptions: EChartsOption = {};
   studentAttendanceLineOptions: EChartsOption = {};
@@ -42,10 +48,14 @@ export class Dashboard implements OnInit {
       || this.authService.hasRole('SYSTEM_ADMIN')
       || this.authService.hasRole('PRINCIPAL');
 
+    this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
 
-    if (this.isAdmin) {
+    if (this.isSystemAdmin) {
+      this.loadSystemStats();
+      this.loadSchoolsForPicker();
+    } else if (this.isAdmin) {
       this.backend.get<DashboardStats>('/dashboard/stats').subscribe({
         next: (data) => this.stats = data
       });
@@ -59,19 +69,67 @@ export class Dashboard implements OnInit {
       this.loadStudentChart();
     }
 
-    this.backend.get<Subscription>('/subscriptions/me').subscribe({
-      next: (sub) => this.subscription = sub
-    });
+    if (!this.isSystemAdmin) {
+      this.backend.get<Subscription>('/subscriptions/me').subscribe({
+        next: (sub) => this.subscription = sub,
+        error: () => {}
+      });
+    }
 
     this.backend.get<Announcement[]>('/announcements/feed').subscribe({
       next: (data) => this.announcements = data
     });
+
     if (this.isTeacher) {
       this.backend.get<TeacherDashboardStats>('/dashboard/teacher').subscribe({
         next: (data) => this.teacherStats = data,
         error: () => this.teacherStats = null
       });
     }
+  }
+
+  private loadSystemStats(): void {
+    this.backend.get<SystemDashboardStats>('/dashboard/system').subscribe({
+      next: (data) => this.systemStats = data
+    });
+  }
+
+  private loadSchoolsForPicker(): void {
+    this.backend.get<any[]>('/admin/schools').subscribe({
+      next: (data) => {
+        this.schoolsForPicker = data.map(s => ({
+          schoolId: s.schoolId,
+          schoolName: s.schoolName
+        }));
+      }
+    });
+  }
+
+  onSchoolSelected(): void {
+    if (this.selectedSchoolId === null) {
+      this.stats = null;
+      this.announcements = [];
+      this.adminAttendanceLineOptions = {};
+      this.adminFeePieOptions = {};
+      localStorage.removeItem('activeSchoolId');
+      return;
+    }
+
+    localStorage.setItem('activeSchoolId', String(this.selectedSchoolId));
+
+    this.stats = null;
+    this.announcements = [];
+    this.adminAttendanceLineOptions = {};
+    this.adminFeePieOptions = {};
+
+    this.backend.get<DashboardStats>('/dashboard/stats').subscribe({
+      next: (data) => this.stats = data
+    });
+    this.loadAdminCharts();
+
+    this.backend.get<Announcement[]>('/announcements/feed').subscribe({
+      next: (data) => this.announcements = data
+    });
   }
 
   private loadAdminCharts(): void {

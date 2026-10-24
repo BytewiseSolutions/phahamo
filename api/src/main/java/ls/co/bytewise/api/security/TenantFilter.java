@@ -47,7 +47,17 @@ public class TenantFilter extends OncePerRequestFilter {
         if (principal instanceof User user) {
 
             if (user.hasRole(UserRole.SYSTEM_ADMIN)) {
-                filterChain.doFilter(request, response);
+                String header = request.getHeader("X-School-Id");
+                if (header != null && !header.isBlank()) {
+                    try {
+                        TenantContext.setSchoolId(Long.parseLong(header));
+                    } catch (NumberFormatException ignored) { }
+                }
+                try {
+                    filterChain.doFilter(request, response);
+                } finally {
+                    TenantContext.clear();
+                }
                 return;
             }
 

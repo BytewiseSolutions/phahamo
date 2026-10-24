@@ -42,6 +42,9 @@ import {PromotionPage} from './pages/promotion/promotion-page/promotion-page';
 import {PromotionHistory} from './pages/promotion/promotion-history/promotion-history';
 import {EmailReportCards} from './pages/reports/email-report-cards/email-report-cards';
 import {BulkImport} from './pages/imports/bulk-import/bulk-import';
+import {SubscriptionExpired} from './pages/subscription/subscription-expired/subscription-expired';
+import {AdminSchoolList} from './pages/subscription/admin-school-list/admin-school-list';
+import {systemAdminGuard} from './util/system-admin.guard';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -49,6 +52,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'reset-password', component: ResetPassword },
   { path: 'auth/callback', component: AuthCallback },
+  { path: 'subscription-expired', component: SubscriptionExpired },
   {
     path: '',
     component: Layout,
@@ -67,6 +71,7 @@ const routes: Routes = [
       { path: 'my-classes/:assignmentId', component: MyClassView },
       { path: 'my-classes/:assignmentId/attendance/:lessonId', component: AttendancePage },
       { path: 'subscriptions', component: SubscriptionList },
+      { path: 'admin/schools', component: AdminSchoolList, canActivate: [systemAdminGuard] },
       { path: 'plan-prices', component: PlanPriceList },
       { path: 'plans', component: Plans },
       { path: 'payment-methods', component: PaymentMethodList },

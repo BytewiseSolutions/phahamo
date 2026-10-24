@@ -52,4 +52,10 @@ public class DashboardController {
     public TeacherDashboardStatsDto getTeacherStats(@AuthenticationPrincipal User currentUser) {
         return dashboardService.getTeacherStats(currentUser);
     }
+
+    @GetMapping("/system")
+    @Secured("ROLE_SYSTEM_ADMIN")
+    public SystemDashboardStats systemStats() {
+        return dashboardService.getSystemStats();
+    }
 }

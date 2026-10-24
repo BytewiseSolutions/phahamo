@@ -189,3 +189,42 @@
   color: var(--error);
   font-weight: 600;
 }
+
+.school-picker-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+}
+
+.picker-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.picker-select {
+  flex: 1;
+  max-width: 400px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.picker-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(29, 73, 82, 0.08);
+}

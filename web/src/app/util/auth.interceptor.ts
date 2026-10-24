@@ -9,7 +9,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
-    const schoolId = this.authService.getActiveSchoolId();
+    const schoolId = localStorage.getItem('activeSchoolId') || this.authService.getActiveSchoolId();
 
     let headers: { [key: string]: string } = {};
 

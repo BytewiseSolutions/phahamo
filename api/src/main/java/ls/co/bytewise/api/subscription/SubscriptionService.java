@@ -111,4 +111,73 @@ public class SubscriptionService {
                 .orElseThrow(() -> new SchoolExceptions.SchoolNotFoundException(
                         "No subscription found for this school"));
     }
+
+    @Transactional
+    public SubscriptionDto suspend(Long schoolId) {
+        Subscription subscription = findBySchoolIdOrThrow(schoolId);
+        subscription.setStatus(SubscriptionStatus.SUSPENDED);
+        Subscription saved = subscriptionRepository.save(subscription);
+        return new SubscriptionDto(saved);
+    }
+
+    @Transactional
+    public SubscriptionDto activate(Long schoolId, SubscriptionPlan plan, int months) {
+        if (months <= 0) {
+            throw new IllegalArgumentException("Months must be greater than zero");
+        }
+        Subscription subscription = findBySchoolIdOrThrow(schoolId);
+        Instant now = Instant.now();
+
+        subscription.setPlan(plan);
+        subscription.setStatus(SubscriptionStatus.ACTIVE);
+        subscription.setStartedAt(now);
+        subscription.setEndsAt(plan == SubscriptionPlan.ONE_OFF
+                ? null
+                : now.plus(months * 30L, ChronoUnit.DAYS));
+
+        Subscription saved = subscriptionRepository.save(subscription);
+        return new SubscriptionDto(saved);
+    }
+
+    @Transactional
+    public SubscriptionDto extendTrial(Long schoolId, int days) {
+        if (days <= 0) {
+            throw new IllegalArgumentException("Days must be greater than zero");
+        }
+        Subscription subscription = findBySchoolIdOrThrow(schoolId);
+        Instant now = Instant.now();
+        Instant base = subscription.getEndsAt() == null || subscription.getEndsAt().isBefore(now)
+                ? now
+                : subscription.getEndsAt();
+
+        subscription.setEndsAt(base.plus(days, ChronoUnit.DAYS));
+
+        if (subscription.getStatus() == SubscriptionStatus.EXPIRED) {
+            subscription.setStatus(SubscriptionStatus.TRIAL);
+        }
+
+        Subscription saved = subscriptionRepository.save(subscription);
+        return new SubscriptionDto(saved);
+    }
+
+    public SubscriptionStatus computeEffectiveStatus(Subscription sub) {
+        if (sub.getStatus() == SubscriptionStatus.SUSPENDED
+                || sub.getStatus() == SubscriptionStatus.CANCELLED) {
+            return sub.getStatus();
+        }
+        if (sub.getEndsAt() != null && sub.getEndsAt().isBefore(Instant.now())) {
+            return SubscriptionStatus.EXPIRED;
+        }
+        return sub.getStatus();
+    }
+
+    public boolean isSchoolActive(Long schoolId) {
+        return subscriptionRepository.findBySchoolId(schoolId)
+                .map(sub -> {
+                    SubscriptionStatus effective = computeEffectiveStatus(sub);
+                    return effective == SubscriptionStatus.TRIAL
+                            || effective == SubscriptionStatus.ACTIVE;
+                })
+                .orElse(false);
+    }
 }
