@@ -15,6 +15,7 @@ import ls.co.bytewise.api.student.StudentDto;
 import ls.co.bytewise.api.teacher.TeacherDto;
 
 import java.util.Set;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -31,6 +32,7 @@ public class UserDto extends BaseDto {
     private String password;
 
     private String phone;
+    private Instant dateOfBirth;
     private Status status;
     private Set<UserRole> roles;
 
@@ -52,6 +54,7 @@ public class UserDto extends BaseDto {
         this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
+        this.dateOfBirth = user.getDateOfBirth();
         this.status = user.getStatus();
         this.roles = user.getRoles();
     }

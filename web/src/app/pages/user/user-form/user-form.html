@@ -66,6 +66,13 @@
           </div>
         }
 
+        @if (selectedRole && selectedRole !== 'STUDENT') {
+          <div class="form-group">
+            <label for="staffDateOfBirth">Staff Date of Birth</label>
+            <input id="staffDateOfBirth" type="date" formControlName="staffDateOfBirth"/>
+          </div>
+        }
+
         @if (!isEditMode && selectedRole === 'TEACHER') {
           <div class="form-row">
             <div class="form-group">

@@ -11,6 +11,7 @@ import {TeacherDashboardStats} from './teacher-dashboard-stats';
 import {SystemDashboardStats} from './system-dashboard-stats';
 import { StudentFeePayment } from '../student-fees/student-fee-payment';
 import { UpcomingExam } from './upcoming-exam';
+import { Birthday } from './birthday';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,6 +30,7 @@ export class Dashboard implements OnInit {
   isStudent = false;
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
+  isStaff = false;
 
   systemStats: SystemDashboardStats | null = null;
   isSystemAdmin = false;
@@ -42,6 +44,8 @@ export class Dashboard implements OnInit {
   recentPaymentsLoading = false;
   upcomingExams: UpcomingExam[] = [];
   upcomingExamsLoaded = false;
+  birthdays: Birthday[] = [];
+  birthdaysLoaded = false;
 
   constructor(
     private authService: AuthService,
@@ -57,6 +61,7 @@ export class Dashboard implements OnInit {
     this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
+    this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
     if (this.isSystemAdmin) {
       this.loadSystemStats();
@@ -68,6 +73,7 @@ export class Dashboard implements OnInit {
       this.loadAdminCharts();
       this.loadRecentPayments();
       this.loadUpcomingExams();
+      this.loadBirthdays();
     }
 
     if (this.isStudent) {
@@ -76,6 +82,7 @@ export class Dashboard implements OnInit {
       });
       this.loadStudentChart();
       this.loadUpcomingExams();
+      this.loadBirthdays();
     }
 
     if (!this.isSystemAdmin) {
@@ -94,6 +101,10 @@ export class Dashboard implements OnInit {
         next: (data) => this.teacherStats = data,
         error: () => this.teacherStats = null
       });
+    }
+
+    if (this.isStaff && !this.isAdmin && !this.isStudent) {
+      this.loadBirthdays();
     }
   }
 
@@ -123,6 +134,8 @@ export class Dashboard implements OnInit {
       this.recentPayments = [];
       this.upcomingExams = [];
       this.upcomingExamsLoaded = false;
+      this.birthdays = [];
+      this.birthdaysLoaded = false;
       localStorage.removeItem('activeSchoolId');
       return;
     }
@@ -140,6 +153,7 @@ export class Dashboard implements OnInit {
     this.loadAdminCharts();
     this.loadRecentPayments();
     this.loadUpcomingExams();
+    this.loadBirthdays();
 
     this.backend.get<Announcement[]>('/announcements/feed').subscribe({
       next: (data) => this.announcements = data
@@ -175,6 +189,23 @@ export class Dashboard implements OnInit {
       error: () => {
         this.upcomingExams = [];
         this.upcomingExamsLoaded = true;
+      }
+    });
+  }
+
+  private loadBirthdays(): void {
+    if (!this.isStaff) return;
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+
+    this.birthdaysLoaded = false;
+    this.backend.get<Birthday[]>('/dashboard/birthdays').subscribe({
+      next: (birthdays) => {
+        this.birthdays = birthdays;
+        this.birthdaysLoaded = true;
+      },
+      error: () => {
+        this.birthdays = [];
+        this.birthdaysLoaded = true;
       }
     });
   }
@@ -257,5 +288,10 @@ export class Dashboard implements OnInit {
   get showUpcomingExams(): boolean {
     return this.upcomingExamsLoaded
       && (this.isStudent || (this.isAdmin && (!this.isSystemAdmin || this.selectedSchoolId !== null)));
+  }
+
+  get showBirthdays(): boolean {
+    return this.birthdaysLoaded && this.isStaff
+      && (!this.isSystemAdmin || this.selectedSchoolId !== null);
   }
 }

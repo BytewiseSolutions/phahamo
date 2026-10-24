@@ -22,6 +22,7 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -47,6 +48,9 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String phone;
+
+    @Column(name = "date_of_birth")
+    private Instant dateOfBirth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

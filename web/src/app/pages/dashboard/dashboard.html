@@ -200,6 +200,46 @@
     </div>
   }
 
+  @if (showBirthdays) {
+    <section class="birthdays-card">
+      <div class="birthdays-header">
+        <div>
+          <h2>Upcoming Birthdays</h2>
+          <p>Students and staff celebrating in the next 7 days</p>
+        </div>
+        <i class="fa-solid fa-cake-candles birthdays-icon"></i>
+      </div>
+
+      @if (birthdays.length === 0) {
+        <div class="birthdays-empty">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>No birthdays in the next 7 days</span>
+        </div>
+      } @else {
+        <div class="birthdays-list">
+          @for (birthday of birthdays; track birthday.type + '-' + birthday.personId) {
+            <div class="birthday-row" [class.birthday-today]="birthday.today">
+              <span class="birthday-date">
+                <strong>{{ birthday.date | date:'dd' }}</strong>
+                <span>{{ birthday.date | date:'MMM' }}</span>
+              </span>
+              <div class="birthday-person">
+                <strong>{{ birthday.name }}</strong>
+                <span>
+                  {{ birthday.type === 'STUDENT' ? 'Student' : 'Staff' }}
+                  @if (birthday.className) { · {{ birthday.className }} }
+                </span>
+              </div>
+              @if (birthday.today) {
+                <span class="today-badge">Today</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
   @if (showUpcomingExams) {
     <section class="upcoming-exams-card">
       <div class="upcoming-exams-header">

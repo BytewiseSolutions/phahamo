@@ -216,6 +216,135 @@
   box-shadow: var(--shadow-sm);
 }
 
+.birthdays-card {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.birthdays-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.birthdays-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.birthdays-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.birthdays-icon {
+  color: var(--warning);
+  font-size: 20px;
+}
+
+.birthdays-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.birthday-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--border-light);
+}
+
+.birthday-row.birthday-today {
+  margin: 0 -4px;
+  padding-right: 8px;
+  padding-left: 8px;
+  border-radius: var(--border-radius-sm);
+  background: #fff8e7;
+}
+
+.birthday-date {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.birthday-today .birthday-date {
+  background: #ffe7a8;
+  color: #875d00;
+}
+
+.birthday-date strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.birthday-date span {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.birthday-person {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.birthday-person strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.birthday-person span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.today-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ffe7a8;
+  color: #875d00;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.birthdays-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.birthdays-empty i {
+  color: var(--success);
+}
+
 .upcoming-exams-header {
   display: flex;
   align-items: flex-start;

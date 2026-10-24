@@ -38,6 +38,7 @@ export class UserForm implements OnChanges, OnDestroy {
       phone: ['', Validators.required],
       role: ['', Validators.required],
       status: ['ACTIVE'],
+      staffDateOfBirth: [''],
 
       studentDateOfBirth: [''],
       studentGender: [''],
@@ -78,6 +79,8 @@ export class UserForm implements OnChanges, OnDestroy {
           fullName: `${this.editingUser.firstName} ${this.editingUser.lastName}`.trim(),
           email: this.editingUser.email,
           phone: this.editingUser.phone,
+          staffDateOfBirth: this.editingUser.dateOfBirth
+            ? this.editingUser.dateOfBirth.substring(0, 10) : '',
           role: this.editingUser.roles[0] ?? '',
           status: this.editingUser.status
         });
@@ -145,7 +148,15 @@ export class UserForm implements OnChanges, OnDestroy {
     if (this.isEditMode && this.editingUser) {
       this.userUpdated.emit({
         id: this.editingUser.id,
-        payload: { firstName, lastName, phone: formValue.phone, roles: [formValue.role], status: formValue.status }
+        payload: {
+          firstName,
+          lastName,
+          phone: formValue.phone,
+          dateOfBirth: formValue.staffDateOfBirth
+            ? new Date(formValue.staffDateOfBirth).toISOString() : null,
+          roles: [formValue.role],
+          status: formValue.status
+        }
       });
       this.userForm.reset({ status: 'ACTIVE' });
       this.selectedRole = '';
@@ -153,6 +164,10 @@ export class UserForm implements OnChanges, OnDestroy {
     }
 
     const payload: any = { firstName, lastName, email: formValue.email, phone: formValue.phone, roles: [formValue.role] };
+
+    if (formValue.role !== 'STUDENT' && formValue.staffDateOfBirth) {
+      payload.dateOfBirth = new Date(formValue.staffDateOfBirth).toISOString();
+    }
 
     if (formValue.role === 'STUDENT') {
       payload.student = {

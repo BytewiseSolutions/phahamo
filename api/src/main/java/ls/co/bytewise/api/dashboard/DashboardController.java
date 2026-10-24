@@ -38,6 +38,12 @@ public class DashboardController {
         return dashboardService.getUpcomingExams(currentUser);
     }
 
+    @GetMapping("/birthdays")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER", "ROLE_FINANCE_OFFICER"})
+    public List<BirthdayDto> getBirthdays() {
+        return dashboardService.getBirthdays();
+    }
+
     @GetMapping("/student")
     @Secured({"ROLE_STUDENT"})
     public StudentDashboardStatsDto getStudentStats(@AuthenticationPrincipal User currentUser) {

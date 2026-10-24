@@ -34,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -183,6 +184,87 @@ public class DashboardService {
         return examinations.stream()
                 .map(examination -> toUpcomingExam(examination, studentClassId))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BirthdayDto> getBirthdays() {
+        Long schoolId = TenantContext.getSchoolId();
+        LocalDate today = LocalDate.now();
+        LocalDate windowEnd = today.plusDays(6);
+        MonthDay start = MonthDay.from(today);
+        MonthDay end = MonthDay.from(windowEnd);
+
+        List<BirthdayDto> birthdays = new ArrayList<>();
+        addStudentBirthdays(birthdays, schoolId, today, start, end);
+        addStaffBirthdays(birthdays, schoolId, today, start, end);
+
+        return birthdays.stream()
+                .sorted(java.util.Comparator.comparing(BirthdayDto::getDate)
+                        .thenComparing(BirthdayDto::getName))
+                .toList();
+    }
+
+    private void addStudentBirthdays(List<BirthdayDto> birthdays, Long schoolId, LocalDate today,
+                                     MonthDay start, MonthDay end) {
+        for (int month : birthdayMonths(start, end)) {
+            for (Student student : studentRepository.findAllBySchoolIdAndBirthMonth(schoolId, month)) {
+                LocalDate birthDate = student.getDateOfBirth().atZone(ZoneOffset.UTC).toLocalDate();
+                MonthDay monthDay = MonthDay.from(birthDate);
+                if (!isWithinWeek(monthDay, start, end)) continue;
+
+                LocalDate date = birthdayDateInWindow(monthDay, today);
+                String className = student.getCurrentClass() == null ? null : student.getCurrentClass().getName();
+                birthdays.add(new BirthdayDto(
+                        student.getId(),
+                        student.getUser().getFullName(),
+                        "STUDENT",
+                        className,
+                        date,
+                        date.equals(today)));
+            }
+        }
+    }
+
+    private void addStaffBirthdays(List<BirthdayDto> birthdays, Long schoolId, LocalDate today,
+                                   MonthDay start, MonthDay end) {
+        for (int month : birthdayMonths(start, end)) {
+            for (User user : userRepository.findAllBySchoolIdAndBirthMonth(schoolId, month)) {
+                boolean staff = user.getRoles().stream().anyMatch(role -> role == UserRole.SCHOOL_ADMIN
+                        || role == UserRole.PRINCIPAL
+                        || role == UserRole.TEACHER
+                        || role == UserRole.FINANCE_OFFICER);
+                if (!staff || user.getDateOfBirth() == null) continue;
+
+                MonthDay monthDay = MonthDay.from(user.getDateOfBirth().atZone(ZoneOffset.UTC).toLocalDate());
+                if (!isWithinWeek(monthDay, start, end)) continue;
+
+                LocalDate date = birthdayDateInWindow(monthDay, today);
+                birthdays.add(new BirthdayDto(
+                        user.getId(), user.getFullName(), "STAFF", null, date, date.equals(today)));
+            }
+        }
+    }
+
+    private List<Integer> birthdayMonths(MonthDay start, MonthDay end) {
+        if (start.getMonthValue() == end.getMonthValue()) {
+            return List.of(start.getMonthValue());
+        }
+        return List.of(start.getMonthValue(), end.getMonthValue());
+    }
+
+    private boolean isWithinWeek(MonthDay birthday, MonthDay start, MonthDay end) {
+        if (!start.isAfter(end)) {
+            return !birthday.isBefore(start) && !birthday.isAfter(end);
+        }
+        return !birthday.isBefore(start) || !birthday.isAfter(end);
+    }
+
+    private LocalDate birthdayDateInWindow(MonthDay birthday, LocalDate windowStart) {
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = windowStart.plusDays(i);
+            if (MonthDay.from(date).equals(birthday)) return date;
+        }
+        throw new IllegalStateException("Birthday is outside the current week");
     }
 
     private UpcomingExamDto toUpcomingExam(Examination examination, Long classId) {
