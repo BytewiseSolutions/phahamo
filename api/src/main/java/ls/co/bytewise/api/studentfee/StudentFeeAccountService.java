@@ -14,6 +14,8 @@ import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -254,6 +256,13 @@ public class StudentFeeAccountService {
 
     public StudentFeeAccountDto getById(Long id) {
         return new StudentFeeAccountDto(requireAccount(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<StudentFeePaymentDto> listPayments(Pageable pageable) {
+        Long schoolId = TenantContext.getSchoolId();
+        return paymentRepository.findAllBySchoolIdOrderByPaidAtDescIdDesc(schoolId, pageable)
+                .map(StudentFeePaymentDto::new);
     }
 
     @Transactional

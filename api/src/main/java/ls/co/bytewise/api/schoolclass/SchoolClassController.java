@@ -30,7 +30,7 @@ public class SchoolClassController {
     }
 
     @GetMapping
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER", "ROLE_FINANCE_OFFICER"})
     public List<SchoolClassDto> list() {
         return schoolClassService.listClasses();
     }

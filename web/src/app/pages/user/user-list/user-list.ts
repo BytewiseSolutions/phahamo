@@ -3,6 +3,7 @@ import { BackendService } from '../../../util/backend.service';
 import { User } from '../../../util/user';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import {Router} from '@angular/router';
+import {AuthService} from '../../../util/auth.service';
 
 @Component({
   selector: 'app-user-list',
@@ -23,8 +24,13 @@ export class UserList implements OnInit {
   constructor(
     private backend: BackendService,
     private confirmDialog: ConfirmDialogService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
+
+  get canManageUsers(): boolean {
+    return this.authService.hasRole('SCHOOL_ADMIN') || this.authService.hasRole('SYSTEM_ADMIN');
+  }
 
   tabs = [
     { role: 'ALL', label: 'All' },

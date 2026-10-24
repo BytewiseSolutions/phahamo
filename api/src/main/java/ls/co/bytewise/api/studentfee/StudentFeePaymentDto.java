@@ -20,6 +20,7 @@ public class StudentFeePaymentDto {
     private Double balanceAfter;
     private Long receivedById;
     private String receivedByName;
+    private String studentName;
 
     public StudentFeePaymentDto(StudentFeePayment p) {
         this.id = p.getId();
@@ -28,6 +29,10 @@ public class StudentFeePaymentDto {
         this.balanceAfter = p.getBalanceAfter();
         this.reference = p.getReference();
         this.paidAt = p.getPaidAt();
+        if (p.getAccount() != null && p.getAccount().getStudent() != null
+                && p.getAccount().getStudent().getUser() != null) {
+            this.studentName = p.getAccount().getStudent().getUser().getFullName();
+        }
         if (p.getReceivedBy() != null) {
             this.receivedById = p.getReceivedBy().getId();
             this.receivedByName = p.getReceivedBy().getFullName();

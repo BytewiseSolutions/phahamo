@@ -31,6 +31,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("schoolId") Long schoolId,
             @Param("role") UserRole role
     );
+
+    @Query("""
+        SELECT DISTINCT u FROM User u
+        JOIN u.schools s
+        WHERE s.id = :schoolId
+          AND u.dateOfBirth IS NOT NULL
+          AND FUNCTION('MONTH', u.dateOfBirth) = :month
+        """)
+    List<User> findAllBySchoolIdAndBirthMonth(
+            @Param("schoolId") Long schoolId,
+            @Param("month") int month);
     @Query("""
     SELECT COUNT(u) FROM User u
     JOIN u.roles r

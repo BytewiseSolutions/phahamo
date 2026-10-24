@@ -70,13 +70,24 @@ export class Header implements OnInit {
       .substring(0, 2)
       .toUpperCase();
 
-    this.pageTitle = this.pageTitles[this.router.url] ?? '';
+    this.pageTitle = this.resolvePageTitle(this.router.url);
 
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: any) => {
-        this.pageTitle = this.pageTitles[e.urlAfterRedirects] ?? '';
+        this.pageTitle = this.resolvePageTitle(e.urlAfterRedirects);
       });
+  }
+
+  private resolvePageTitle(url: string): string {
+    const exactTitle = this.pageTitles[url];
+    if (exactTitle) return exactTitle;
+
+    const matchingPath = Object.keys(this.pageTitles)
+      .filter(path => url.startsWith(path + '/'))
+      .sort((a, b) => b.length - a.length)[0];
+
+    return matchingPath ? this.pageTitles[matchingPath] : '';
   }
 
   private formatRole(role: string): string {

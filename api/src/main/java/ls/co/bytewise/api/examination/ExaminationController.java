@@ -37,9 +37,9 @@ public class ExaminationController {
     }
 
     @GetMapping("/{id}")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public ExaminationDto get(@PathVariable Long id) {
-        return examinationService.get(id);
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER", "ROLE_STUDENT"})
+    public ExaminationDto get(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
+        return examinationService.get(currentUser, id);
     }
 
     @PutMapping("/{id}")

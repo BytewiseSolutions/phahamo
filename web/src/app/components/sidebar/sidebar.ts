@@ -67,8 +67,8 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Profile', path: '/profile', icon: 'fa-solid fa-user' },
   ],
   FINANCE_OFFICER: [
-    { label: 'Fees', path: '/fees', icon: 'fa-solid fa-money-check-dollar' },
-    { label: 'Payments', path: '/payments', icon: 'fa-solid fa-credit-card' },
+    { label: 'Fees', path: '/student-fees', icon: 'fa-solid fa-money-check-dollar' },
+    { label: 'Payments', path: '/student-fees/payments', icon: 'fa-solid fa-credit-card' },
     { label: 'Student Fees', path: '/student-fees', icon: 'fa-solid fa-file-invoice-dollar' },
     { label: 'Reports', path: '/reports', icon: 'fa-solid fa-chart-line' },
     { label: 'Subscriptions', path: '/subscriptions', icon: 'fa-solid fa-file-invoice-dollar' },
@@ -153,6 +153,18 @@ export class Sidebar implements OnInit {
 
   onLogout(): void {
     this.authService.logout();
+  }
+
+  isLinkActive(link: SidebarLink): boolean {
+    const currentPath = this.router.url.split('?')[0];
+
+    if (link.path === '/student-fees') {
+      return currentPath === link.path
+        || (currentPath.startsWith(`${link.path}/`)
+          && !currentPath.startsWith('/student-fees/payments'));
+    }
+
+    return currentPath === link.path || currentPath.startsWith(`${link.path}/`);
   }
 
   @HostListener('window:resize')

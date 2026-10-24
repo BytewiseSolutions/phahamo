@@ -1,0 +1,41 @@
+<div class="examination-detail-page">
+  <button type="button" class="link-button back-button" (click)="goBack()">
+    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+  </button>
+
+  @if (errorMessage) {
+    <div class="error-banner">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading examination details...</div>
+  } @else if (examination) {
+    <div class="detail-card">
+      <div class="detail-header">
+        <div>
+          <span class="eyebrow">Examination</span>
+          <h1>{{ examination.name }}</h1>
+          <p>{{ examination.termName }}</p>
+        </div>
+        <div class="date-range">
+          <span>{{ formatDate(examination.startDate) }}</span>
+          @if (examination.endDate !== examination.startDate) {
+            <span>to {{ formatDate(examination.endDate) }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="subjects-section">
+        <h2>Subjects and Classes</h2>
+        <div class="subject-list">
+          @for (link of examination.subjectClasses; track link.subjectId + '-' + link.classId) {
+            <div class="subject-row">
+              <span>{{ link.subjectName }}</span>
+              <span>{{ link.className }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -92,6 +92,7 @@ public class UserService {
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
+        user.setDateOfBirth(dto.getDateOfBirth());
         user.setPassword(passwordEncoder.encode(temporaryPassword));
         user.setMustChangePassword(true);
         user.setStatus(Status.ACTIVE);
@@ -226,6 +227,7 @@ public class UserService {
         if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
         if (dto.getLastName() != null) user.setLastName(dto.getLastName());
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
+        if (dto.getDateOfBirth() != null) user.setDateOfBirth(dto.getDateOfBirth());
 
         user.setUpdatedBy(editor);
 

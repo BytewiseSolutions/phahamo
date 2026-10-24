@@ -9,6 +9,10 @@ import { StudentDashboardStats } from './student-dashboard-stats';
 import { EChartsOption } from 'echarts';
 import {TeacherDashboardStats} from './teacher-dashboard-stats';
 import {SystemDashboardStats} from './system-dashboard-stats';
+import { StudentFeePayment } from '../student-fees/student-fee-payment';
+import { UpcomingExam } from './upcoming-exam';
+import { Birthday } from './birthday';
+import { FinanceDashboardStats } from './finance-dashboard-stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +31,9 @@ export class Dashboard implements OnInit {
   isStudent = false;
   teacherStats: TeacherDashboardStats | null = null;
   isTeacher = false;
+  isFinanceOfficer = false;
+  financeStats: FinanceDashboardStats | null = null;
+  isStaff = false;
 
   systemStats: SystemDashboardStats | null = null;
   isSystemAdmin = false;
@@ -36,6 +43,12 @@ export class Dashboard implements OnInit {
   adminAttendanceLineOptions: EChartsOption = {};
   adminFeePieOptions: EChartsOption = {};
   studentAttendanceLineOptions: EChartsOption = {};
+  recentPayments: StudentFeePayment[] = [];
+  recentPaymentsLoading = false;
+  upcomingExams: UpcomingExam[] = [];
+  upcomingExamsLoaded = false;
+  birthdays: Birthday[] = [];
+  birthdaysLoaded = false;
 
   constructor(
     private authService: AuthService,
@@ -51,6 +64,8 @@ export class Dashboard implements OnInit {
     this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
     this.isStudent = this.authService.hasRole('STUDENT');
     this.isTeacher = this.authService.hasRole('TEACHER');
+    this.isFinanceOfficer = this.authService.hasRole('FINANCE_OFFICER');
+    this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
     if (this.isSystemAdmin) {
       this.loadSystemStats();
@@ -60,6 +75,9 @@ export class Dashboard implements OnInit {
         next: (data) => this.stats = data
       });
       this.loadAdminCharts();
+      this.loadRecentPayments();
+      this.loadUpcomingExams();
+      this.loadBirthdays();
     }
 
     if (this.isStudent) {
@@ -67,6 +85,15 @@ export class Dashboard implements OnInit {
         next: (data) => this.studentStats = data
       });
       this.loadStudentChart();
+      this.loadUpcomingExams();
+      this.loadBirthdays();
+    }
+
+    if (this.isFinanceOfficer) {
+      this.backend.get<FinanceDashboardStats>('/dashboard/finance').subscribe({
+        next: (data) => this.financeStats = data
+      });
+      this.loadRecentPayments();
     }
 
     if (!this.isSystemAdmin) {
@@ -85,6 +112,10 @@ export class Dashboard implements OnInit {
         next: (data) => this.teacherStats = data,
         error: () => this.teacherStats = null
       });
+    }
+
+    if (this.isStaff && !this.isAdmin && !this.isStudent) {
+      this.loadBirthdays();
     }
   }
 
@@ -111,6 +142,11 @@ export class Dashboard implements OnInit {
       this.announcements = [];
       this.adminAttendanceLineOptions = {};
       this.adminFeePieOptions = {};
+      this.recentPayments = [];
+      this.upcomingExams = [];
+      this.upcomingExamsLoaded = false;
+      this.birthdays = [];
+      this.birthdaysLoaded = false;
       localStorage.removeItem('activeSchoolId');
       return;
     }
@@ -126,9 +162,62 @@ export class Dashboard implements OnInit {
       next: (data) => this.stats = data
     });
     this.loadAdminCharts();
+    this.loadRecentPayments();
+    this.loadUpcomingExams();
+    this.loadBirthdays();
 
     this.backend.get<Announcement[]>('/announcements/feed').subscribe({
       next: (data) => this.announcements = data
+    });
+  }
+
+  private loadRecentPayments(): void {
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+
+    this.recentPaymentsLoading = true;
+    this.backend.get<StudentFeePayment[]>('/dashboard/recent-payments').subscribe({
+      next: (payments) => {
+        this.recentPayments = payments;
+        this.recentPaymentsLoading = false;
+      },
+      error: () => {
+        this.recentPayments = [];
+        this.recentPaymentsLoading = false;
+      }
+    });
+  }
+
+  private loadUpcomingExams(): void {
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+    if (!this.isAdmin && !this.isStudent) return;
+
+    this.upcomingExamsLoaded = false;
+    this.backend.get<UpcomingExam[]>('/dashboard/upcoming-exams').subscribe({
+      next: (exams) => {
+        this.upcomingExams = exams;
+        this.upcomingExamsLoaded = true;
+      },
+      error: () => {
+        this.upcomingExams = [];
+        this.upcomingExamsLoaded = true;
+      }
+    });
+  }
+
+  private loadBirthdays(): void {
+    if (!this.isStaff) return;
+    if (this.isSystemAdmin && this.selectedSchoolId === null) return;
+
+    this.birthdaysLoaded = false;
+    this.backend.get<Birthday[]>('/dashboard/birthdays').subscribe({
+      next: (birthdays) => {
+        this.birthdays = birthdays;
+        this.birthdaysLoaded = true;
+      },
+      error: () => {
+        this.birthdays = [];
+        this.birthdaysLoaded = true;
+      }
     });
   }
 
@@ -203,5 +292,25 @@ export class Dashboard implements OnInit {
   goToAttendance(): void { this.router.navigate(['/attendance/my']); }
   goToResults(): void { this.router.navigate(['/results/my']); }
   goToFees(): void { this.router.navigate(['/my-fees']); }
+  goToPaymentHistory(): void { this.router.navigate(['/student-fees/payments']); }
+  goToFeeAccounts(): void { this.router.navigate(['/student-fees']); }
+  goToExam(examId: number): void { this.router.navigate(['/examinations', examId]); }
+  goToExaminations(): void { this.router.navigate(['/examinations']); }
+  goToUsers(): void { this.router.navigate(['/users']); }
+  goToAttendanceHistory(): void { this.router.navigate(['/attendance/history']); }
+  goToGrades(): void { this.router.navigate(['/grades']); }
+  goToAssessment(assessmentId: number): void { this.router.navigate(['/grades', assessmentId, 'marks']); }
+  goToTeacherAttendance(): void { this.router.navigate(['/my-classes']); }
+  goToAnnouncements(): void { this.router.navigate(['/announcements']); }
   goToMyClasses(): void { this.router.navigate(['/my-classes']); }
+
+  get showUpcomingExams(): boolean {
+    return this.upcomingExamsLoaded
+      && (this.isStudent || (this.isAdmin && (!this.isSystemAdmin || this.selectedSchoolId !== null)));
+  }
+
+  get showBirthdays(): boolean {
+    return this.birthdaysLoaded && this.isStaff
+      && (!this.isSystemAdmin || this.selectedSchoolId !== null);
+  }
 }

@@ -3,6 +3,7 @@ package ls.co.bytewise.api.examination;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.subject.Subject;
 import ls.co.bytewise.api.subject.SubjectRepository;
 import ls.co.bytewise.api.term.Term;
@@ -20,15 +21,18 @@ public class ExaminationService {
     private final TermRepository termRepository;
     private final SubjectRepository subjectRepository;
     private final SchoolClassRepository schoolClassRepository;
+    private final StudentRepository studentRepository;
 
     public ExaminationService(ExaminationRepository examinationRepository,
                               TermRepository termRepository,
                               SubjectRepository subjectRepository,
-                              SchoolClassRepository schoolClassRepository) {
+                              SchoolClassRepository schoolClassRepository,
+                              StudentRepository studentRepository) {
         this.examinationRepository = examinationRepository;
         this.termRepository = termRepository;
         this.subjectRepository = subjectRepository;
         this.schoolClassRepository = schoolClassRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Transactional
@@ -90,6 +94,29 @@ public class ExaminationService {
 
     public ExaminationDto get(Long id) {
         return new ExaminationDto(findOrThrow(id));
+    }
+
+    @Transactional(readOnly = true)
+    public ExaminationDto get(User currentUser, Long id) {
+        ExaminationDto dto = new ExaminationDto(findOrThrow(id));
+
+        if (currentUser != null && currentUser.hasRole(ls.co.bytewise.api.common.UserRole.STUDENT)) {
+            Long schoolId = TenantContext.getSchoolId();
+            Long classId = studentRepository.findByUserId(currentUser.getId())
+                    .filter(student -> student.getSchool().getId().equals(schoolId))
+                    .map(student -> student.getCurrentClass() == null ? null : student.getCurrentClass().getId())
+                    .orElse(null);
+
+            if (classId == null) {
+                dto.setSubjectClasses(List.of());
+            } else {
+                dto.setSubjectClasses(dto.getSubjectClasses().stream()
+                        .filter(link -> link.getClassId().equals(classId))
+                        .toList());
+            }
+        }
+
+        return dto;
     }
 
     @Transactional

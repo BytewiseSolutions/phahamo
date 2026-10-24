@@ -25,6 +25,16 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findAllBySchoolIdAndCurrentClassId(Long schoolId, Long currentClassId);
 
     @Query("""
+        SELECT s FROM Student s
+        WHERE s.school.id = :schoolId
+          AND s.dateOfBirth IS NOT NULL
+          AND FUNCTION('MONTH', s.dateOfBirth) = :month
+        """)
+    List<Student> findAllBySchoolIdAndBirthMonth(
+            @Param("schoolId") Long schoolId,
+            @Param("month") int month);
+
+    @Query("""
     SELECT s
     FROM Student s
     WHERE s.school.id = :schoolId
@@ -68,6 +78,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByUserId(Long userId);
     long countBySchoolIdAndStatus(Long schoolId, StudentStatus status);
+
+    long countBySchoolIdAndCurrentClassIdAndStatus(Long schoolId, Long currentClassId, StudentStatus status);
 
     @Query("""
     SELECT s.currentClass.name, COUNT(s)

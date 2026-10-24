@@ -3,6 +3,8 @@ package ls.co.bytewise.api.studentfee;
 import ls.co.bytewise.api.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/student-fees")
-@Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+@Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER"})
 public class StudentFeeAccountController {
 
     private final StudentFeeAccountService feeService;
@@ -84,6 +86,11 @@ public class StudentFeeAccountController {
     @GetMapping("/{id}")
     public StudentFeeAccountDto getById(@PathVariable Long id) {
         return feeService.getById(id);
+    }
+
+    @GetMapping("/payments")
+    public Page<StudentFeePaymentDto> listPayments(Pageable pageable) {
+        return feeService.listPayments(pageable);
     }
 
     @PostMapping("/{accountId}/payments")

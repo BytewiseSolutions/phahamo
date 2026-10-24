@@ -2,6 +2,9 @@ package ls.co.bytewise.api.dashboard;
 
 import ls.co.bytewise.api.attendance.AttendanceRepository;
 import ls.co.bytewise.api.attendance.AttendanceStatus;
+import ls.co.bytewise.api.assessment.Assessment;
+import ls.co.bytewise.api.assessment.AssessmentRepository;
+import ls.co.bytewise.api.assessment.mark.MarkRepository;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -9,6 +12,10 @@ import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.student.StudentStatus;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountRepository;
+import ls.co.bytewise.api.studentfee.StudentFeePaymentDto;
+import ls.co.bytewise.api.studentfee.StudentFeePaymentRepository;
+import ls.co.bytewise.api.examination.Examination;
+import ls.co.bytewise.api.examination.ExaminationRepository;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
 import ls.co.bytewise.api.subscription.Subscription;
 import ls.co.bytewise.api.subscription.SubscriptionRepository;
@@ -19,20 +26,27 @@ import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.timetable.Timetable;
 import ls.co.bytewise.api.timetable.TimetableDto;
 import ls.co.bytewise.api.timetable.TimetableRepository;
-import ls.co.bytewise.api.timetable.lesson.LessonRepository;
 import ls.co.bytewise.api.timetable.lesson.LessonStatus;
+import ls.co.bytewise.api.timetable.lesson.LessonDto;
+import ls.co.bytewise.api.timetable.lesson.LessonRepository;
+import ls.co.bytewise.api.timetable.lesson.LessonService;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.MonthDay;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -44,10 +58,15 @@ public class DashboardService {
     private final TermRepository termRepository;
     private final TimetableRepository timetableRepository;
     private final SubjectClassAssignmentRepository assignmentRepository;
-    private final LessonRepository lessonRepository;
     private final SchoolRepository schoolRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionService subscriptionService;
+    private final StudentFeePaymentRepository paymentRepository;
+    private final ExaminationRepository examinationRepository;
+    private final LessonService lessonService;
+    private final AssessmentRepository assessmentRepository;
+    private final MarkRepository markRepository;
+    private final LessonRepository lessonRepository;
 
 
     public DashboardService(StudentRepository studentRepository,
@@ -57,10 +76,15 @@ public class DashboardService {
                             TermRepository termRepository,
                             TimetableRepository timetableRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
-                            LessonRepository lessonRepository,
                             SchoolRepository schoolRepository,
                             SubscriptionRepository subscriptionRepository,
-                            SubscriptionService subscriptionService
+                            SubscriptionService subscriptionService,
+                            StudentFeePaymentRepository paymentRepository,
+                            ExaminationRepository examinationRepository,
+                            LessonService lessonService,
+                            AssessmentRepository assessmentRepository,
+                            MarkRepository markRepository,
+                            LessonRepository lessonRepository
                             ) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
@@ -69,10 +93,15 @@ public class DashboardService {
         this.termRepository = termRepository;
         this.timetableRepository = timetableRepository;
         this.assignmentRepository = assignmentRepository;
-        this.lessonRepository = lessonRepository;
         this.schoolRepository = schoolRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.subscriptionService = subscriptionService;
+        this.paymentRepository = paymentRepository;
+        this.examinationRepository = examinationRepository;
+        this.lessonService = lessonService;
+        this.assessmentRepository = assessmentRepository;
+        this.markRepository = markRepository;
+        this.lessonRepository = lessonRepository;
     }
 
     public SystemDashboardStats getSystemStats() {
@@ -116,6 +145,15 @@ public class DashboardService {
         stats.setTotalStudents(studentRepository.countBySchoolIdAndStatus(schoolId, StudentStatus.ACTIVE));
         stats.setTotalTeachers(userRepository.countActiveByRoleAndSchool(UserRole.TEACHER, schoolId));
 
+        LocalDate today = LocalDate.now();
+        stats.setAttendanceRateToday(calculateAttendanceRate(schoolId, today));
+        stats.setLessonsCancelledToday(lessonRepository.countBySchoolIdAndDateAndStatus(
+                schoolId, today, LessonStatus.CANCELLED));
+        stats.setLessonsSubstitutedToday(lessonRepository.countBySchoolIdAndDateAndStatus(
+                schoolId, today, LessonStatus.SUBSTITUTED));
+        stats.setUpcomingExamsCount(examinationRepository.findUpcomingBySchool(
+                schoolId, today, today.plusDays(7)).size());
+
         Term currentTerm = getCurrentTerm(schoolId);
         if (currentTerm != null) {
             stats.setAttendanceRateTerm(calculateAttendanceRate(schoolId, currentTerm, null));
@@ -132,6 +170,171 @@ public class DashboardService {
         }
 
         return stats;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentFeePaymentDto> getRecentPayments() {
+        Long schoolId = TenantContext.getSchoolId();
+        return paymentRepository.findAllBySchoolIdOrderByPaidAtDescIdDesc(schoolId, PageRequest.of(0, 5))
+                .stream()
+                .map(StudentFeePaymentDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public FinanceDashboardStatsDto getFinanceStats() {
+        Long schoolId = TenantContext.getSchoolId();
+        FinanceDashboardStatsDto stats = new FinanceDashboardStatsDto();
+
+        Term currentTerm = getCurrentTerm(schoolId);
+        if (currentTerm != null) {
+            List<Object[]> feeResults = feeAccountRepository.sumFeesForTerm(schoolId, currentTerm.getId());
+            if (feeResults != null && !feeResults.isEmpty() && feeResults.get(0) != null) {
+                Object[] row = feeResults.get(0);
+                double collected = row[1] == null ? 0.0 : ((Number) row[1]).doubleValue();
+                double expected = row[0] == null ? 0.0 : ((Number) row[0]).doubleValue();
+                stats.setFeesCollectedThisTerm(collected);
+                stats.setTotalOutstanding(Math.max(0.0, expected - collected));
+            }
+        }
+
+        LocalDate today = LocalDate.now();
+        ZoneId zone = ZoneId.systemDefault();
+        Instant from = today.atStartOfDay(zone).toInstant();
+        Instant to = today.plusDays(1).atStartOfDay(zone).toInstant();
+        List<Object[]> paymentResults = paymentRepository.summarizePaymentsBetween(schoolId, from, to);
+        if (paymentResults != null && !paymentResults.isEmpty() && paymentResults.get(0) != null) {
+            Object[] row = paymentResults.get(0);
+            stats.setPaymentsRecordedToday(row[0] == null ? 0 : ((Number) row[0]).longValue());
+        }
+
+        return stats;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UpcomingExamDto> getUpcomingExams(User currentUser) {
+        Long schoolId = TenantContext.getSchoolId();
+        LocalDate fromDate = LocalDate.now();
+        LocalDate toDate = fromDate.plusDays(7);
+
+        Long classId = null;
+        List<Examination> examinations;
+        if (currentUser != null && currentUser.hasRole(UserRole.STUDENT)) {
+            classId = studentRepository.findByUserId(currentUser.getId())
+                    .filter(student -> student.getSchool().getId().equals(schoolId))
+                    .map(student -> student.getCurrentClass() == null ? null : student.getCurrentClass().getId())
+                    .orElse(null);
+
+            if (classId == null) {
+                return List.of();
+            }
+            examinations = examinationRepository.findUpcomingBySchoolClass(
+                    schoolId, classId, fromDate, toDate);
+        } else {
+            examinations = examinationRepository.findUpcomingBySchool(schoolId, fromDate, toDate);
+        }
+
+        Long studentClassId = classId;
+        return examinations.stream()
+                .map(examination -> toUpcomingExam(examination, studentClassId))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BirthdayDto> getBirthdays() {
+        Long schoolId = TenantContext.getSchoolId();
+        LocalDate today = LocalDate.now();
+        LocalDate windowEnd = today.plusDays(6);
+        MonthDay start = MonthDay.from(today);
+        MonthDay end = MonthDay.from(windowEnd);
+
+        List<BirthdayDto> birthdays = new ArrayList<>();
+        addStudentBirthdays(birthdays, schoolId, today, start, end);
+        addStaffBirthdays(birthdays, schoolId, today, start, end);
+
+        return birthdays.stream()
+                .sorted(java.util.Comparator.comparing(BirthdayDto::getDate)
+                        .thenComparing(BirthdayDto::getName))
+                .toList();
+    }
+
+    private void addStudentBirthdays(List<BirthdayDto> birthdays, Long schoolId, LocalDate today,
+                                     MonthDay start, MonthDay end) {
+        for (int month : birthdayMonths(start, end)) {
+            for (Student student : studentRepository.findAllBySchoolIdAndBirthMonth(schoolId, month)) {
+                LocalDate birthDate = student.getDateOfBirth().atZone(ZoneOffset.UTC).toLocalDate();
+                MonthDay monthDay = MonthDay.from(birthDate);
+                if (!isWithinWeek(monthDay, start, end)) continue;
+
+                LocalDate date = birthdayDateInWindow(monthDay, today);
+                String className = student.getCurrentClass() == null ? null : student.getCurrentClass().getName();
+                birthdays.add(new BirthdayDto(
+                        student.getId(),
+                        student.getUser().getFullName(),
+                        "STUDENT",
+                        className,
+                        date,
+                        date.equals(today)));
+            }
+        }
+    }
+
+    private void addStaffBirthdays(List<BirthdayDto> birthdays, Long schoolId, LocalDate today,
+                                   MonthDay start, MonthDay end) {
+        for (int month : birthdayMonths(start, end)) {
+            for (User user : userRepository.findAllBySchoolIdAndBirthMonth(schoolId, month)) {
+                boolean staff = user.getRoles().stream().anyMatch(role -> role == UserRole.SCHOOL_ADMIN
+                        || role == UserRole.PRINCIPAL
+                        || role == UserRole.TEACHER
+                        || role == UserRole.FINANCE_OFFICER);
+                if (!staff || user.getDateOfBirth() == null) continue;
+
+                MonthDay monthDay = MonthDay.from(user.getDateOfBirth().atZone(ZoneOffset.UTC).toLocalDate());
+                if (!isWithinWeek(monthDay, start, end)) continue;
+
+                LocalDate date = birthdayDateInWindow(monthDay, today);
+                birthdays.add(new BirthdayDto(
+                        user.getId(), user.getFullName(), "STAFF", null, date, date.equals(today)));
+            }
+        }
+    }
+
+    private List<Integer> birthdayMonths(MonthDay start, MonthDay end) {
+        if (start.getMonthValue() == end.getMonthValue()) {
+            return List.of(start.getMonthValue());
+        }
+        return List.of(start.getMonthValue(), end.getMonthValue());
+    }
+
+    private boolean isWithinWeek(MonthDay birthday, MonthDay start, MonthDay end) {
+        if (!start.isAfter(end)) {
+            return !birthday.isBefore(start) && !birthday.isAfter(end);
+        }
+        return !birthday.isBefore(start) || !birthday.isAfter(end);
+    }
+
+    private LocalDate birthdayDateInWindow(MonthDay birthday, LocalDate windowStart) {
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = windowStart.plusDays(i);
+            if (MonthDay.from(date).equals(birthday)) return date;
+        }
+        throw new IllegalStateException("Birthday is outside the current week");
+    }
+
+    private UpcomingExamDto toUpcomingExam(Examination examination, Long classId) {
+        String subjects = examination.getSubjectClasses().stream()
+                .filter(link -> classId == null || link.getSchoolClass().getId().equals(classId))
+                .map(link -> link.getSubject().getName())
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        return new UpcomingExamDto(
+                examination.getId(),
+                examination.getName(),
+                subjects.isBlank() ? "—" : subjects,
+                examination.getStartDate(),
+                examination.getEndDate());
     }
 
     @Transactional(readOnly = true)
@@ -262,6 +465,20 @@ public class DashboardService {
         return 0.0;
     }
 
+    private double calculateAttendanceRate(Long schoolId, LocalDate date) {
+        List<Object[]> results = attendanceRepository.getAttendanceSummary(
+                schoolId, date, date, null, AttendanceStatus.PRESENT);
+
+        if (results == null || results.isEmpty() || results.get(0) == null) {
+            return 0.0;
+        }
+
+        Object[] row = results.get(0);
+        long total = row[0] != null ? ((Number) row[0]).longValue() : 0;
+        long present = row[1] != null ? ((Number) row[1]).longValue() : 0;
+        return total > 0 ? Math.round((present * 10000.0) / total) / 100.0 : 0.0;
+    }
+
     private Term getCurrentTerm(Long schoolId) {
         LocalDate today = LocalDate.now();
         return termRepository.findBySchoolIdOrderByStartDateDesc(schoolId).stream()
@@ -282,24 +499,44 @@ public class DashboardService {
         long classes = assignmentRepository.countByTeacherIdAndSchoolId(currentUser.getId(), schoolId);
         stats.setTotalClasses(classes);
 
-        DayOfWeek today = LocalDate.now().getDayOfWeek();
-        List<Timetable> todaysSlots = timetableRepository
-                .findAllByAssignment_Teacher_IdAndSchoolId(currentUser.getId(), schoolId)
-                .stream()
-                .filter(t -> t.getDayOfWeek() == today)
-                .toList();
-        stats.setTodayPeriods(todaysSlots.size());
-
         LocalDate todayDate = LocalDate.now();
-        long pending = 0;
-        for (Timetable slot : todaysSlots) {
-            boolean exists = lessonRepository.existsByTimetableIdAndDateAndStatus(
-                    slot.getId(), todayDate, LessonStatus.COMPLETED);
-            if (!exists) {
-                pending++;
+        List<LessonDto> todayLessons = lessonService
+                .getOrCreateLessonsForTeacherAndDate(currentUser, currentUser.getId(), todayDate);
+        stats.setTodayLessons(todayLessons);
+        stats.setTodayPeriods(todayLessons.size());
+        stats.setPendingAttendance(todayLessons.stream()
+                .filter(lesson -> lesson.getStatus() == LessonStatus.SCHEDULED
+                        || lesson.getStatus() == LessonStatus.SUBSTITUTED)
+                .count());
+
+        Term currentTerm = getCurrentTerm(schoolId);
+        if (currentTerm != null) {
+            List<TeacherAssessmentTaskDto> missingMarkTasks = new ArrayList<>();
+            for (Assessment assessment : assessmentRepository
+                    .findAllByAssignment_Teacher_IdAndSchoolIdOrderByDateDesc(currentUser.getId(), schoolId)) {
+                if (!assessment.getTerm().getId().equals(currentTerm.getId())) continue;
+
+                Long classId = assessment.getAssignment().getSchoolClass().getId();
+                long activeStudents = studentRepository.countBySchoolIdAndCurrentClassIdAndStatus(
+                        schoolId, classId, StudentStatus.ACTIVE);
+                long markedStudents = markRepository.countByAssessmentIdAndScoreIsNotNull(assessment.getId());
+                long missingMarks = Math.max(0, activeStudents - markedStudents);
+
+                if (missingMarks > 0) {
+                    missingMarkTasks.add(new TeacherAssessmentTaskDto(
+                            assessment.getId(),
+                            assessment.getName(),
+                            assessment.getAssignment().getSubject().getName(),
+                            assessment.getAssignment().getSchoolClass().getName(),
+                            assessment.getDate(),
+                            missingMarks));
+                }
             }
+            stats.setAssessmentsMissingMarks(missingMarkTasks);
+            stats.setMissingMarks(missingMarkTasks.stream()
+                    .mapToLong(TeacherAssessmentTaskDto::getMissingMarks)
+                    .sum());
         }
-        stats.setPendingAttendance(pending);
 
         return stats;
     }

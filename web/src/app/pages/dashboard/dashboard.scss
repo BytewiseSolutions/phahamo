@@ -101,6 +101,395 @@
 .text-muted { color: var(--text-muted); font-weight: 500; }
 .text-success { color: var(--success); }
 
+.recent-payments-card {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recent-payments-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.recent-payments-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.recent-payments-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.recent-payments-header p,
+.payment-student span,
+.payment-recorded-by {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.view-history {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.recent-payments-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-payment-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 62px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.payment-student {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  flex: 1;
+}
+
+.payment-student div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.payment-student strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.payment-avatar {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary) !important;
+}
+
+.payment-recorded-by {
+  min-width: 160px;
+}
+
+.payment-amount {
+  min-width: 105px;
+  color: var(--success);
+  font-size: 14px;
+  text-align: right;
+}
+
+.recent-payments-empty {
+  padding: 24px 0 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.upcoming-exams-card {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.birthdays-card {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.birthdays-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.birthdays-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.birthdays-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.birthdays-icon {
+  color: var(--warning);
+  font-size: 20px;
+}
+
+.birthdays-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.birthday-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--border-light);
+}
+
+.birthday-row.birthday-today {
+  margin: 0 -4px;
+  padding-right: 8px;
+  padding-left: 8px;
+  border-radius: var(--border-radius-sm);
+  background: #fff8e7;
+}
+
+.birthday-date {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.birthday-today .birthday-date {
+  background: #ffe7a8;
+  color: #875d00;
+}
+
+.birthday-date strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.birthday-date span {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.birthday-person {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.birthday-person strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.birthday-person span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.today-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ffe7a8;
+  color: #875d00;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.birthdays-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.birthdays-empty i {
+  color: var(--success);
+}
+
+.upcoming-exams-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.upcoming-exams-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.upcoming-exams-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.upcoming-exams-icon {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.upcoming-exams-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.upcoming-exam-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  border-top: 1px solid var(--border-light);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.upcoming-exam-row:hover .exam-details strong {
+  color: var(--primary);
+}
+
+.exam-date {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.exam-date strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.exam-date span {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.exam-details {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exam-details strong,
+.exam-details span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exam-details strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.exam-details span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.exam-arrow {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.upcoming-exams-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.upcoming-exams-empty i {
+  color: var(--success);
+}
+
+@media (max-width: 700px) {
+  .recent-payments-header,
+  .recent-payment-row {
+    align-items: flex-start;
+  }
+
+  .recent-payments-header {
+    flex-direction: column;
+  }
+
+  .recent-payment-row {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
+  .payment-student {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .payment-recorded-by {
+    margin-left: 42px;
+  }
+
+  .payment-amount {
+    margin-left: auto;
+  }
+}
+
 /* Graphs */
 .dashboard-graphs-grid {
   display: grid;
@@ -227,4 +616,149 @@
 .picker-select:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(29, 73, 82, 0.08);
+}
+
+.stat-card[role="link"] {
+  cursor: pointer;
+}
+
+.stat-card[role="link"]:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.stat-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.teacher-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.teacher-action-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.teacher-action-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.teacher-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.teacher-action-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.teacher-action-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.teacher-action-icon {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.teacher-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teacher-task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.teacher-task-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.teacher-task-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.teacher-task-row span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.task-time {
+  flex: 0 0 58px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.task-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.task-button b {
+  margin-left: auto;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.teacher-action-summary,
+.teacher-empty {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.teacher-empty {
+  padding: 12px 0 4px;
+}
+
+.announcement-task {
+  padding-bottom: 0;
+}
+
+.text-success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+@media (max-width: 850px) {
+  .teacher-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
