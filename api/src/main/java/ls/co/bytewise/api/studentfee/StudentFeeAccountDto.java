@@ -4,6 +4,7 @@ import ls.co.bytewise.api.common.BaseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ls.co.bytewise.api.parent.Parent;
 
 import java.util.List;
 
@@ -33,6 +34,11 @@ public class StudentFeeAccountDto extends BaseDto {
     private List<StudentFeeAdjustmentDto> adjustments;
     private List<StudentFeePaymentDto> payments;
 
+    private java.time.Instant lastReminderSentAt;
+    private Double lastReminderAmount;
+    private boolean hasEmailParent;
+    private java.util.List<ParentContactDto> parents;
+
     public StudentFeeAccountDto(StudentFeeAccount acc) {
         super(acc);
         this.studentId = acc.getStudent().getId();
@@ -57,5 +63,27 @@ public class StudentFeeAccountDto extends BaseDto {
         this.lines = acc.getLines().stream().map(StudentFeeLineDto::new).toList();
         this.adjustments = acc.getAdjustments().stream().map(StudentFeeAdjustmentDto::new).toList();
         this.payments = acc.getPayments().stream().map(StudentFeePaymentDto::new).toList();
+
+        this.lastReminderSentAt = acc.getLastReminderSentAt();
+        this.lastReminderAmount = acc.getLastReminderAmount();
+
+        List<ParentContactDto> parentList = new java.util.ArrayList<>();
+        boolean anyEmail = false;
+        if (acc.getStudent() != null && acc.getStudent().getParents() != null) {
+            for (Parent p : acc.getStudent().getParents()) {
+                if (p.getUser() == null) continue;
+                String email = p.getUser().getEmail();
+                boolean hasEmail = email != null && !email.isBlank();
+                if (hasEmail) anyEmail = true;
+                parentList.add(new ParentContactDto(
+                        p.getUser().getFullName(),
+                        email,
+                        p.getUser().getPhone(),
+                        hasEmail
+                ));
+            }
+        }
+        this.parents = parentList;
+        this.hasEmailParent = anyEmail;
     }
 }
