@@ -31,8 +31,7 @@
         <li [title]="collapsed ? link.label : ''">
           <a
             [routerLink]="link.path"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: false }"
+            [class.active]="isLinkActive(link)"
             class="sidebar-link"
           >
             <i [class]="link.icon"></i>

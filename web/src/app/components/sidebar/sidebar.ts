@@ -155,6 +155,18 @@ export class Sidebar implements OnInit {
     this.authService.logout();
   }
 
+  isLinkActive(link: SidebarLink): boolean {
+    const currentPath = this.router.url.split('?')[0];
+
+    if (link.path === '/student-fees') {
+      return currentPath === link.path
+        || (currentPath.startsWith(`${link.path}/`)
+          && !currentPath.startsWith('/student-fees/payments'));
+    }
+
+    return currentPath === link.path || currentPath.startsWith(`${link.path}/`);
+  }
+
   @HostListener('window:resize')
   onResize(): void {
     if (window.innerWidth > 768) {
