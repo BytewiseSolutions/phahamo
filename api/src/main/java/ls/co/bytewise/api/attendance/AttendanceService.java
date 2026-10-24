@@ -1,6 +1,9 @@
 package ls.co.bytewise.api.attendance;
 
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.mail.MailService;
+import ls.co.bytewise.api.parent.Parent;
+import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -13,6 +16,9 @@ import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -22,17 +28,24 @@ public class AttendanceService {
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final LessonRepository lessonRepository;
+    private final AbsenceAlertLogRepository absenceAlertLogRepository;
+    private final MailService mailService;
+
 
     public AttendanceService(
             AttendanceRepository attendanceRepository,
             StudentRepository studentRepository,
             SchoolClassRepository schoolClassRepository,
-            LessonRepository lessonRepository
+            LessonRepository lessonRepository,
+            AbsenceAlertLogRepository absenceAlertLogRepository,
+            MailService mailService
     ) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.lessonRepository = lessonRepository;
+        this.absenceAlertLogRepository = absenceAlertLogRepository;
+        this.mailService = mailService;
     }
 
     public List<AttendanceDto> getAttendanceForLesson(User requester, Long lessonId) {
@@ -60,7 +73,6 @@ public class AttendanceService {
         Long schoolId = TenantContext.getSchoolId();
         Lesson lesson = resolveLesson(lessonId, schoolId);
         ensureCanMarkLesson(marker, lesson);
-
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
 
         List<AttendanceDto> result = records.stream()
@@ -72,6 +84,15 @@ public class AttendanceService {
         lesson.setUpdatedBy(marker);
         lessonRepository.save(lesson);
 
+        records.stream()
+                .filter(r -> r.getStatus() == AttendanceStatus.ABSENT)
+                .forEach(r -> {
+                    Student student = studentRepository.findByIdAndSchoolId(r.getStudentId(), schoolId).orElse(null);
+                    if (student != null) {
+                        triggerAbsenceAlert(student, schoolClass, lesson.getDate());
+                    }
+                });
+
         return result;
     }
 
@@ -82,9 +103,64 @@ public class AttendanceService {
         Long schoolId = TenantContext.getSchoolId();
         Lesson lesson = resolveLesson(lessonId, schoolId);
         ensureCanMarkLesson(marker, lesson);
-
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
-        return new AttendanceDto(upsert(marker, schoolClass, lesson, studentId, status));
+        Attendance saved = upsert(marker, schoolClass, lesson, studentId, status);
+
+        if (status == AttendanceStatus.ABSENT) {
+            Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId).orElse(null);
+            if (student != null) {
+                triggerAbsenceAlert(student, schoolClass, lesson.getDate());
+            }
+        }
+
+        return new AttendanceDto(saved);
+    }
+
+    private void triggerAbsenceAlert(Student student, SchoolClass schoolClass, LocalDate lessonDate) {
+        School school = schoolClass.getSchool();
+
+        if (!school.isAbsenceAlertsEnabled()) {
+            return;
+        }
+
+        LocalDate absenceDate = lessonDate;  // no conversion needed
+
+        if (absenceAlertLogRepository.existsByStudentIdAndAbsenceDate(student.getId(), absenceDate)) {
+            return;
+        }
+
+        try {
+            AbsenceAlertLog log = new AbsenceAlertLog();
+            log.setStudent(student);
+            log.setAbsenceDate(absenceDate);
+            log.setSentAt(java.time.Instant.now());
+            log.setSchool(school);
+            absenceAlertLogRepository.save(log);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return;
+        }
+
+        String subject = "Absence Notification — " + student.getUser().getFullName();
+        String body = buildAbsenceEmailBody(student, schoolClass, school, absenceDate);
+
+        for (Parent parent : student.getParents()) {
+            String email = parent.getUser() != null ? parent.getUser().getEmail() : null;
+            if (email != null && !email.isBlank()) {
+                mailService.send(email, subject, body);
+            }
+        }
+    }
+
+    private String buildAbsenceEmailBody(Student student, SchoolClass schoolClass, School school, LocalDate date) {
+        String studentName = student.getUser().getFullName();
+        String className = schoolClass.getName();
+        String formattedDate = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+
+        return "Dear Parent,\n\n" +
+                studentName + " in " + className + " was marked absent on " + formattedDate + ".\n\n" +
+                "If this is incorrect, please contact the school.\n\n" +
+                "Regards,\n" +
+                school.getName();
     }
 
     private Attendance upsert(User marker, SchoolClass schoolClass, Lesson lesson, Long studentId, AttendanceStatus status) {

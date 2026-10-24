@@ -44,6 +44,7 @@ export class SchoolProfile implements OnInit, OnDestroy {
       schoolTermStructure: [TermStructure.THREE_TERM, Validators.required],
       schoolCurrency: [Currency.LSL, Validators.required],
       schoolTimezone: ['Africa/Maseru', Validators.required],
+      absenceAlertsEnabled: [true],
     });
   }
 
@@ -145,6 +146,7 @@ export class SchoolProfile implements OnInit, OnDestroy {
       schoolTermStructure: school.schoolTermStructure,
       schoolCurrency: school.schoolCurrency,
       schoolTimezone: school.schoolTimezone,
+      absenceAlertsEnabled: school.absenceAlertsEnabled ?? true,
     });
   }
 
