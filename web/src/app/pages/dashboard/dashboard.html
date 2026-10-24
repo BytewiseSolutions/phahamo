@@ -1,5 +1,13 @@
 <div class="dashboard-page">
-  <h1>Dashboard</h1>
+  <div class="dashboard-title-row">
+    <h1>Dashboard</h1>
+    @if (unreadMessages > 0) {
+      <button type="button" class="unread-messages-badge" (click)="goToMessages()">
+        <i class="fa-solid fa-envelope"></i>
+        {{ unreadMessages }} unread {{ unreadMessages === 1 ? 'message' : 'messages' }}
+      </button>
+    }
+  </div>
 
   <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
 

@@ -2,6 +2,35 @@
   padding: 20px;
 }
 
+.dashboard-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.dashboard-title-row h1 {
+  margin: 0;
+}
+
+.unread-messages-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.unread-messages-badge:hover {
+  opacity: 0.9;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

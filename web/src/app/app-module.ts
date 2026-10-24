@@ -98,6 +98,7 @@ import { ActivateSubscriptionDialog } from './pages/subscription/activate-subscr
 import { SubscriptionExpired } from './pages/subscription/subscription-expired/subscription-expired';
 import {SubscriptionInterceptor} from './util/subscription.interceptor';
 import { Profile } from './pages/profile/profile/profile';
+import { MessagesPage } from './pages/messages/messages-page/messages-page';
 
 @NgModule({
   declarations: [
@@ -190,6 +191,7 @@ import { Profile } from './pages/profile/profile/profile';
     ActivateSubscriptionDialog,
     SubscriptionExpired,
     Profile,
+    MessagesPage,
   ],
   imports: [
     BrowserModule,

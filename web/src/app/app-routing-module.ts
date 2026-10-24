@@ -48,6 +48,7 @@ import {SubscriptionExpired} from './pages/subscription/subscription-expired/sub
 import {AdminSchoolList} from './pages/subscription/admin-school-list/admin-school-list';
 import {systemAdminGuard} from './util/system-admin.guard';
 import {Profile} from './pages/profile/profile/profile';
+import {MessagesPage} from './pages/messages/messages-page/messages-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -100,6 +101,7 @@ const routes: Routes = [
       { path: 'students/promote', component: PromotionPage },
       { path: 'students/promotions/history', component: PromotionHistory },
       { path: 'profile', component: Profile },
+      { path: 'messages', component: MessagesPage },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

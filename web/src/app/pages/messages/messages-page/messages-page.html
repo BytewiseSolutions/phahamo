@@ -1,0 +1,109 @@
+<div class="messages-page">
+  <div class="page-header">
+    <div>
+      <h1>Messages</h1>
+      <p>Communicate securely with people at your school.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="startCompose()">
+      <i class="fa-solid fa-pen"></i> New message
+    </button>
+  </div>
+
+  @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
+
+  <div class="messages-layout">
+    <aside class="message-folders">
+      <button type="button" [class.active]="folder === 'inbox'" (click)="loadFolder('inbox')">
+        <i class="fa-solid fa-inbox"></i>
+        <span>Inbox</span>
+        @if (unreadInboxCount > 0) { <b class="folder-badge">{{ unreadInboxCount }}</b> }
+      </button>
+      <button type="button" [class.active]="folder === 'sent'" (click)="loadFolder('sent')">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Sent</span>
+        @if (sentThreadCount > 0) { <b class="folder-badge">{{ sentThreadCount }}</b> }
+      </button>
+    </aside>
+
+    <section class="message-list">
+      @if (loading) {
+        <div class="message-empty">Loading messages...</div>
+      } @else if (visibleThreads.length === 0) {
+        <div class="message-empty">{{ folder === 'inbox' ? 'Your inbox is empty.' : 'No sent messages yet.' }}</div>
+      } @else {
+        @for (item of visibleThreads; track item.threadId) {
+          <button type="button" class="message-thread-row" [class.unread]="item.unread" (click)="openThread(item)">
+            <span class="message-thread-icon"><i class="fa-solid fa-user"></i></span>
+            <span class="message-thread-copy">
+              <strong>{{ item.otherParticipantName }}</strong>
+              <b>{{ item.subject }}</b>
+              <span>{{ item.preview }}</span>
+            </span>
+            <time>{{ item.lastMessageAt | date:'dd MMM, HH:mm' }}</time>
+          </button>
+        }
+      }
+    </section>
+
+    <section class="message-thread-panel">
+      @if (composing) {
+        <div class="compose-panel">
+          <h2>{{ selectedThreadId ? 'Reply' : 'New message' }}</h2>
+          @if (!selectedThreadId) {
+            <label>To
+              <ng-select
+                [items]="recipients"
+                bindLabel="name"
+                bindValue="id"
+                [(ngModel)]="recipientId"
+                [searchable]="true"
+                [clearable]="true"
+                [hideSelected]="true"
+                placeholder="Search by name...">
+              </ng-select>
+            </label>
+          } @else {
+            <p class="reply-to">Replying to {{ replyRecipientName }}</p>
+          }
+          <label>Subject (optional)<input type="text" [(ngModel)]="subject" maxlength="200"></label>
+          <label>Message<textarea rows="8" [(ngModel)]="body"></textarea></label>
+          <div class="compose-actions">
+            <button type="button" class="secondary-button" (click)="composing = false">Cancel</button>
+            <button type="button" class="primary-button" [disabled]="sending" (click)="send()">{{ sending ? 'Sending...' : 'Send' }}</button>
+          </div>
+        </div>
+      } @else if (thread.length > 0) {
+        <div class="thread-header">
+          <div><h2>{{ thread[0].subject }}</h2><span>Conversation</span></div>
+          <button type="button" class="secondary-button" (click)="reply()"><i class="fa-solid fa-reply"></i> Reply</button>
+        </div>
+        <div class="thread-messages">
+          @for (message of thread; track message.id) {
+            <article class="message-bubble" [class.message-outgoing]="message.senderId === currentUserId">
+              @if (editingMessageId === message.id) {
+                <label class="message-edit-field">Subject (optional)<input type="text" [(ngModel)]="editSubject" maxlength="200"></label>
+                <label class="message-edit-field">Message<textarea rows="4" [(ngModel)]="editBody"></textarea></label>
+                <div class="message-edit-actions">
+                  <button type="button" class="message-action-button" (click)="cancelEdit()">Cancel</button>
+                  <button type="button" class="message-action-button confirm" (click)="saveEdit()">Save</button>
+                </div>
+              } @else {
+                <div class="message-bubble-header"><strong>{{ message.senderName }}</strong><time>{{ message.sentAt | date:'dd MMM yyyy, HH:mm' }}</time></div>
+                <p [class.deleted-message]="message.deleted">{{ message.body }}</p>
+                @if (message.editedAt && !message.deleted) { <small class="edited-label">Edited</small> }
+                @if (isOwnMessage(message) && !message.deleted) {
+                  <div class="message-actions">
+                    <button type="button" class="message-action-button" (click)="editMessage(message)">Edit</button>
+                    <button type="button" class="message-action-button delete" (click)="deleteMessage(message)">Delete</button>
+                  </div>
+                }
+              }
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="message-empty">Select a conversation to read it.</div>
+      }
+    </section>
+  </div>
+</div>
