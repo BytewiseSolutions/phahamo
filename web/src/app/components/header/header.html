@@ -5,13 +5,13 @@
   </div>
 
   <div class="header-right">
-    <div class="user-info">
+    <button type="button" class="user-info" (click)="goToProfile()" title="View my profile">
       <div class="user-avatar">{{ initials }}</div>
       <div class="user-details">
         <span class="user-name">{{ fullName }}</span>
         <span class="user-role">{{ role }}</span>
       </div>
-    </div>
+    </button>
 
     <button type="button" class="logout-btn" (click)="onLogout()" title="Logout">
       <i class="fa-solid fa-right-from-bracket"></i>

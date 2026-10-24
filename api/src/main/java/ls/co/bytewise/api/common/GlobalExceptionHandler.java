@@ -363,4 +363,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleReportCardRenderException(ReportCardExceptions.ReportCardRenderException ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
+
+    @ExceptionHandler(UserExceptions.LastAdminException.class)
+    public ResponseEntity<Map<String, Object>> handleLastAdmin(UserExceptions.LastAdminException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(UserExceptions.AdminProtectionException.class)
+    public ResponseEntity<Map<String, Object>> handleAdminProtection(UserExceptions.AdminProtectionException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
 }

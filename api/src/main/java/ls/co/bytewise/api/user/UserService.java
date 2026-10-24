@@ -65,18 +65,24 @@ public class UserService {
             throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
         }
 
-        if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
-            throw new UserExceptions.InvalidRoleAssignmentException(
-                    "System Administrator accounts cannot be created this way");
-        }
-
         boolean creatorIsSystemAdmin = creator.hasRole(UserRole.SYSTEM_ADMIN);
+
+        if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN) && !creatorIsSystemAdmin) {
+            throw new UserExceptions.InvalidRoleAssignmentException(
+                    "Only a System Administrator can create another System Administrator");
+        }
 
         School school = null;
         if (!creatorIsSystemAdmin) {
             Long schoolId = TenantContext.getSchoolId();
             school = schoolRepository.findById(schoolId)
                     .orElseThrow(() -> new IllegalStateException("Active school not found"));
+
+            if (dto.getRoles().contains(UserRole.SCHOOL_ADMIN)
+                    && !creator.hasRole(UserRole.SCHOOL_ADMIN)) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "Only a School Administrator can create another School Administrator");
+            }
         }
 
         String temporaryPassword = generateTemporaryPassword();
@@ -163,43 +169,111 @@ public class UserService {
     @Transactional
     public UserDto updateUser(User editor, Long userId, UserDto dto) {
         User user = getUserInCurrentSchool(userId);
-
-        if (dto.getFirstName() != null) {
-            user.setFirstName(dto.getFirstName());
-        }
-
-        if (dto.getLastName() != null) {
-            user.setLastName(dto.getLastName());
-        }
-
-        if (dto.getPhone() != null) {
-            user.setPhone(dto.getPhone());
-        }
-
-        user.setUpdatedBy(editor);
+        Long schoolId = TenantContext.getSchoolId();
+        boolean editorIsSystemAdmin = editor.hasRole(UserRole.SYSTEM_ADMIN);
 
         if (dto.getRoles() != null) {
             if (dto.getRoles().isEmpty()) {
                 throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
             }
-            if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN)) {
+
+            if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN) && !editorIsSystemAdmin) {
                 throw new UserExceptions.InvalidRoleAssignmentException(
-                        "System Administrator accounts cannot be created this way");
+                        "Only a System Administrator can grant the System Administrator role");
             }
+
+            if (!editorIsSystemAdmin && user.hasRole(UserRole.SCHOOL_ADMIN)) {
+                throw new UserExceptions.AdminProtectionException(
+                        "Only a System Administrator can modify another School Administrator's account");
+            }
+
+            if (dto.getRoles().contains(UserRole.SCHOOL_ADMIN)
+                    && !editorIsSystemAdmin
+                    && !editor.hasRole(UserRole.SCHOOL_ADMIN)) {
+                throw new UserExceptions.InvalidRoleAssignmentException(
+                        "Only a School Administrator or System Administrator can grant the School Administrator role");
+            }
+
             user.setRoles(dto.getRoles());
         }
 
         if (dto.getStatus() != null) {
+            boolean isDeactivating = dto.getStatus() == Status.INACTIVE
+                    && user.getStatus() == Status.ACTIVE;
+            boolean targetIsSchoolAdmin = user.hasRole(UserRole.SCHOOL_ADMIN);
+
+            if (isDeactivating && targetIsSchoolAdmin && !editorIsSystemAdmin) {
+                if (editor.getId().equals(user.getId())) {
+                    long otherAdmins = userRepository.countActiveByRoleAndSchoolExcluding(
+                            UserRole.SCHOOL_ADMIN, schoolId, user.getId());
+                    if (otherAdmins == 0) {
+                        throw new UserExceptions.LastAdminException(
+                                "You are the last active School Administrator. Promote another user to School Administrator before deactivating your own account.");
+                    }
+                } else {
+                    long otherAdmins = userRepository.countActiveByRoleAndSchoolExcluding(
+                            UserRole.SCHOOL_ADMIN, schoolId, user.getId());
+                    if (otherAdmins == 0) {
+                        throw new UserExceptions.LastAdminException(
+                                "Cannot deactivate the last active School Administrator.");
+                    }
+                }
+            }
+
             user.setStatus(dto.getStatus());
         }
+
+        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+        if (dto.getPhone() != null) user.setPhone(dto.getPhone());
+
+        user.setUpdatedBy(editor);
 
         User saved = userRepository.save(user);
         return new UserDto(saved);
     }
 
     @Transactional
-    public void deactivateUser(Long userId) {
+    public UserDto updateSelf(User currentUser, UserDto dto) {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException("User not found"));
+
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+
+        user.setUpdatedBy(currentUser);
+
+        User saved = userRepository.save(user);
+        return new UserDto(saved);
+    }
+
+    @Transactional
+    public void deactivateUser(User editor, Long userId) {
         User user = getUserInCurrentSchool(userId);
+        Long schoolId = TenantContext.getSchoolId();
+        boolean editorIsSystemAdmin = editor.hasRole(UserRole.SYSTEM_ADMIN);
+
+        if (!editorIsSystemAdmin && user.hasRole(UserRole.SCHOOL_ADMIN)) {
+            long otherAdmins = userRepository.countActiveByRoleAndSchoolExcluding(
+                    UserRole.SCHOOL_ADMIN, schoolId, user.getId());
+            if (otherAdmins == 0) {
+                throw new UserExceptions.LastAdminException(
+                        "Cannot deactivate the last active School Administrator.");
+            }
+
+            if (editor.getId().equals(user.getId())) {
+                throw new UserExceptions.AdminProtectionException(
+                        "You cannot deactivate your own account. Ask another administrator to do it.");
+            }
+        }
+
         user.setStatus(Status.INACTIVE);
         userRepository.save(user);
     }

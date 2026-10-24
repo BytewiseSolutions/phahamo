@@ -83,6 +83,10 @@ export class Header implements OnInit {
     return role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   }
 
+  goToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
+
   onLogout(): void {
     this.authService.logout();
   }

@@ -52,6 +52,19 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  transition: background var(--transition-fast);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+
+  &:hover {
+    background: var(--background);
+  }
 }
 
 .user-avatar {

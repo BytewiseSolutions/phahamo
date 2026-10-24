@@ -40,4 +40,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     AND u.status = 'ACTIVE'
    """)
     long countActiveByRoleAndSchool(@Param("role") UserRole role, @Param("schoolId") Long schoolId);
+
+    @Query("""
+    SELECT COUNT(u) FROM User u
+    JOIN u.roles r
+    JOIN u.schools s
+    WHERE r = :role
+      AND s.id = :schoolId
+      AND u.status = 'ACTIVE'
+      AND u.id <> :excludeUserId
+""")
+    long countActiveByRoleAndSchoolExcluding(
+            @Param("role") UserRole role,
+            @Param("schoolId") Long schoolId,
+            @Param("excludeUserId") Long excludeUserId);
 }
