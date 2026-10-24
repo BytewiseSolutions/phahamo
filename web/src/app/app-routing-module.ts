@@ -45,6 +45,7 @@ import {BulkImport} from './pages/imports/bulk-import/bulk-import';
 import {SubscriptionExpired} from './pages/subscription/subscription-expired/subscription-expired';
 import {AdminSchoolList} from './pages/subscription/admin-school-list/admin-school-list';
 import {systemAdminGuard} from './util/system-admin.guard';
+import {Profile} from './pages/profile/profile/profile';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -94,6 +95,7 @@ const routes: Routes = [
       { path: 'remarks', component: RemarksPage },
       { path: 'students/promote', component: PromotionPage },
       { path: 'students/promotions/history', component: PromotionHistory },
+      { path: 'profile', component: Profile },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

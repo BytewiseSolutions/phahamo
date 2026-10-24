@@ -13,4 +13,16 @@ public class UserExceptions {
             super(message);
         }
     }
+
+    public static class LastAdminException extends RuntimeException {
+        public LastAdminException(String message) {
+            super(message);
+        }
+    }
+
+    public static class AdminProtectionException extends RuntimeException {
+        public AdminProtectionException(String message) {
+            super(message);
+        }
+    }
 }

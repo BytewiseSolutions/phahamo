@@ -94,6 +94,7 @@ import { ExtendTrialDialog } from './pages/subscription/extend-trial-dialog/exte
 import { ActivateSubscriptionDialog } from './pages/subscription/activate-subscription-dialog/activate-subscription-dialog';
 import { SubscriptionExpired } from './pages/subscription/subscription-expired/subscription-expired';
 import {SubscriptionInterceptor} from './util/subscription.interceptor';
+import { Profile } from './pages/profile/profile/profile';
 
 @NgModule({
   declarations: [
@@ -182,6 +183,7 @@ import {SubscriptionInterceptor} from './util/subscription.interceptor';
     ExtendTrialDialog,
     ActivateSubscriptionDialog,
     SubscriptionExpired,
+    Profile,
   ],
   imports: [
     BrowserModule,

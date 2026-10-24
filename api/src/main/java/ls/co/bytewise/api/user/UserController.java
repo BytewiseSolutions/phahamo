@@ -64,16 +64,24 @@ public class UserController {
         return userService.updateUser(currentUser, id, dto);
     }
 
+    @PutMapping("/me")
+    public UserDto updateMe(@AuthenticationPrincipal User currentUser,
+                            @RequestBody UserDto dto) {
+        return userService.updateSelf(currentUser, dto);
+    }
+
     @DeleteMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
-    public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
-        userService.deactivateUser(id);
+    public ResponseEntity<Void> deactivateUser(@AuthenticationPrincipal User currentUser,
+                                               @PathVariable Long id) {
+        userService.deactivateUser(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/activate")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
-    public ResponseEntity<Void> activateUser(@PathVariable Long id) {
+    public ResponseEntity<Void> activateUser(@AuthenticationPrincipal User currentUser,
+                                             @PathVariable Long id) {
         userService.activateUser(id);
         return ResponseEntity.noContent().build();
     }

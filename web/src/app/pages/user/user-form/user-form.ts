@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleCha
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '../../../util/user';
+import { AuthService } from '../../../util/auth.service';
 
 @Component({
   selector: 'app-user-form',
@@ -18,14 +19,19 @@ export class UserForm implements OnChanges, OnDestroy {
 
   userForm: FormGroup;
   selectedRole = '';
-  availableRoles = ['PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'STUDENT'];
+  availableRoles: string[] = [];
   availableStatuses = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
   availableGenders = ['MALE', 'FEMALE'];
   availableEmploymentTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT'];
 
   private destroy$ = new Subject<void>();
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
+    this.buildAvailableRoles();
+
     this.userForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.pattern(/^\S+\s+\S+.*$/)]],
       email: ['', [Validators.required, Validators.email]],
@@ -49,6 +55,20 @@ export class UserForm implements OnChanges, OnDestroy {
 
   get isEditMode(): boolean {
     return this.editingUser !== null;
+  }
+
+  private buildAvailableRoles(): void {
+    const roles = ['PRINCIPAL', 'TEACHER', 'FINANCE_OFFICER', 'STUDENT'];
+
+    if (this.authService.hasRole('SCHOOL_ADMIN')) {
+      roles.unshift('SCHOOL_ADMIN');
+    }
+
+    if (this.authService.hasRole('SYSTEM_ADMIN')) {
+      roles.unshift('SYSTEM_ADMIN');
+    }
+
+    this.availableRoles = roles;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -163,5 +183,9 @@ export class UserForm implements OnChanges, OnDestroy {
 
   onOverlayClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) this.onClose();
+  }
+
+  formatRole(role: string): string {
+    return role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   }
 }
