@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.result;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.assessment.Assessment;
 import ls.co.bytewise.api.assessment.AssessmentRepository;
 import ls.co.bytewise.api.assessment.AssessmentType;
@@ -37,6 +39,7 @@ public class TermResultService {
     private final SubjectRepository subjectRepository;
     private final TermRepository termRepository;
     private final GradeBandRepository gradeBandRepository;
+    private final AuditLogService auditLogService;
 
     public TermResultService(TermResultRepository termResultRepository,
                              ResultAuditRepository resultAuditRepository,
@@ -46,7 +49,8 @@ public class TermResultService {
                              SchoolClassRepository schoolClassRepository,
                              SubjectRepository subjectRepository,
                              TermRepository termRepository,
-                             GradeBandRepository gradeBandRepository) {
+                             GradeBandRepository gradeBandRepository,
+                             AuditLogService auditLogService) {
         this.termResultRepository = termResultRepository;
         this.resultAuditRepository = resultAuditRepository;
         this.assessmentRepository = assessmentRepository;
@@ -56,6 +60,7 @@ public class TermResultService {
         this.subjectRepository = subjectRepository;
         this.termRepository = termRepository;
         this.gradeBandRepository = gradeBandRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<TermResultDto> listFor(Long classId, Long subjectId, Long termId) {
@@ -246,6 +251,11 @@ public class TermResultService {
             result.setFinalisedBy(null);
             result.setUpdatedBy(currentUser);
             termResultRepository.save(result);
+            auditLogService.record(result.getSchool(), currentUser,
+                    AuditAction.RESULT_CHANGED_AFTER_FINALISATION,
+                    "TERM_RESULT", result.getId(),
+                    "Reopened finalised result for " + result.getStudent().getUser().getFullName()
+                            + " in " + result.getSubject().getName() + "; reason: " + reason.trim());
         }
 
         return listFor(classId, subjectId, termId);
@@ -277,10 +287,11 @@ public class TermResultService {
                     "Mark must be between 0 and 100");
         }
 
+        double previousMark = result.getFinalMark();
         ResultAudit audit = new ResultAudit();
         audit.setSchool(result.getSchool());
         audit.setTermResult(result);
-        audit.setPreviousMark(result.getFinalMark());
+        audit.setPreviousMark(previousMark);
         audit.setNewMark(newMark);
         audit.setReason(reason.trim());
         audit.setChangedBy(currentUser);
@@ -296,6 +307,12 @@ public class TermResultService {
         applyGrade(result, bands);
 
         termResultRepository.save(result);
+        auditLogService.record(result.getSchool(), currentUser,
+                AuditAction.RESULT_CHANGED_AFTER_FINALISATION,
+                "TERM_RESULT", result.getId(),
+                "Changed finalised result for " + result.getStudent().getUser().getFullName()
+                        + " in " + result.getSubject().getName() + " from "
+                        + previousMark + " to " + newMark + "; reason: " + reason.trim());
         return new TermResultDto(result);
     }
 

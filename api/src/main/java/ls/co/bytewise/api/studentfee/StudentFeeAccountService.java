@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.studentfee;
 
 import ls.co.bytewise.api.academicyear.AcademicYear;
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.fee.*;
 import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.parent.Parent;
@@ -31,6 +33,7 @@ public class StudentFeeAccountService {
     private final StudentFeePaymentRepository paymentRepository;
     private final MailService mailService;
     private final StudentFeeBalanceService balanceService;
+    private final AuditLogService auditLogService;
 
     public StudentFeeAccountService(StudentFeeAccountRepository accountRepository,
                                     StudentRepository studentRepository,
@@ -39,7 +42,8 @@ public class StudentFeeAccountService {
                                     AnnualFeeRepository annualFeeRepository,
                                     StudentFeePaymentRepository paymentRepository,
                                     MailService mailService,
-                                    StudentFeeBalanceService balanceService) {
+                                    StudentFeeBalanceService balanceService,
+                                    AuditLogService auditLogService) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -48,6 +52,7 @@ public class StudentFeeAccountService {
         this.paymentRepository = paymentRepository;
         this.mailService = mailService;
         this.balanceService = balanceService;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -331,7 +336,8 @@ public class StudentFeeAccountService {
                 .mapToDouble(StudentFeeAdjustment::getAmount).sum());
         account.setUpdatedBy(approver);
 
-        return toDto(accountRepository.save(account));
+        StudentFeeAccount saved = accountRepository.save(account);
+        return toDto(saved);
     }
 
     @Transactional
@@ -440,6 +446,12 @@ public class StudentFeeAccountService {
         account.getPayments().add(payment);
 
         StudentFeeAccount saved = accountRepository.save(account);
+        auditLogService.record(saved.getSchool(), receivedBy, AuditAction.PAYMENT_RECORDED,
+                "PAYMENT", payment.getId(),
+                "Recorded payment of M " + String.format("%.2f", payment.getAmount())
+                        + " for " + student.getUser().getFullName()
+                        + "; balance changed from M " + String.format("%.2f", balance)
+                        + " to M " + String.format("%.2f", balance - payment.getAmount()));
 
         String recipientEmail = null;
         String recipientName = null;
@@ -510,7 +522,13 @@ public class StudentFeeAccountService {
         payment.setReversedAt(Instant.now());
         payment.setReversedBy(reversedBy);
 
-        return toDto(accountRepository.save(account));
+        StudentFeeAccount saved = accountRepository.save(account);
+        auditLogService.record(saved.getSchool(), reversedBy, AuditAction.PAYMENT_REVERSED,
+                "PAYMENT", payment.getId(),
+                "Reversed payment of M " + String.format("%.2f", payment.getAmount())
+                        + " for " + account.getStudent().getUser().getFullName()
+                        + "; reason: " + payment.getReversalReason());
+        return toDto(saved);
     }
 
     public StudentFeeAccountDto getAccountForStudent(User user, Long termId) {

@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.timetable;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -41,6 +44,7 @@ public class TimetableService {
     private final HolidayService holidayService;
     private final SchoolRepository schoolRepository;
     private final SchoolClassRepository schoolClassRepository;
+    private final AuditLogService auditLogService;
 
     public TimetableService(TimetableRepository timetableRepository,
                             PeriodRepository periodRepository,
@@ -49,7 +53,8 @@ public class TimetableService {
                             LessonRepository lessonRepository,
                             HolidayService holidayService,
                             SchoolRepository schoolRepository,
-                            SchoolClassRepository schoolClassRepository) {
+                            SchoolClassRepository schoolClassRepository,
+                            AuditLogService auditLogService) {
         this.timetableRepository = timetableRepository;
         this.periodRepository = periodRepository;
         this.assignmentRepository = assignmentRepository;
@@ -58,6 +63,7 @@ public class TimetableService {
         this.holidayService = holidayService;
         this.schoolRepository = schoolRepository;
         this.schoolClassRepository = schoolClassRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -111,6 +117,8 @@ public class TimetableService {
         timetable.setUpdatedBy(creator);
 
         Timetable saved = timetableRepository.save(timetable);
+        auditLogService.record(school, creator, AuditAction.TIMETABLE_CREATED,
+                "TIMETABLE", saved.getId(), describe(saved));
         return new TimetableDto(saved);
     }
 
@@ -166,6 +174,8 @@ public class TimetableService {
         timetable.setUpdatedBy(editor);
 
         Timetable saved = timetableRepository.save(timetable);
+        auditLogService.record(saved.getSchool(), editor, AuditAction.TIMETABLE_UPDATED,
+                "TIMETABLE", saved.getId(), describe(saved));
         return new TimetableDto(saved);
     }
 
@@ -220,9 +230,12 @@ public class TimetableService {
         }
 
         school.setTimetablePublished(true);
-        school.setTimetablePublishedAt(java.time.Instant.now());
+        school.setTimetablePublishedAt(Instant.now());
         school.setTimetablePublishedBy(publisher);
         School saved = schoolRepository.save(school);
+        auditLogService.record(saved, publisher, AuditAction.TIMETABLE_PUBLISHED,
+                "SCHOOL", saved.getId(), "Published the timetable"
+                        + (problems.isEmpty() ? "" : " with " + problems.size() + " acknowledged problem(s)"));
         return publicationDto(saved, problems);
     }
 
@@ -358,9 +371,17 @@ public class TimetableService {
     }
 
     @Transactional
-    public void deleteTimetable(Long id) {
+    public void deleteTimetable(User deleter, Long id) {
         Timetable timetable = getTimetableInCurrentSchool(id);
         timetableRepository.delete(timetable);
+        auditLogService.record(timetable.getSchool(), deleter, AuditAction.TIMETABLE_DELETED,
+                "TIMETABLE", timetable.getId(), "Deleted " + describe(timetable));
+    }
+
+    private String describe(Timetable timetable) {
+        return timetable.getAssignment().getSchoolClass().getName() + " - "
+                + timetable.getAssignment().getSubject().getName() + " on "
+                + timetable.getDayOfWeek() + " during " + timetable.getPeriod().getName();
     }
 
     private Timetable getTimetableInCurrentSchool(Long id) {

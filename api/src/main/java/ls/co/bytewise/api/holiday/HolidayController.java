@@ -50,8 +50,9 @@ public class HolidayController {
 
     @DeleteMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        holidayService.delete(id);
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal User currentUser,
+                                       @PathVariable Long id) {
+        holidayService.delete(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 }

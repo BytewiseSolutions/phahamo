@@ -82,7 +82,7 @@ public class UserController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<Void> activateUser(@AuthenticationPrincipal User currentUser,
                                              @PathVariable Long id) {
-        userService.activateUser(id);
+        userService.activateUser(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 

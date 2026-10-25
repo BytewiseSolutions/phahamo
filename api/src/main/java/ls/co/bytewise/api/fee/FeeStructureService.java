@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.fee;
 
 import ls.co.bytewise.api.academicyear.AcademicYear;
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.academicyear.AcademicYearRepository;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
@@ -24,19 +26,22 @@ public class FeeStructureService {
     private final TermRepository termRepository;
     private final AcademicYearRepository academicYearRepository;
     private final StudentFeeAccountService feeAccountService;
+    private final AuditLogService auditLogService;
 
     public FeeStructureService(FeeStructureRepository feeStructureRepository,
                                AnnualFeeRepository annualFeeRepository,
                                SchoolClassRepository schoolClassRepository,
                                TermRepository termRepository,
                                AcademicYearRepository academicYearRepository,
-                               StudentFeeAccountService feeAccountService) {
+                               StudentFeeAccountService feeAccountService,
+                               AuditLogService auditLogService) {
         this.feeStructureRepository = feeStructureRepository;
         this.annualFeeRepository = annualFeeRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.termRepository = termRepository;
         this.academicYearRepository = academicYearRepository;
         this.feeAccountService = feeAccountService;
+        this.auditLogService = auditLogService;
     }
 
     public List<FeeStructureDto> listStructures(Long classId, Long termId) {
@@ -112,6 +117,9 @@ public class FeeStructureService {
         }
 
         FeeStructure saved = feeStructureRepository.save(structure);
+        auditLogService.record(saved.getSchool(), creator, AuditAction.FEE_STRUCTURE_CREATED,
+                "FEE_STRUCTURE", saved.getId(), "Created fee structure for "
+                        + saved.getSchoolClass().getName() + " - " + saved.getTerm().getName());
         feeAccountService.synchronizeClassTerm(saved.getSchoolClass().getId(), saved.getTerm().getId(), creator);
         return new FeeStructureDto(saved);
     }
@@ -142,14 +150,20 @@ public class FeeStructureService {
 
         structure.setUpdatedBy(editor);
         FeeStructure saved = feeStructureRepository.save(structure);
+        auditLogService.record(saved.getSchool(), editor, AuditAction.FEE_STRUCTURE_UPDATED,
+                "FEE_STRUCTURE", saved.getId(), "Updated fee structure for "
+                        + saved.getSchoolClass().getName() + " - " + saved.getTerm().getName());
         feeAccountService.synchronizeClassTerm(saved.getSchoolClass().getId(), saved.getTerm().getId(), editor);
         return new FeeStructureDto(saved);
     }
 
     @Transactional
-    public void deleteStructure(Long id) {
+    public void deleteStructure(User deleter, Long id) {
         FeeStructure structure = requireStructure(id);
         feeStructureRepository.delete(structure);
+        auditLogService.record(structure.getSchool(), deleter, AuditAction.FEE_STRUCTURE_DELETED,
+                "FEE_STRUCTURE", structure.getId(), "Deleted fee structure for "
+                        + structure.getSchoolClass().getName() + " - " + structure.getTerm().getName());
     }
 
     public List<AnnualFeeDto> listAnnualFees(Long classId, Long academicYearId) {
@@ -219,6 +233,9 @@ public class FeeStructureService {
         fee.setUpdatedBy(creator);
 
         AnnualFee saved = annualFeeRepository.save(fee);
+        auditLogService.record(saved.getSchool(), creator, AuditAction.FEE_STRUCTURE_CREATED,
+                "ANNUAL_FEE", saved.getId(), "Created annual fee " + saved.getName()
+                        + " for " + saved.getSchoolClass().getName());
         return new AnnualFeeDto(saved);
     }
 
@@ -236,13 +253,17 @@ public class FeeStructureService {
         fee.setUpdatedBy(editor);
 
         AnnualFee saved = annualFeeRepository.save(fee);
+        auditLogService.record(saved.getSchool(), editor, AuditAction.FEE_STRUCTURE_UPDATED,
+                "ANNUAL_FEE", saved.getId(), "Updated annual fee " + saved.getName());
         return new AnnualFeeDto(saved);
     }
 
     @Transactional
-    public void deleteAnnualFee(Long id) {
+    public void deleteAnnualFee(User deleter, Long id) {
         AnnualFee fee = requireAnnualFee(id);
         annualFeeRepository.delete(fee);
+        auditLogService.record(fee.getSchool(), deleter, AuditAction.FEE_STRUCTURE_DELETED,
+                "ANNUAL_FEE", fee.getId(), "Deleted annual fee " + fee.getName());
     }
 
     private FeeStructure requireStructure(Long id) {

@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.user;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.mail.MailService;
@@ -35,6 +37,7 @@ public class UserService {
     private final StudentService studentService;
     private final ParentService parentService;
     private final TeacherService teacherService;
+    private final AuditLogService auditLogService;
 
     public UserService(UserRepository userRepository,
                        SchoolRepository schoolRepository,
@@ -42,7 +45,8 @@ public class UserService {
                        MailService mailService,
                        StudentService studentService,
                        ParentService parentService,
-                       TeacherService teacherService
+                       TeacherService teacherService,
+                       AuditLogService auditLogService
                        ) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
@@ -51,6 +55,7 @@ public class UserService {
         this.studentService = studentService;
         this.parentService = parentService;
         this.teacherService = teacherService;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -131,6 +136,13 @@ public class UserService {
                 temporaryPassword,
                 school != null ? school.getName() : "School Management System");
 
+        if (school != null) {
+            auditLogService.record(school, creator, AuditAction.USER_CREATED,
+                    "USER", saved.getId(),
+                    "Created user " + saved.getFullName() + " (" + saved.getEmail()
+                            + ") with roles " + saved.getRoles());
+        }
+
         return new UserDto(saved);
     }
 
@@ -174,6 +186,8 @@ public class UserService {
         User user = getUserInCurrentSchool(userId);
         Long schoolId = TenantContext.getSchoolId();
         boolean editorIsSystemAdmin = editor.hasRole(UserRole.SYSTEM_ADMIN);
+        Set<UserRole> previousRoles = user.getRoles() == null ? Set.of() : Set.copyOf(user.getRoles());
+        Status previousStatus = user.getStatus();
 
         if (dto.getRoles() != null) {
             if (dto.getRoles().isEmpty()) {
@@ -234,6 +248,19 @@ public class UserService {
         user.setUpdatedBy(editor);
 
         User saved = userRepository.save(user);
+        School school = saved.getSchools().stream().findFirst().orElse(null);
+        if (school != null && !previousRoles.equals(saved.getRoles())) {
+            auditLogService.record(school, editor, AuditAction.USER_ROLE_CHANGED,
+                    "USER", saved.getId(),
+                    "Changed roles for " + saved.getFullName() + " from " + previousRoles
+                            + " to " + saved.getRoles());
+        }
+        if (school != null && previousStatus != saved.getStatus()
+                && saved.getStatus() == Status.INACTIVE) {
+            auditLogService.record(school, editor, AuditAction.USER_DEACTIVATED,
+                    "USER", saved.getId(),
+                    "Deactivated user " + saved.getFullName());
+        }
         return new UserDto(saved);
     }
 
@@ -279,14 +306,19 @@ public class UserService {
         }
 
         user.setStatus(Status.INACTIVE);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+        School school = saved.getSchools().stream().findFirst().orElse(null);
+        if (school != null) {
+            auditLogService.record(school, editor, AuditAction.USER_DEACTIVATED,
+                    "USER", saved.getId(), "Deactivated user " + saved.getFullName());
+        }
     }
 
     @Transactional
-    public void activateUser(Long userId) {
+    public void activateUser(User editor, Long userId) {
         User user = getUserInCurrentSchool(userId);
         user.setStatus(Status.ACTIVE);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
     }
 
     private User getUserInCurrentSchool(Long userId) {

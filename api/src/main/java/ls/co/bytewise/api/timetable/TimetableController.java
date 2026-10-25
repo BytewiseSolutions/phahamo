@@ -80,8 +80,9 @@ public class TimetableController {
 
     @DeleteMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
-    public ResponseEntity<Void> deleteTimetable(@PathVariable Long id) {
-        timetableService.deleteTimetable(id);
+    public ResponseEntity<Void> deleteTimetable(@AuthenticationPrincipal User currentUser,
+                                                @PathVariable Long id) {
+        timetableService.deleteTimetable(currentUser, id);
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/my-class")

@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.holiday;
 
 import jakarta.transaction.Transactional;
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.attendance.AttendanceRepository;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
@@ -23,15 +25,18 @@ public class HolidayService {
     private final SchoolRepository schoolRepository;
     private final LessonRepository lessonRepository;
     private final AttendanceRepository attendanceRepository;
+    private final AuditLogService auditLogService;
 
     public HolidayService(HolidayRepository holidayRepository,
                           SchoolRepository schoolRepository,
                           LessonRepository lessonRepository,
-                          AttendanceRepository attendanceRepository) {
+                          AttendanceRepository attendanceRepository,
+                          AuditLogService auditLogService) {
         this.holidayRepository = holidayRepository;
         this.schoolRepository = schoolRepository;
         this.lessonRepository = lessonRepository;
         this.attendanceRepository = attendanceRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<HolidayDto> list(LocalDate from, LocalDate to) {
@@ -69,6 +74,9 @@ public class HolidayService {
 
         Holiday saved = holidayRepository.save(holiday);
         cancelLessonsAndAttendance(creator, schoolId, saved.getStartDate(), saved.getEndDate());
+        auditLogService.record(school, creator, AuditAction.HOLIDAY_CREATED,
+                "HOLIDAY", saved.getId(), "Created holiday " + saved.getName()
+                        + " from " + saved.getStartDate() + " to " + saved.getEndDate());
         return new HolidayDto(saved);
     }
 
@@ -83,12 +91,18 @@ public class HolidayService {
         holiday.setUpdatedBy(editor);
         Holiday saved = holidayRepository.save(holiday);
         cancelLessonsAndAttendance(editor, saved.getSchool().getId(), saved.getStartDate(), saved.getEndDate());
+        auditLogService.record(saved.getSchool(), editor, AuditAction.HOLIDAY_UPDATED,
+                "HOLIDAY", saved.getId(), "Updated holiday " + saved.getName()
+                        + " from " + saved.getStartDate() + " to " + saved.getEndDate());
         return new HolidayDto(saved);
     }
 
     @Transactional
-    public void delete(Long id) {
-        holidayRepository.delete(findOrThrow(id));
+    public void delete(User deleter, Long id) {
+        Holiday holiday = findOrThrow(id);
+        holidayRepository.delete(holiday);
+        auditLogService.record(holiday.getSchool(), deleter, AuditAction.HOLIDAY_DELETED,
+                "HOLIDAY", holiday.getId(), "Deleted holiday " + holiday.getName());
     }
 
     public boolean isHoliday(Long schoolId, LocalDate date) {

@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.term;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.academicyear.AcademicYear;
 import ls.co.bytewise.api.academicyear.AcademicYearRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -14,11 +16,14 @@ public class TermService {
 
     private final TermRepository termRepository;
     private final AcademicYearRepository academicYearRepository;
+    private final AuditLogService auditLogService;
 
     public TermService(TermRepository termRepository,
-                       AcademicYearRepository academicYearRepository) {
+                       AcademicYearRepository academicYearRepository,
+                       AuditLogService auditLogService) {
         this.termRepository = termRepository;
         this.academicYearRepository = academicYearRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -45,6 +50,8 @@ public class TermService {
         term.setUpdatedBy(creator);
 
         Term saved = termRepository.save(term);
+        auditLogService.record(saved.getSchool(), creator, AuditAction.TERM_CREATED,
+                "TERM", saved.getId(), "Created term " + saved.getName());
         return new TermDto(saved);
     }
 
@@ -94,11 +101,13 @@ public class TermService {
         term.setUpdatedBy(editor);
 
         Term saved = termRepository.save(term);
+        auditLogService.record(saved.getSchool(), editor, AuditAction.TERM_UPDATED,
+                "TERM", saved.getId(), "Updated term " + saved.getName());
         return new TermDto(saved);
     }
 
     @Transactional
-    public void deleteTerm(Long id) {
+    public void deleteTerm(User deleter, Long id) {
         Long schoolId = TenantContext.getSchoolId();
 
         Term term = findOrThrow(id);
@@ -108,6 +117,8 @@ public class TermService {
         }
 
         termRepository.delete(term);
+        auditLogService.record(term.getSchool(), deleter, AuditAction.TERM_DELETED,
+                "TERM", term.getId(), "Deleted term " + term.getName());
     }
 
     private Term findOrThrow(Long id) {
