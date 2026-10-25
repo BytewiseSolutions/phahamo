@@ -4,6 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.Optional;
 import java.time.Instant;
@@ -12,6 +14,15 @@ import java.util.List;
 @Repository
 public interface StudentFeePaymentRepository extends JpaRepository<StudentFeePayment, Long> {
     Optional<StudentFeePayment> findByIdAndAccount_SchoolId(Long id, Long schoolId);
+
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT p FROM StudentFeePayment p
+            WHERE p.account.id = :accountId AND p.amount = :amount
+            ORDER BY p.paidAt DESC
+            """)
+    List<StudentFeePayment> findAllByAccountIdAndAmountOrderByPaidAtDesc(
+            @org.springframework.data.repository.query.Param("accountId") Long accountId,
+            @org.springframework.data.repository.query.Param("amount") Double amount);
 
     Page<StudentFeePayment> findAllBySchoolIdOrderByPaidAtDescIdDesc(Long schoolId, Pageable pageable);
 

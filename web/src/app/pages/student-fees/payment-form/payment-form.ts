@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
-import { StudentFeePaymentInput } from '../student-fee-payment';
+import { StudentFeePayment, StudentFeePaymentInput } from '../student-fee-payment';
 import { StudentFeeAccount } from '../student-fee-account';
 import { PaymentMethodType } from '../../../util/payment-method';
 
@@ -26,6 +26,7 @@ export class PaymentForm implements OnChanges {
 
   saving = false;
   errorMessage = '';
+  duplicatePayment: StudentFeePayment | null = null;
 
   methods: { value: PaymentMethodType; label: string }[] = [
     { value: PaymentMethodType.CASH, label: 'Cash' },
@@ -49,10 +50,12 @@ export class PaymentForm implements OnChanges {
     this.paidAt = this.iso(new Date());
     this.reference = '';
     this.errorMessage = '';
+    this.duplicatePayment = null;
     this.saving = false;
   }
 
   onSave(): void {
+    if (this.saving) return;
     this.errorMessage = '';
 
     if (!this.accountId) {
@@ -72,15 +75,25 @@ export class PaymentForm implements OnChanges {
       return;
     }
 
+    this.recordPayment(false);
+  }
+
+  confirmDuplicatePayment(): void {
+    if (!this.duplicatePayment) return;
+    this.duplicatePayment = null;
+    this.recordPayment(true);
+  }
+
+  private recordPayment(confirmDuplicate: boolean): void {
     const payload: StudentFeePaymentInput = {
-      amount: this.amount,
+      amount: this.amount!,
       method: this.method,
       reference: this.reference?.trim() || undefined,
-      paidAt: this.paidAt + 'T12:00:00Z'
+      paidAt: this.paidAt + 'T12:00:00Z',
+      confirmDuplicate
     };
 
     this.saving = true;
-
     this.backend.postSilently<StudentFeeAccount>(
       `/student-fees/${this.accountId}/payments`, payload
     ).subscribe({
@@ -89,9 +102,25 @@ export class PaymentForm implements OnChanges {
         this.saved.emit();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to record payment.';
+        if (err.status === 409 && err.error?.code === 'DUPLICATE_PAYMENT') {
+          this.duplicatePayment = err.error.existingPayment;
+          this.errorMessage = '';
+        } else {
+          this.errorMessage = err.error?.message || 'Failed to record payment.';
+        }
         this.saving = false;
       }
+    });
+  }
+
+  cancelDuplicate(): void {
+    this.duplicatePayment = null;
+  }
+
+  formatDate(value: string | undefined): string {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric'
     });
   }
 

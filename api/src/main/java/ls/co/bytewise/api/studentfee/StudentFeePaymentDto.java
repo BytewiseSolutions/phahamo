@@ -26,6 +26,7 @@ public class StudentFeePaymentDto {
     private Instant reversedAt;
     private Long reversedById;
     private String reversedByName;
+    private boolean confirmDuplicate;
 
     public StudentFeePaymentDto(StudentFeePayment p) {
         this.id = p.getId();

@@ -351,7 +351,9 @@ public class StudentFeeAccountService {
 
     @Transactional
     public StudentFeeAccountDto recordPayment(Long accountId, StudentFeePaymentDto dto, User receivedBy) {
-        StudentFeeAccount account = requireAccount(accountId);
+        StudentFeeAccount account = accountRepository.findByIdAndSchoolIdForUpdate(
+                        accountId, TenantContext.getSchoolId())
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Fee account not found"));
         Student student = account.getStudent();
 
         if (dto.getAmount() == null || dto.getAmount() <= 0) {
@@ -360,6 +362,12 @@ public class StudentFeeAccountService {
         if (dto.getMethod() == null) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("Payment method is required");
         }
+
+        StudentFeePayment duplicate = findDuplicatePayment(account, dto);
+        if (duplicate != null && !dto.isConfirmDuplicate()) {
+            throw new StudentFeeExceptions.DuplicatePaymentException(new StudentFeePaymentDto(duplicate));
+        }
+
         if (account.getBalance() <= 0) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("This account is already fully paid");
         }
@@ -413,6 +421,22 @@ public class StudentFeeAccountService {
         }
 
         return new StudentFeeAccountDto(saved);
+    }
+
+    private StudentFeePayment findDuplicatePayment(StudentFeeAccount account, StudentFeePaymentDto dto) {
+        return paymentRepository.findAllByAccountIdAndAmountOrderByPaidAtDesc(account.getId(), dto.getAmount())
+                .stream()
+                .filter(payment -> {
+                    if (dto.getReference() != null && !dto.getReference().isBlank()) {
+                        return payment.getReference() != null
+                                && payment.getReference().trim().equalsIgnoreCase(dto.getReference().trim());
+                    }
+                    if (dto.getPaidAt() == null || payment.getPaidAt() == null) return false;
+                    return payment.getPaidAt().atZone(java.time.ZoneOffset.UTC).toLocalDate()
+                            .equals(dto.getPaidAt().atZone(java.time.ZoneOffset.UTC).toLocalDate());
+                })
+                .findFirst()
+                .orElse(null);
     }
 
     @Transactional

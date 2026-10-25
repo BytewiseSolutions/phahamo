@@ -4,12 +4,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAccount, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM StudentFeeAccount a WHERE a.id = :id AND a.school.id = :schoolId")
+    Optional<StudentFeeAccount> findByIdAndSchoolIdForUpdate(
+            @Param("id") Long id,
+            @Param("schoolId") Long schoolId);
 
     List<StudentFeeAccount> findAllBySchoolId(Long schoolId);
 

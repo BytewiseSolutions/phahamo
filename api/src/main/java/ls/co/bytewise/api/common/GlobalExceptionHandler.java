@@ -371,6 +371,18 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(StudentFeeExceptions.DuplicatePaymentException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicatePayment(
+            StudentFeeExceptions.DuplicatePaymentException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("code", "DUPLICATE_PAYMENT");
+        body.put("message", ex.getMessage());
+        body.put("existingPayment", ex.getExistingPayment());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(ReportCardExceptions.ReportCardNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleReportCardNotFound(ReportCardExceptions.ReportCardNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());

@@ -15,6 +15,23 @@
           <div class="error-banner">{{ errorMessage }}</div>
         }
 
+        @if (duplicatePayment) {
+          <div class="duplicate-warning">
+            <strong>Possible duplicate payment</strong>
+            <p>
+              A payment for <strong>M {{ duplicatePayment.amount | number:'1.2-2' }}</strong>
+              was already recorded on {{ formatDate(duplicatePayment.paidAt) }}
+              @if (duplicatePayment.reference) { with reference <strong>{{ duplicatePayment.reference }}</strong> }.
+            </p>
+            <div class="duplicate-actions">
+              <button type="button" class="secondary-button" (click)="cancelDuplicate()">Cancel</button>
+              <button type="button" class="warning-button" (click)="confirmDuplicatePayment()">
+                Record Genuine Second Payment
+              </button>
+            </div>
+          </div>
+        }
+
         <div class="form-row">
           <div class="form-group">
             <label>Amount (M)</label>

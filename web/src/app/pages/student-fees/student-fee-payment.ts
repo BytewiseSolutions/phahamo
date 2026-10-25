@@ -19,4 +19,6 @@ export interface StudentFeePayment {
 export type StudentFeePaymentInput = Pick<
   StudentFeePayment,
   'amount' | 'method' | 'reference' | 'paidAt'
->;
+> & {
+  confirmDuplicate?: boolean;
+};

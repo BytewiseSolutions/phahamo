@@ -173,3 +173,18 @@
   color: var(--error);
   font-size: 13px;
 }
+
+.duplicate-warning {
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgb(from var(--warning) r g b / 0.35);
+  border-radius: var(--border-radius-md);
+  background: rgb(from var(--warning) r g b / 0.1);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.duplicate-warning p { margin: 6px 0 14px; line-height: 1.5; }
+.duplicate-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.warning-button { height: 36px; padding: 0 14px; border: 0; border-radius: var(--border-radius-md); background: var(--warning); color: var(--text-primary); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.warning-button:hover { filter: brightness(0.95); }
