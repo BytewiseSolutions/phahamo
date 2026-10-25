@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.student;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountService;
 import ls.co.bytewise.api.security.TenantContext;
@@ -19,13 +21,16 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final StudentFeeAccountService feeAccountService;
+    private final AuditLogService auditLogService;
 
     public StudentService(StudentRepository studentRepository,
                            SchoolClassRepository schoolClassRepository,
-                           StudentFeeAccountService feeAccountService) {
+                           StudentFeeAccountService feeAccountService,
+                           AuditLogService auditLogService) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.feeAccountService = feeAccountService;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -93,6 +98,7 @@ public class StudentService {
     public StudentDto assignClass(User editor, Long studentId, Long schoolClassId) {
         Long schoolId = TenantContext.getSchoolId();
         Student student = findOrThrow(studentId);
+        StudentStatus previousStatus = student.getStatus();
 
         if (schoolClassId == null) {
             student.setCurrentClass(null);
@@ -106,6 +112,7 @@ public class StudentService {
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
+        recordStatusChange(editor, saved, previousStatus);
         feeAccountService.synchronizeStudentAccounts(saved, editor);
         return new StudentDto(saved);
     }
@@ -113,6 +120,7 @@ public class StudentService {
     @Transactional
     public StudentDto reactivate(User editor, Long studentId) {
         Student student = findOrThrow(studentId);
+        StudentStatus previousStatus = student.getStatus();
 
         if (student.getCurrentClass() == null) {
             throw new StudentExceptions.InvalidStudentOperationException(
@@ -122,8 +130,17 @@ public class StudentService {
         student.setStatus(StudentStatus.ACTIVE);
         student.setUpdatedBy(editor);
         Student saved = studentRepository.save(student);
+        recordStatusChange(editor, saved, previousStatus);
         feeAccountService.synchronizeStudentAccounts(saved, editor);
         return new StudentDto(saved);
+    }
+
+    private void recordStatusChange(User editor, Student student, StudentStatus previousStatus) {
+        if (previousStatus == student.getStatus()) return;
+        auditLogService.record(student.getSchool(), editor, AuditAction.STUDENT_STATUS_CHANGED,
+                "STUDENT", student.getId(),
+                "Changed status for " + student.getUser().getFullName() + " from "
+                        + previousStatus + " to " + student.getStatus());
     }
 
     private SchoolClass resolveClass(Long schoolClassId, Long schoolId) {

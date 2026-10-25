@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { PlanPrice } from '../../../util/plan-price';
 import { SubscriptionPlan } from '../../../util/subscription-plan';
-import { Currency } from '../../../util/school';
+import { Currency } from '../../../util/currency';
 
 @Component({
   selector: 'app-plan-price-form',

@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BackendService } from '../../util/backend.service';
-import { School, SchoolRegistration } from '../../util/school';
+import { School } from '../../util/school';
+import { SchoolRegistration } from '../../util/school-registration';
 
 @Component({
   selector: 'app-register',

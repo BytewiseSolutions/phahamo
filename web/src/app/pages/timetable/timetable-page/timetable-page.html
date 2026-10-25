@@ -27,6 +27,36 @@
     <div class="error-banner">{{ errorMessage }}</div>
   }
 
+  @if (!isTeacher && !isStudent && publication) {
+    <div class="publication-banner" [class.published]="publication.published">
+      <div>
+        <strong>{{ publication.published ? 'Timetable Published' : 'Timetable Draft' }}</strong>
+        @if (publication.published) {
+          <span>Teachers and students can see the current timetable.</span>
+        } @else {
+          <span>Only administrators and principals can see this timetable until it is published.</span>
+        }
+      </div>
+      @if (!publication.published) {
+        <button type="button" class="primary-button" [disabled]="publishing" (click)="publishTimetable()">
+          {{ publishing ? 'Publishing...' : 'Publish Timetable' }}
+        </button>
+      }
+    </div>
+
+    @if (!publication.published && publication.problems.length > 0) {
+      <div class="publication-problems">
+        <strong>Problems found before publishing</strong>
+        <ul>
+          @for (problem of publication.problems; track problem) {
+            <li>{{ problem }}</li>
+          }
+        </ul>
+        <p>You can fix these problems or publish anyway after confirming that you have seen them.</p>
+      </div>
+    }
+  }
+
   @if (!isTeacher && !isStudent) {
     <div class="timetable-tabs">
       <button type="button" class="timetable-tab" [class.active]="activeTab === 'schedule'" (click)="onTabChange('schedule')">Schedule</button>

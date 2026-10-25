@@ -22,6 +22,20 @@ public class TimetableController {
         this.timetableService = timetableService;
     }
 
+    @GetMapping("/publication")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public TimetablePublicationDto publication() {
+        return timetableService.publication();
+    }
+
+    @PostMapping("/publish")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public TimetablePublicationDto publish(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody(required = false) TimetablePublishRequest request) {
+        return timetableService.publish(currentUser, request != null && request.isConfirmProblems());
+    }
+
     @PostMapping
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<TimetableDto> createTimetable(@AuthenticationPrincipal User currentUser,
@@ -49,22 +63,26 @@ public class TimetableController {
     @GetMapping("/teacher/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<TimetableDto> listByTeacher(
+            @AuthenticationPrincipal User currentUser,
             @PathVariable Long id,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return timetableService.listByTeacher(id, date);
+        return timetableService.listByTeacher(currentUser, id, date);
     }
 
     @GetMapping("/class/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public List<TimetableDto> listByClass(@PathVariable Long id) {
-        return timetableService.listByClass(id);
+    public List<TimetableDto> listByClass(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long id) {
+        return timetableService.listByClass(currentUser, id);
     }
 
     @DeleteMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
-    public ResponseEntity<Void> deleteTimetable(@PathVariable Long id) {
-        timetableService.deleteTimetable(id);
+    public ResponseEntity<Void> deleteTimetable(@AuthenticationPrincipal User currentUser,
+                                                @PathVariable Long id) {
+        timetableService.deleteTimetable(currentUser, id);
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/my-class")

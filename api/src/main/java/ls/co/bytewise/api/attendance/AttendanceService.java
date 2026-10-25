@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.attendance;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.holiday.HolidayService;
 import ls.co.bytewise.api.mail.MailService;
@@ -33,6 +35,7 @@ public class AttendanceService {
     private final AbsenceAlertLogRepository absenceAlertLogRepository;
     private final MailService mailService;
     private final HolidayService holidayService;
+    private final AuditLogService auditLogService;
 
 
     public AttendanceService(
@@ -42,7 +45,8 @@ public class AttendanceService {
             LessonRepository lessonRepository,
             AbsenceAlertLogRepository absenceAlertLogRepository,
             MailService mailService,
-            HolidayService holidayService
+            HolidayService holidayService,
+            AuditLogService auditLogService
     ) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
@@ -51,6 +55,7 @@ public class AttendanceService {
         this.absenceAlertLogRepository = absenceAlertLogRepository;
         this.mailService = mailService;
         this.holidayService = holidayService;
+        this.auditLogService = auditLogService;
     }
 
     public List<AttendanceDto> getAttendanceForLesson(User requester, Long lessonId) {
@@ -90,6 +95,9 @@ public class AttendanceService {
         lesson.setStatus(LessonStatus.COMPLETED);
         lesson.setUpdatedBy(marker);
         lessonRepository.save(lesson);
+        auditLogService.record(lesson.getSchool(), marker, AuditAction.ATTENDANCE_CHANGED,
+                "LESSON", lesson.getId(), "Updated attendance for " + schoolClass.getName()
+                        + " on " + lesson.getDate() + " for " + records.size() + " student(s)");
 
         records.stream()
                 .filter(r -> r.getStatus() == AttendanceStatus.ABSENT)
@@ -113,6 +121,9 @@ public class AttendanceService {
         ensureCanMarkLesson(marker, lesson);
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
         Attendance saved = upsert(marker, schoolClass, lesson, studentId, status);
+        auditLogService.record(lesson.getSchool(), marker, AuditAction.ATTENDANCE_CHANGED,
+                "ATTENDANCE", saved.getId(), "Marked " + saved.getStudent().getUser().getFullName()
+                        + " as " + status + " for " + lesson.getDate());
 
         if (status == AttendanceStatus.ABSENT) {
             Student student = studentRepository.findByIdAndSchoolId(studentId, schoolId).orElse(null);

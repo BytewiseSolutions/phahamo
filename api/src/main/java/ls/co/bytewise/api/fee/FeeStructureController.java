@@ -61,8 +61,9 @@ public class FeeStructureController {
 
     @DeleteMapping("/fee-structures/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<Void> deleteStructure(@PathVariable Long id) {
-        feeService.deleteStructure(id);
+    public ResponseEntity<Void> deleteStructure(@AuthenticationPrincipal User currentUser,
+                                                @PathVariable Long id) {
+        feeService.deleteStructure(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -100,8 +101,9 @@ public class FeeStructureController {
 
     @DeleteMapping("/annual-fees/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<Void> deleteAnnualFee(@PathVariable Long id) {
-        feeService.deleteAnnualFee(id);
+    public ResponseEntity<Void> deleteAnnualFee(@AuthenticationPrincipal User currentUser,
+                                                @PathVariable Long id) {
+        feeService.deleteAnnualFee(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 

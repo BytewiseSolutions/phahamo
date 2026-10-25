@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.academicyear;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -16,12 +18,15 @@ public class AcademicYearService {
     private final AcademicYearRepository academicYearRepository;
     private final SchoolRepository schoolRepository;
     private final TermRepository termRepository;
+    private final AuditLogService auditLogService;
 
     public AcademicYearService(AcademicYearRepository academicYearRepository,
-                               SchoolRepository schoolRepository, TermRepository termRepository) {
+                               SchoolRepository schoolRepository, TermRepository termRepository,
+                               AuditLogService auditLogService) {
         this.academicYearRepository = academicYearRepository;
         this.schoolRepository = schoolRepository;
         this.termRepository = termRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -44,6 +49,8 @@ public class AcademicYearService {
         }
 
         AcademicYear saved = academicYearRepository.save(academicYear);
+        auditLogService.record(school, creator, AuditAction.ACADEMIC_YEAR_CREATED,
+                "ACADEMIC_YEAR", saved.getId(), "Created academic year " + saved.getName());
         return new AcademicYearDto(saved);
     }
 
@@ -77,11 +84,13 @@ public class AcademicYearService {
         academicYear.setActive(dto.isActive());
 
         AcademicYear saved = academicYearRepository.save(academicYear);
+        auditLogService.record(saved.getSchool(), editor, AuditAction.ACADEMIC_YEAR_UPDATED,
+                "ACADEMIC_YEAR", saved.getId(), "Updated academic year " + saved.getName());
         return new AcademicYearDto(saved);
     }
 
     @Transactional
-    public void deleteAcademicYear(Long id) {
+    public void deleteAcademicYear(User deleter, Long id) {
         AcademicYear academicYear = findOrThrow(id);
 
         if (termRepository.existsByAcademicYearId(id)) {
@@ -90,6 +99,8 @@ public class AcademicYearService {
         }
 
         academicYearRepository.delete(academicYear);
+        auditLogService.record(academicYear.getSchool(), deleter, AuditAction.ACADEMIC_YEAR_DELETED,
+                "ACADEMIC_YEAR", academicYear.getId(), "Deleted academic year " + academicYear.getName());
     }
 
     private void deactivateCurrentActiveYear(Long excludeId) {

@@ -1,4 +1,4 @@
-import { Currency } from './school';
+import { Currency } from './currency';
 import { SubscriptionPlan } from './subscription-plan';
 import { SubscriptionRequestStatus } from './subscription-request-status';
 

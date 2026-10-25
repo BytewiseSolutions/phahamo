@@ -56,8 +56,9 @@ public class TermController {
 
     @DeleteMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        termService.deleteTerm(id);
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal User currentUser,
+                                       @PathVariable Long id) {
+        termService.deleteTerm(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 }

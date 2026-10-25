@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.user.auth;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.security.JwtService;
 import ls.co.bytewise.api.security.PasswordResetToken;
@@ -29,19 +31,22 @@ public class AuthenticationService {
     private final TokenBlacklistService tokenBlacklistService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JavaMailSender mailSender;
+    private final AuditLogService auditLogService;
 
     public AuthenticationService(UserRepository userRepository,
                                  PasswordEncoder passwordEncoder,
                                  JwtService jwtService,
                                  TokenBlacklistService tokenBlacklistService,
                                  PasswordResetTokenRepository passwordResetTokenRepository,
-                                 JavaMailSender mailSender) {
+                                 JavaMailSender mailSender,
+                                 AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.mailSender = mailSender;
+        this.auditLogService = auditLogService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -49,10 +54,12 @@ public class AuthenticationService {
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         if (user.getStatus() != Status.ACTIVE) {
+            recordFailedLogin(user, "account is " + user.getStatus().name().toLowerCase());
             throw new BadCredentialsException("Account is " + user.getStatus().name().toLowerCase());
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            recordFailedLogin(user, "invalid password");
             throw new BadCredentialsException("Invalid email or password");
         }
 
@@ -61,6 +68,10 @@ public class AuthenticationService {
 
     public LoginResponse issueLoginResponse(User user) {
         String token = jwtService.generateToken(user);
+
+        user.getSchools().stream().findFirst().ifPresent(school ->
+                auditLogService.record(school, user, AuditAction.LOGIN,
+                        "USER", user.getId(), "Logged in successfully"));
 
         String schoolName = user.getSchools().stream()
                 .findFirst()
@@ -78,9 +89,18 @@ public class AuthenticationService {
         );
     }
 
-    public void logout(String token) {
+    public void logout(String token, User user) {
         Date expiration = jwtService.extractExpiration(token);
         tokenBlacklistService.blacklist(token, expiration.toInstant());
+        user.getSchools().stream().findFirst().ifPresent(school ->
+                auditLogService.record(school, user, AuditAction.LOGOUT,
+                        "USER", user.getId(), "Logged out"));
+    }
+
+    private void recordFailedLogin(User user, String reason) {
+        user.getSchools().stream().findFirst().ifPresent(school ->
+                auditLogService.record(school, user, AuditAction.FAILED_LOGIN,
+                        "USER", user.getId(), "Failed login attempt: " + reason));
     }
 
     @Transactional

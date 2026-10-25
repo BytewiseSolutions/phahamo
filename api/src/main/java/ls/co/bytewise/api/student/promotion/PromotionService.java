@@ -1,5 +1,7 @@
 package ls.co.bytewise.api.student.promotion;
 
+import ls.co.bytewise.api.audit.AuditAction;
+import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
@@ -24,13 +26,16 @@ public class PromotionService {
     private final StudentRepository studentRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final PromotionRepository promotionRepository;
+    private final AuditLogService auditLogService;
 
     public PromotionService(StudentRepository studentRepository,
                             SchoolClassRepository schoolClassRepository,
-                            PromotionRepository promotionRepository) {
+                            PromotionRepository promotionRepository,
+                            AuditLogService auditLogService) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.promotionRepository = promotionRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<StudentDto> preview(Long fromClassId) {
@@ -112,6 +117,11 @@ public class PromotionService {
             }
             student.setUpdatedBy(admin);
             studentRepository.save(student);
+
+            auditLogService.record(student.getSchool(), admin, AuditAction.STUDENT_STATUS_CHANGED,
+                    "STUDENT", student.getId(),
+                    "Changed status for " + student.getUser().getFullName() + " from "
+                            + previousStatus + " to " + newStatus + "; reason: " + req.getReason().trim());
 
             Promotion log = new Promotion();
             log.setStudent(student);

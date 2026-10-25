@@ -1,0 +1,70 @@
+<div class="audit-page">
+  <div class="page-header">
+    <div>
+      <h1>Audit Log</h1>
+      <p>Review important changes made in your school.</p>
+    </div>
+  </div>
+
+  @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
+
+  <div class="filters-bar">
+    <select [(ngModel)]="actorFilter" [ngModelOptions]="{ standalone: true }">
+      <option value="">Everyone</option>
+      @for (user of users; track user.id) {
+      <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+      }
+    </select>
+    <select [(ngModel)]="actionFilter" [ngModelOptions]="{ standalone: true }">
+      <option value="">All actions</option>
+      @for (action of actions; track action.value) {
+      <option [value]="action.value">{{ action.label }}</option>
+      }
+    </select>
+    <label>From <input type="date" [(ngModel)]="fromDate" [ngModelOptions]="{ standalone: true }"></label>
+    <label>To <input type="date" [(ngModel)]="toDate" [ngModelOptions]="{ standalone: true }"></label>
+    <button type="button" class="primary-button" (click)="applyFilters()">Filter</button>
+    <button type="button" class="clear-button" (click)="clearFilters()">Clear</button>
+  </div>
+
+  @if (loading) {
+  <div class="loading-state">Loading audit log...</div>
+  } @else if (logs.length === 0) {
+  <div class="empty-state">
+    <h3>No audit entries</h3>
+    <p>Important changes will appear here.</p>
+  </div>
+  } @else {
+  <div class="table-wrapper">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Who</th>
+          <th>Action</th>
+          <th>What changed</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs; track log.id) {
+        <tr>
+          <td class="date">{{ formatDate(log.occurredAt) }}</td>
+          <td>{{ log.actorName }}</td>
+          <td><span class="action-badge">{{ actionLabel(log.action) }}</span></td>
+          <td>{{ log.summary }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <span>{{ totalElements }} entr{{ totalElements === 1 ? 'y' : 'ies' }}</span>
+    <div>
+      <button type="button" class="secondary-button" (click)="previousPage()" [disabled]="page === 0">Previous</button>
+      <span>Page {{ page + 1 }} of {{ totalPages }}</span>
+      <button type="button" class="secondary-button" (click)="nextPage()"
+        [disabled]="page + 1 >= totalPages">Next</button>
+    </div>
+  </div>
+  }
+</div>
