@@ -17,15 +17,10 @@
     </div>
   }
 
-  @if (successMessage) {
-    <div class="success-banner">
-      {{ successMessage }}
-    </div>
-  }
-
   <app-subject-class-assignment-form
     [visible]="showForm"
     [schoolClassId]="schoolClassId"
+    [assignedSubjectIds]="assignedSubjectIds"
     [editingAssignment]="editingAssignment"
     (closed)="onFormClosed()"
     (assignmentCreated)="onCreateAssignment($event)"

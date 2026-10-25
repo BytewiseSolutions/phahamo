@@ -29,7 +29,7 @@ export class AssessmentForm implements OnChanges {
     termId: number;
     name: string;
     maxMark: number;
-    weight: number;
+    weight: number | null;
     date: string;
   }>();
   assignments: SubjectClassAssignment[] = [];
@@ -39,7 +39,7 @@ export class AssessmentForm implements OnChanges {
   selectedTermId: number | null = null;
   name = '';
   maxMark = 100;
-  weight = 20;
+  weight: number | null = 20;
   date: string = new Date().toISOString().substring(0, 10);
 
   loading = false;
@@ -164,7 +164,7 @@ export class AssessmentForm implements OnChanges {
       this.errorMessage = 'Max mark must be greater than zero.';
       return;
     }
-    if (this.weight < 0 || this.weight > 100) {
+    if (this.weight !== null && (this.weight < 0 || this.weight > 100)) {
       this.errorMessage = 'Weight must be between 0 and 100.';
       return;
     }
@@ -186,7 +186,7 @@ export class AssessmentForm implements OnChanges {
       termId: this.selectedTermId,
       name: this.name.trim(),
       maxMark: this.maxMark,
-      weight: this.weight,
+      weight: this.weight ?? 0,
       date: this.date
     });
   }

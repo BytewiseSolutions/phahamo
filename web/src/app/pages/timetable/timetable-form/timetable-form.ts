@@ -27,6 +27,8 @@ export class TimetableForm implements OnChanges {
 
   @Input() prefillDayOfWeek: DayOfWeek | null = null;
   @Input() prefillPeriodId: number | null = null;
+  @Input() prefillSchoolClassId: number | null = null;
+  @Input() timetableSlots: Timetable[] = [];
 
   @Output() closed = new EventEmitter<void>();
   @Output() timetableCreated = new EventEmitter<TimetablePayload>();
@@ -55,29 +57,81 @@ export class TimetableForm implements OnChanges {
     return this.editingTimetable !== null;
   }
 
+  get availableAssignments(): SubjectClassAssignment[] {
+    const selectedDay = this.timetableForm.get('dayOfWeek')?.value as DayOfWeek | null;
+    const selectedPeriodId = Number(this.timetableForm.get('periodId')?.value);
+    const currentAssignmentId = this.editingTimetable?.assignmentId;
+
+    return this.assignments.filter(assignment => {
+      const isCurrentAssignment = assignment.id === currentAssignmentId;
+
+      if (this.prefillSchoolClassId !== null &&
+          assignment.schoolClassId !== this.prefillSchoolClassId &&
+          !isCurrentAssignment) {
+        return false;
+      }
+
+      if (!selectedDay || !selectedPeriodId || isCurrentAssignment) {
+        return true;
+      }
+
+      const assignmentSlotsToday = this.timetableSlots.filter(slot =>
+        slot.id !== this.editingTimetable?.id &&
+        slot.dayOfWeek === selectedDay &&
+        slot.assignmentId === assignment.id
+      );
+
+      if (assignmentSlotsToday.length >= 2) {
+        return false;
+      }
+
+      return !this.timetableSlots.some(slot => {
+        if (slot.id === this.editingTimetable?.id ||
+            slot.dayOfWeek !== selectedDay ||
+            slot.periodId !== selectedPeriodId) {
+          return false;
+        }
+
+        const sameClass = slot.schoolClassId === assignment.schoolClassId;
+        const sameTeacher = slot.teacherId != null &&
+          assignment.teacherId != null &&
+          slot.teacherId === assignment.teacherId;
+
+        return sameClass || sameTeacher;
+      });
+    });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible'] && this.visible) {
       this.loadAssignments();
     }
 
-    if (changes['editingTimetable']) {
-      if (this.editingTimetable) {
-        this.timetableForm.patchValue({
-          dayOfWeek: this.editingTimetable.dayOfWeek,
-          periodId: this.editingTimetable.periodId,
-          assignmentId: this.editingTimetable.assignmentId
-        });
-      } else {
-        this.resetForm();
-
-        if (this.prefillDayOfWeek || this.prefillPeriodId) {
-          this.timetableForm.patchValue({
-            dayOfWeek: this.prefillDayOfWeek || '',
-            periodId: this.prefillPeriodId || ''
-          });
-        }
-      }
+    if (
+      this.visible &&
+      (changes['visible'] || changes['editingTimetable'] ||
+        changes['prefillDayOfWeek'] || changes['prefillPeriodId'] ||
+        changes['prefillSchoolClassId'] || changes['timetableSlots'])
+    ) {
+      this.applyFormState();
     }
+  }
+
+  private applyFormState(): void {
+    if (this.editingTimetable) {
+      this.timetableForm.patchValue({
+        dayOfWeek: this.editingTimetable.dayOfWeek,
+        periodId: this.editingTimetable.periodId,
+        assignmentId: this.editingTimetable.assignmentId
+      });
+      return;
+    }
+
+    this.resetForm();
+    this.timetableForm.patchValue({
+      dayOfWeek: this.prefillDayOfWeek || '',
+      periodId: this.prefillPeriodId || ''
+    });
   }
 
   private loadAssignments(): void {

@@ -1,13 +1,18 @@
 <div class="page-container">
 
   <div class="page-header">
-    <div>
+    <div class="remarks-title">
+      <div class="remarks-title-icon">
+        <i class="fa-solid fa-comment-dots"></i>
+      </div>
+      <div>
       <h1>Student Remarks</h1>
       <p>Write class teacher and principal remarks for each student, per term.</p>
+      </div>
     </div>
   </div>
 
-  <div class="filters">
+  <div class="filters remarks-filters">
     <div class="filter-group">
       <label>Class</label>
       <select [(ngModel)]="selectedClassId" (change)="load()" [ngModelOptions]="{ standalone: true }">
@@ -38,7 +43,7 @@
       <p>No students in this class.</p>
     </div>
   } @else {
-    <div class="table-wrapper">
+    <div class="table-wrapper remarks-table-wrapper">
       <table class="remarks-table">
         <thead>
         <tr>

@@ -57,6 +57,8 @@ public class TimetableService {
                     "This subject-class assignment has no teacher assigned yet");
         }
 
+        validateDailyAssignmentLimit(schoolId, dto.getDayOfWeek(), assignment, -1L);
+
         boolean teacherBooked = timetableRepository.existsOverlappingForTeacher(
                 schoolId, dto.getDayOfWeek(), assignment.getTeacher().getId(),
                 period.getStartTime(), period.getEndTime(), -1L);
@@ -116,6 +118,8 @@ public class TimetableService {
                     "This subject-class assignment has no teacher assigned yet");
         }
 
+        validateDailyAssignmentLimit(schoolId, newDayOfWeek, newAssignment, timetable.getId());
+
         boolean teacherBooked = timetableRepository.existsOverlappingForTeacher(
                 schoolId, newDayOfWeek, newAssignment.getTeacher().getId(),
                 newPeriod.getStartTime(), newPeriod.getEndTime(), timetable.getId());
@@ -141,6 +145,19 @@ public class TimetableService {
 
         Timetable saved = timetableRepository.save(timetable);
         return new TimetableDto(saved);
+    }
+
+    private void validateDailyAssignmentLimit(Long schoolId,
+                                              DayOfWeek dayOfWeek,
+                                              SubjectClassAssignment assignment,
+                                              Long excludeId) {
+        long existingSlots = timetableRepository.countSlotsForAssignmentOnDay(
+                schoolId, dayOfWeek, assignment.getId(), excludeId);
+
+        if (existingSlots >= 2) {
+            throw new TimetableExceptions.TimetableConflictException(
+                    "This subject can be scheduled at most twice per day for this class");
+        }
     }
 
     private boolean isSameSlot(Timetable existing, DayOfWeek dayOfWeek, Period period, SubjectClassAssignment assignment) {

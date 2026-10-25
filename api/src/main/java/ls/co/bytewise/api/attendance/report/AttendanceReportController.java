@@ -26,7 +26,7 @@ public class AttendanceReportController {
     @GetMapping("/lessons")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<LessonAttendanceSummaryDto> lessonBreakdown(
-            @RequestParam Long classId,
+            @RequestParam(required = false) Long classId,
             @RequestParam(required = false) Long subjectId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
@@ -37,6 +37,16 @@ public class AttendanceReportController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public List<StudentAttendanceSummaryDto> classBreakdown(
             @PathVariable Long classId,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return reportService.classBreakdown(classId, subjectId, from, to);
+    }
+
+    @GetMapping("/class")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public List<StudentAttendanceSummaryDto> classBreakdownAll(
+            @RequestParam(required = false) Long classId,
             @RequestParam(required = false) Long subjectId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {

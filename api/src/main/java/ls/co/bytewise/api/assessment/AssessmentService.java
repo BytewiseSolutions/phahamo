@@ -64,6 +64,12 @@ public class AssessmentService {
                     "Term and assignment belong to different academic years");
         }
 
+        // Weight is optional in the form. Store an omitted value as zero so the
+        // non-null database column and exam-weight calculations remain safe.
+        if (dto.getWeight() == null) {
+            dto.setWeight(0);
+        }
+
         validate(dto);
 
         Assessment assessment = new Assessment();

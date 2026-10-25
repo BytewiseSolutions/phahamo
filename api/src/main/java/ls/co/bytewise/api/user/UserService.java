@@ -2,6 +2,7 @@ package ls.co.bytewise.api.user;
 
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.parent.ParentDto;
 import ls.co.bytewise.api.parent.ParentService;
 import ls.co.bytewise.api.school.School;
@@ -12,11 +13,8 @@ import ls.co.bytewise.api.student.StudentService;
 import ls.co.bytewise.api.teacher.TeacherDto;
 import ls.co.bytewise.api.teacher.TeacherService;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
+    private final MailService mailService;
     private final StudentService studentService;
     private final ParentService parentService;
     private final TeacherService teacherService;
@@ -41,7 +39,7 @@ public class UserService {
     public UserService(UserRepository userRepository,
                        SchoolRepository schoolRepository,
                        PasswordEncoder passwordEncoder,
-                       JavaMailSender mailSender,
+                       MailService mailService,
                        StudentService studentService,
                        ParentService parentService,
                        TeacherService teacherService
@@ -49,7 +47,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
+        this.mailService = mailService;
         this.studentService = studentService;
         this.parentService = parentService;
         this.teacherService = teacherService;
@@ -318,24 +316,18 @@ public class UserService {
         return password.toString();
     }
 
-    @Async
     private void sendWelcomeEmail(String toEmail,
                                   String firstName,
                                   String temporaryPassword,
                                   String schoolName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Your " + schoolName + " account");
-        message.setText(
+        String body =
                 "Hi " + firstName + ",\n\n" +
                         "An account has been created for you on " + schoolName + ".\n\n" +
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
-                        "http://localhost:4200/login"
-        );
-
-        mailSender.send(message);
+                        "http://localhost:4200/login";
+        mailService.send(toEmail, "Your " + schoolName + " account", body);
     }
 
     public UserDto getUser(Long userId) {

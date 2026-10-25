@@ -747,6 +747,18 @@
   font-size: 12px;
 }
 
+.teacher-more-note {
+  margin-top: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  background: var(--primary-light);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .task-time {
   flex: 0 0 58px;
   color: var(--primary);

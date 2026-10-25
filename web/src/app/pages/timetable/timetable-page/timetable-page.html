@@ -187,7 +187,7 @@
                               <button type="button" class="link-button danger" (click)="onDeleteTimetable(slot)">Delete</button>
                             </div>
                           } @else {
-                            <button type="button" class="empty-cell-button" (click)="onAddSlotForCell(activeDay, period.id)">+</button>
+                            <button type="button" class="empty-cell-button" (click)="onAddSlotForCell(activeDay, period.id, schoolClass.id)">+</button>
                           }
                         </td>
                       }
@@ -264,6 +264,8 @@
     [periods]="periods"
     [prefillDayOfWeek]="prefillDayOfWeek"
     [prefillPeriodId]="prefillPeriodId"
+    [prefillSchoolClassId]="prefillSchoolClassId"
+    [timetableSlots]="timetableSlots"
     (closed)="onTimetableFormClosed()"
     (timetableCreated)="onTimetableCreated($event)"
     (timetableUpdated)="onTimetableUpdated($event)">

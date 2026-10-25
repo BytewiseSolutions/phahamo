@@ -2,6 +2,7 @@ package ls.co.bytewise.api.parent;
 
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentExceptions;
@@ -9,8 +10,6 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,18 +31,18 @@ public class ParentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
+    private final MailService mailService;
 
     public ParentService(ParentRepository parentRepository,
                          StudentRepository studentRepository,
                          UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
-                         JavaMailSender mailSender) {
+                         MailService mailService) {
         this.parentRepository = parentRepository;
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -241,18 +240,13 @@ public class ParentService {
                                   String firstName,
                                   String temporaryPassword,
                                   String schoolName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Your " + schoolName + " account");
-        message.setText(
+        String body =
                 "Hi " + firstName + ",\n\n" +
                         "An account has been created for you on " + schoolName + ".\n\n" +
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
-                        "http://localhost:4200/login"
-        );
-
-        mailSender.send(message);
+                        "http://localhost:4200/login";
+        mailService.send(toEmail, "Your " + schoolName + " account", body);
     }
 }

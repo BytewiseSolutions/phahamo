@@ -60,7 +60,7 @@ export class AttendanceHistory implements OnInit {
     this.backend.get<SchoolClass[]>('/classes').subscribe({
       next: (classes) => {
         this.classes = classes;
-        this.selectedClassId = classes[0]?.id ?? null;
+        this.selectedClassId = null;
 
         this.backend.get<Subject[]>('/subjects').subscribe({
           next: (subjects) => {
@@ -70,12 +70,8 @@ export class AttendanceHistory implements OnInit {
               next: (terms) => {
                 this.terms = terms;
 
-                const today = this.iso(new Date());
-                const current = terms.find(t =>
-                  t.startDate.substring(0, 10) <= today &&
-                  today <= t.endDate.substring(0, 10)
-                );
-                this.selectedTermId = (current ?? terms[0])?.id ?? null;
+                this.selectedTermId = -1;
+                this.setAllTermDates();
 
                 this.loadingFilters = false;
                 this.loadForMode();
@@ -106,6 +102,12 @@ export class AttendanceHistory implements OnInit {
   }
 
   onTermChange(): void {
+    if (this.selectedTermId === -1) {
+      this.setAllTermDates();
+      this.loadForMode();
+      return;
+    }
+
     if (this.selectedTermId === null) {
       this.loadForMode();
       return;
@@ -129,15 +131,18 @@ export class AttendanceHistory implements OnInit {
   }
 
   loadLessons(): void {
-    if (!this.selectedClassId || !this.fromDate || !this.toDate) {
+    if (!this.fromDate || !this.toDate) {
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
 
-    let url = `/attendance/report/lessons?classId=${this.selectedClassId}`
-      + `&from=${this.fromDate}&to=${this.toDate}`;
+    let url = `/attendance/report/lessons?from=${this.fromDate}&to=${this.toDate}`;
+
+    if (this.selectedClassId) {
+      url += `&classId=${this.selectedClassId}`;
+    }
 
     if (this.selectedSubjectId) {
       url += `&subjectId=${this.selectedSubjectId}`;
@@ -157,15 +162,16 @@ export class AttendanceHistory implements OnInit {
   }
 
   loadClassBreakdown(): void {
-    if (!this.selectedClassId || !this.fromDate || !this.toDate) {
+    if (!this.fromDate || !this.toDate) {
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
 
-    let url = `/attendance/report/class/${this.selectedClassId}`
-      + `?from=${this.fromDate}&to=${this.toDate}`;
+    let url = this.selectedClassId
+      ? `/attendance/report/class/${this.selectedClassId}?from=${this.fromDate}&to=${this.toDate}`
+      : `/attendance/report/class?from=${this.fromDate}&to=${this.toDate}`;
 
     if (this.selectedSubjectId) {
       url += `&subjectId=${this.selectedSubjectId}`;
@@ -214,7 +220,7 @@ export class AttendanceHistory implements OnInit {
   }
 
   downloadClassReportCards(): void {
-    if (!this.selectedClassId || !this.selectedTermId) {
+    if (!this.selectedClassId || !this.selectedTermId || this.selectedTermId === -1) {
       this.errorMessage = 'Select a class and term first.';
       return;
     }
@@ -238,7 +244,7 @@ export class AttendanceHistory implements OnInit {
   }
 
   downloadStudentReportCard(studentId: number): void {
-    if (!this.selectedTermId) {
+    if (!this.selectedTermId || this.selectedTermId === -1) {
       this.errorMessage = 'Select a term first.';
       return;
     }
@@ -348,5 +354,14 @@ export class AttendanceHistory implements OnInit {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private setAllTermDates(): void {
+    if (this.terms.length === 0) return;
+
+    const starts = this.terms.map(term => term.startDate.substring(0, 10)).sort();
+    const ends = this.terms.map(term => term.endDate.substring(0, 10)).sort();
+    this.fromDate = starts[0];
+    this.toDate = ends[ends.length - 1];
   }
 }

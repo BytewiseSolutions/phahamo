@@ -2,8 +2,30 @@
   padding: 40px;
 }
 
+.page-header {
+  margin-bottom: 24px;
+}
+
+.remarks-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.remarks-title-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: var(--border-radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 19px;
+}
+
 .page-header h1 {
-  margin: 0 0 4px;
+  margin: 0 0 5px;
   font-size: 24px;
   font-weight: 600;
   color: var(--text-primary);
@@ -20,6 +42,14 @@
   gap: 16px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+}
+
+.remarks-filters {
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-group {
@@ -43,6 +73,14 @@
   border-radius: var(--border-radius-md);
   font-size: 13px;
   background: var(--surface);
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-group select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(from var(--primary) r g b / 0.1);
 }
 
 .table-wrapper {
@@ -66,6 +104,14 @@
   vertical-align: top;
 }
 
+.remarks-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.remarks-table tbody tr:hover {
+  background: rgb(from var(--primary) r g b / 0.025);
+}
+
 .remarks-table th {
   background: var(--background);
   color: var(--text-secondary);
@@ -76,6 +122,14 @@
 
 .student-cell {
   width: 200px;
+  background: rgb(from var(--primary) r g b / 0.02);
+}
+
+.student-cell strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .student-cell .subtitle {
@@ -97,11 +151,15 @@
   box-sizing: border-box;
   font-family: inherit;
   resize: vertical;
+  min-height: 82px;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .remark-cell textarea:focus {
   border-color: var(--primary);
   outline: none;
+  box-shadow: 0 0 0 3px rgb(from var(--primary) r g b / 0.1);
 }
 
 .locked-box,
@@ -112,10 +170,17 @@
   font-size: 13px;
   min-height: 20px;
   white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .locked-box {
-  opacity: 0.6;
+  background: rgb(from var(--text-secondary) r g b / 0.08);
+  color: var(--text-secondary);
+  opacity: 1;
+}
+
+.readonly-box {
+  background: rgb(from var(--primary) r g b / 0.05);
 }
 
 .meta {
@@ -162,4 +227,98 @@
   font-size: 14px;
   border: 1px dashed var(--border-light);
   border-radius: var(--border-radius-md);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 24px 16px;
+  }
+
+  .remarks-title {
+    align-items: flex-start;
+  }
+
+  .remarks-title-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 16px;
+  }
+
+  .remarks-filters {
+    padding: 14px;
+  }
+
+  .filter-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .remarks-table-wrapper {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+  }
+
+  .remarks-table,
+  .remarks-table tbody,
+  .remarks-table tr,
+  .remarks-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .remarks-table thead {
+    display: none;
+  }
+
+  .remarks-table tbody tr {
+    margin-bottom: 16px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .remarks-table tbody tr:hover {
+    background: var(--surface);
+  }
+
+  .remarks-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .remarks-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .student-cell {
+    width: 100%;
+    background: var(--primary-light);
+  }
+
+  .remark-cell {
+    width: 100%;
+  }
+
+  .remark-cell::before {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .remark-cell:nth-child(2)::before {
+    content: 'Class Teacher Remark';
+  }
+
+  .remark-cell:nth-child(3)::before {
+    content: 'Principal Remark';
+  }
 }

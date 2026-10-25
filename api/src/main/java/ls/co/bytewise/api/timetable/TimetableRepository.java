@@ -17,6 +17,18 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
     List<Timetable> findAllByAssignment_SchoolClass_IdAndSchoolId(Long schoolClassId, Long schoolId);
 
     @Query("""
+        SELECT COUNT(t) FROM Timetable t
+        WHERE t.school.id = :schoolId
+        AND t.dayOfWeek = :dayOfWeek
+        AND t.assignment.id = :assignmentId
+        AND t.id <> :excludeId
+        """)
+    long countSlotsForAssignmentOnDay(@Param("schoolId") Long schoolId,
+                                      @Param("dayOfWeek") DayOfWeek dayOfWeek,
+                                      @Param("assignmentId") Long assignmentId,
+                                      @Param("excludeId") Long excludeId);
+
+    @Query("""
         SELECT COUNT(t) > 0 FROM Timetable t
         WHERE t.school.id = :schoolId
         AND t.dayOfWeek = :dayOfWeek

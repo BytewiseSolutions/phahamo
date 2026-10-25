@@ -17,6 +17,7 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
   @Input() schoolClassId: number | null = null;
   @Input() fixedTeacherId: number | null = null;
   @Input() editingAssignment: SubjectClassAssignment | null = null;
+  @Input() assignedSubjectIds: number[] = [];
 
   @Output() closed = new EventEmitter<void>();
   @Output() assignmentCreated = new EventEmitter<SubjectClassAssignmentPayload>();
@@ -54,9 +55,20 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
     return this.fixedTeacherId !== null && this.fixedTeacherId !== undefined;
   }
 
+  get availableSubjects(): Subject[] {
+    const currentSubjectId = this.editingAssignment?.subjectId;
+
+    return this.subjects.filter(subject =>
+      subject.id === currentSubjectId || !this.assignedSubjectIds.includes(subject.id)
+    );
+  }
+
   ngOnInit(): void {
     this.backend.get<AcademicYear[]>('/academic-years').subscribe({
-      next: (years) => this.academicYears = years,
+      next: (years) => {
+        this.academicYears = years;
+        this.setDefaultAcademicYear();
+      },
       error: () => this.loadError = 'Failed to load academic years.'
     });
 
@@ -85,6 +97,11 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['visible']?.currentValue && !this.editingAssignment) {
+      this.resetForm();
+      this.setDefaultAcademicYear();
+    }
+
     if (changes['schoolClassId'] && this.isClassLocked) {
       this.assignmentForm.get('schoolClassId')?.setValue(this.schoolClassId);
     }
@@ -103,7 +120,21 @@ export class SubjectClassAssignmentForm implements OnInit, OnChanges {
         });
       } else {
         this.resetForm();
+        this.setDefaultAcademicYear();
       }
+    }
+  }
+
+  private setDefaultAcademicYear(): void {
+    if (this.isEditMode || this.assignmentForm.get('academicYearId')?.value) {
+      return;
+    }
+
+    const academicYear = this.academicYears.find(year => year.active)
+      ?? (this.academicYears.length === 1 ? this.academicYears[0] : null);
+
+    if (academicYear) {
+      this.assignmentForm.get('academicYearId')?.setValue(academicYear.id);
     }
   }
 

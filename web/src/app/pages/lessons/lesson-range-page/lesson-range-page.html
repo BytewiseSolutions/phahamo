@@ -11,9 +11,11 @@
     <button type="button" class="mode-tab" [class.active]="mode === 'class'" (click)="setMode('class')">
       By Class
     </button>
-    <button type="button" class="mode-tab" [class.active]="mode === 'teacher'" (click)="setMode('teacher')">
-      By Teacher
-    </button>
+    @if (canFilterByTeacher) {
+      <button type="button" class="mode-tab" [class.active]="mode === 'teacher'" (click)="setMode('teacher')">
+        By Teacher
+      </button>
+    }
   </div>
 
   <div class="filters">

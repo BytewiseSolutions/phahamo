@@ -32,6 +32,10 @@ public class TimetableDto extends BaseDto {
     @NotNull(message = "Assignment is required")
     private Long assignmentId;
 
+    private Long schoolClassId;
+
+    private Long teacherId;
+
     private String subjectName;
 
     private String schoolClassName;
@@ -52,10 +56,12 @@ public class TimetableDto extends BaseDto {
         this.periodEndTime = timetable.getPeriod().getEndTime();
 
         this.assignmentId = timetable.getAssignment().getId();
+        this.schoolClassId = timetable.getAssignment().getSchoolClass().getId();
         this.subjectName = timetable.getAssignment().getSubject().getName();
         this.schoolClassName = timetable.getAssignment().getSchoolClass().getName();
 
         if (timetable.getAssignment().getTeacher() != null) {
+            this.teacherId = timetable.getAssignment().getTeacher().getId();
             this.teacherName = timetable.getAssignment().getTeacher().getFullName();
         }
     }

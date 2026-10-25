@@ -68,7 +68,6 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Results', path: '/results', icon: 'fa-solid fa-clipboard-check' },
     { label: 'Student Remarks', path: '/remarks', icon: 'fa-solid fa-comment-dots' },
     { label: 'Email Report Cards', path: '/report-cards/email', icon: 'fa-solid fa-envelope' },
-    { label: 'Profile', path: '/profile', icon: 'fa-solid fa-user' },
   ],
   FINANCE_OFFICER: [
     { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },

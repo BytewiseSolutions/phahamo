@@ -100,8 +100,9 @@ public class AttendanceReportService {
         Map<Long, List<Attendance>> byStudent = rows.stream()
                 .collect(Collectors.groupingBy(a -> a.getStudent().getId()));
 
-        List<Student> students = studentRepository
-                .findAllBySchoolIdAndCurrentClassId(schoolId, classId);
+        List<Student> students = classId == null
+                ? studentRepository.findAllBySchoolId(schoolId)
+                : studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, classId);
 
         List<StudentAttendanceSummaryDto> result = new ArrayList<>();
         for (Student student : students) {

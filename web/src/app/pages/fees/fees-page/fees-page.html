@@ -52,6 +52,7 @@
         <select [(ngModel)]="selectedTermId"
                 (ngModelChange)="loadForTab()"
                 [ngModelOptions]="{ standalone: true }">
+          <option [ngValue]="null">All terms</option>
           @for (t of terms; track t.id) {
             <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
           }
@@ -81,59 +82,71 @@
         <p>Add a fee structure for this class and term.</p>
       </div>
     } @else {
-      @for (s of structures; track s.id) {
-        <div class="structure-card">
-          <div class="structure-header">
-            <div>
-              <h3>{{ s.className }} — {{ s.termName }}</h3>
-              <p class="structure-meta">{{ s.academicYearName }}</p>
-            </div>
-            <div class="structure-actions">
-              <button type="button" class="link-button" (click)="openEditStructure(s)">Edit</button>
-              <button type="button" class="link-button danger" (click)="deleteStructure(s)">Delete</button>
-            </div>
-          </div>
-
-          <table class="items-table">
-            <thead>
-            <tr>
-              <th>Fee Item</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-              @for (item of s.items; track item.id) {
-                <tr>
-                  <td>{{ item.name }}</td>
-                  <td class="amount-cell">{{ formatAmount(item.amount) }}</td>
-                  <td>
-                    @if (item.mandatory) {
-                      <span class="badge mandatory">Mandatory</span>
-                    } @else {
-                      <span class="badge optional">Optional</span>
-                    }
-                  </td>
-                  <td class="desc-cell">{{ item.description || '—' }}</td>
-                </tr>
-              }
-            </tbody>
-            <tfoot>
-            <tr>
-              <td><strong>Total</strong></td>
-              <td class="amount-cell"><strong>{{ formatAmount(s.total) }}</strong></td>
-              <td colspan="2"></td>
-            </tr>
-            <tr>
-              <td>Mandatory Only</td>
-              <td class="amount-cell">{{ formatAmount(s.mandatoryTotal) }}</td>
-              <td colspan="2"></td>
-            </tr>
-            </tfoot>
-          </table>
-        </div>
-      }
+      <div class="table-wrapper term-structures-table-wrapper">
+        <table class="term-structures-table">
+          <thead>
+          <tr>
+            <th>Class</th>
+            <th>Term</th>
+            <th>Mandatory</th>
+            <th>Total</th>
+            <th>Fee Items</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (s of structures; track s.id) {
+              <tr>
+                <td>
+                  <strong>{{ s.className }}</strong>
+                  <span class="table-meta">{{ s.academicYearName }}</span>
+                </td>
+                <td>{{ s.termName }}</td>
+                <td class="amount-cell">{{ formatAmount(s.mandatoryTotal) }}</td>
+                <td class="amount-cell">{{ formatAmount(s.total) }}</td>
+                <td>{{ s.items.length }}</td>
+                <td class="actions-cell">
+                  <button type="button" class="link-button" (click)="openEditStructure(s)">Edit</button>
+                  <button type="button" class="link-button danger" (click)="deleteStructure(s)">Delete</button>
+                </td>
+              </tr>
+              <tr class="details-row">
+                <td colspan="6">
+                  <details>
+                    <summary>View fee items</summary>
+                    <table class="items-table">
+                      <thead>
+                      <tr>
+                        <th>Fee Item</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (item of s.items; track item.id) {
+                          <tr>
+                            <td>{{ item.name }}</td>
+                            <td class="amount-cell">{{ formatAmount(item.amount) }}</td>
+                            <td>
+                              @if (item.mandatory) {
+                                <span class="badge mandatory">Mandatory</span>
+                              } @else {
+                                <span class="badge optional">Optional</span>
+                              }
+                            </td>
+                            <td class="desc-cell">{{ item.description || '—' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </details>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
 
   } @else {

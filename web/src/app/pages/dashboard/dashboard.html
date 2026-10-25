@@ -249,7 +249,7 @@
           <div class="teacher-empty">No lessons scheduled today.</div>
         } @else {
           <div class="teacher-task-list">
-            @for (lesson of teacherStats.todayLessons; track lesson.id) {
+            @for (lesson of (teacherStats.todayLessons | slice:0:3); track lesson.id) {
               <div class="teacher-task-row">
                 <span class="task-time">{{ lesson.periodStartTime }}</span>
                 <div>
@@ -257,6 +257,9 @@
                   <span>{{ lesson.schoolClassName }} · {{ lesson.periodName }}</span>
                 </div>
               </div>
+            }
+            @if (teacherStats.todayLessons.length > 3) {
+              <div class="teacher-more-note">Showing the first 3 lessons. Open Timetable to view all.</div>
             }
           </div>
         }

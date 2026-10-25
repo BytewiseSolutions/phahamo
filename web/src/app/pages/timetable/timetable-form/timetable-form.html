@@ -59,7 +59,7 @@
 
           <select id="assignmentId" formControlName="assignmentId">
             <option value="">Select an assignment</option>
-            @for (assignment of assignments; track assignment.id) {
+            @for (assignment of availableAssignments; track assignment.id) {
               <option [value]="assignment.id">
                 {{ assignment.subjectName }} — {{ assignment.schoolClassName }}
                 @if (assignment.teacherName) {

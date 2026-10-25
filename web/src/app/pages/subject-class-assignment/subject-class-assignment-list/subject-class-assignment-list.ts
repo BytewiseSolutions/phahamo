@@ -18,7 +18,10 @@ export class SubjectClassAssignmentList implements OnChanges {
   showForm = false;
   editingAssignment: SubjectClassAssignment | null = null;
   errorMessage = '';
-  successMessage = '';
+
+  get assignedSubjectIds(): number[] {
+    return this.assignments.map(assignment => assignment.subjectId);
+  }
 
   constructor(
     private backend: BackendService,
@@ -53,14 +56,12 @@ export class SubjectClassAssignmentList implements OnChanges {
     this.editingAssignment = null;
     this.showForm = !this.showForm;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onEdit(assignment: SubjectClassAssignment): void {
     this.editingAssignment = assignment;
     this.showForm = true;
     this.errorMessage = '';
-    this.successMessage = '';
   }
 
   onFormClosed(): void {
@@ -70,11 +71,9 @@ export class SubjectClassAssignmentList implements OnChanges {
 
   onCreateAssignment(payload: SubjectClassAssignmentPayload): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
-    this.backend.post<SubjectClassAssignment>('/subject-class-assignments', payload).subscribe({
+    this.backend.postSilently<SubjectClassAssignment>('/subject-class-assignments', payload).subscribe({
       next: () => {
-        this.successMessage = 'Subject assigned to class.';
         this.showForm = false;
         this.loadAssignments();
       },
@@ -87,14 +86,12 @@ export class SubjectClassAssignmentList implements OnChanges {
 
   onUpdateAssignment(event: { id: number; payload: SubjectClassAssignmentPayload }): void {
     this.errorMessage = '';
-    this.successMessage = '';
 
-    this.backend.put<SubjectClassAssignment>(
+    this.backend.putSilently<SubjectClassAssignment>(
       `/subject-class-assignments/${event.id}`,
       event.payload
     ).subscribe({
       next: () => {
-        this.successMessage = 'Assignment updated.';
         this.showForm = false;
         this.editingAssignment = null;
         this.loadAssignments();
@@ -117,11 +114,9 @@ export class SubjectClassAssignmentList implements OnChanges {
     if (!confirmed) return;
 
     this.errorMessage = '';
-    this.successMessage = '';
 
     this.backend.delete<void>(`/subject-class-assignments/${assignment.id}`).subscribe({
       next: () => {
-        this.successMessage = 'Subject removed from class.';
         this.loadAssignments();
       },
       error: (err) => {

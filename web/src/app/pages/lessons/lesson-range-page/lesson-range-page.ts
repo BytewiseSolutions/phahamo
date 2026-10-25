@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
+import { AuthService } from '../../../util/auth.service';
 import { SchoolClass } from '../../class/class';
 import { Teacher } from '../../teacher/teacher';
 import { Lesson } from '../lesson';
@@ -16,6 +17,7 @@ type RangePreset = 'week' | 'month' | 'quarter' | 'custom';
 export class LessonRangePage implements OnInit {
   mode: Mode = 'class';
   preset: RangePreset = 'month';
+  canFilterByTeacher = false;
 
   classes: SchoolClass[] = [];
   teachers: Teacher[] = [];
@@ -30,9 +32,14 @@ export class LessonRangePage implements OnInit {
   loading = false;
   errorMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.canFilterByTeacher = ['SCHOOL_ADMIN', 'SYSTEM_ADMIN', 'PRINCIPAL']
+      .some((role) => this.authService.hasRole(role));
     this.applyPreset('month');
     this.loadFilters();
   }
@@ -46,15 +53,19 @@ export class LessonRangePage implements OnInit {
       }
     });
 
-    this.backend.get<Teacher[]>('/teachers').subscribe({
-      next: (teachers) => {
-        this.teachers = teachers;
-        this.selectedTeacherId = teachers[0]?.id ?? null;
-      }
-    });
+    if (this.canFilterByTeacher) {
+      this.backend.get<Teacher[]>('/teachers').subscribe({
+        next: (teachers) => {
+          this.teachers = teachers;
+          this.selectedTeacherId = teachers[0]?.id ?? null;
+        }
+      });
+    }
   }
 
   setMode(mode: Mode): void {
+    if (mode === 'teacher' && !this.canFilterByTeacher) return;
+
     this.mode = mode;
     this.lessons = [];
     this.errorMessage = '';

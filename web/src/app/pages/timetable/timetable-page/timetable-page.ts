@@ -42,6 +42,7 @@ export class TimetablePage implements OnInit {
   editingTimetable: Timetable | null = null;
   prefillDayOfWeek: DayOfWeek | null = null;
   prefillPeriodId: number | null = null;
+  prefillSchoolClassId: number | null = null;
 
   private userId: number | null = null;
 
@@ -248,16 +249,18 @@ export class TimetablePage implements OnInit {
 
   toggleTimetableForm(): void {
     this.editingTimetable = null;
-    this.prefillDayOfWeek = null;
+    this.prefillDayOfWeek = this.activeDay;
     this.prefillPeriodId = null;
+    this.prefillSchoolClassId = null;
     this.showTimetableForm = !this.showTimetableForm;
     this.errorMessage = '';
   }
 
-  onAddSlotForCell(day: DayOfWeek, periodId: number): void {
+  onAddSlotForCell(day: DayOfWeek, periodId: number, schoolClassId: number): void {
     this.editingTimetable = null;
     this.prefillDayOfWeek = day;
     this.prefillPeriodId = periodId;
+    this.prefillSchoolClassId = schoolClassId;
     this.showTimetableForm = true;
     this.errorMessage = '';
   }
@@ -266,6 +269,7 @@ export class TimetablePage implements OnInit {
     this.editingTimetable = slot;
     this.prefillDayOfWeek = null;
     this.prefillPeriodId = null;
+    this.prefillSchoolClassId = null;
     this.showTimetableForm = true;
     this.errorMessage = '';
   }
@@ -275,6 +279,7 @@ export class TimetablePage implements OnInit {
     this.editingTimetable = null;
     this.prefillDayOfWeek = null;
     this.prefillPeriodId = null;
+    this.prefillSchoolClassId = null;
   }
 
   onTimetableCreated(payload: TimetablePayload): void {
@@ -285,6 +290,7 @@ export class TimetablePage implements OnInit {
         this.showTimetableForm = false;
         this.prefillDayOfWeek = null;
         this.prefillPeriodId = null;
+        this.prefillSchoolClassId = null;
         this.loadTimetable();
       },
       error: (err) => {

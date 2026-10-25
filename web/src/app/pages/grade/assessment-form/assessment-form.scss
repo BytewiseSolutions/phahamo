@@ -84,6 +84,14 @@
   color: var(--text-primary);
 }
 
+.optional-label {
+  margin-left: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
 .form-group input,
 .form-group select {
   width: 100%;

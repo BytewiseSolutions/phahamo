@@ -5,6 +5,7 @@ import { Term } from '../../terms/term';
 import { AcademicYear } from '../../academic-years/academic-year';
 import { FeeStructure } from '../fee-structure';
 import { AnnualFee } from '../annual-fee';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 type Tab = 'termFees' | 'annualFees';
 
@@ -38,7 +39,10 @@ export class FeesPage implements OnInit {
   showAnnualFeeForm = false;
   editingAnnualFee: AnnualFee | null = null;
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.loadFilters();
@@ -53,7 +57,7 @@ export class FeesPage implements OnInit {
         this.backend.get<Term[]>('/terms').subscribe({
           next: (terms) => {
             this.terms = terms;
-            this.selectedTermId = terms[0]?.id ?? null;
+            this.selectedTermId = null;
 
             this.backend.get<AcademicYear[]>('/academic-years').subscribe({
               next: (years) => {
@@ -165,8 +169,15 @@ export class FeesPage implements OnInit {
     this.editingStructure = null;
   }
 
-  deleteStructure(structure: FeeStructure): void {
-    if (!confirm(`Delete fee structure for ${structure.className} — ${structure.termName}?`)) {
+  async deleteStructure(structure: FeeStructure): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Fee Structure',
+      message: `Delete fee structure for ${structure.className} — ${structure.termName}?`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -199,8 +210,15 @@ export class FeesPage implements OnInit {
     this.editingAnnualFee = null;
   }
 
-  deleteAnnualFee(fee: AnnualFee): void {
-    if (!confirm(`Delete ${fee.name} for ${fee.className}?`)) return;
+  async deleteAnnualFee(fee: AnnualFee): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Annual Fee',
+      message: `Delete ${fee.name} for ${fee.className}?`,
+      confirmText: 'Delete',
+      danger: true
+    });
+
+    if (!confirmed) return;
 
     this.backend.delete<void>(`/annual-fees/${fee.id}`).subscribe({
       next: () => this.loadAnnualFees(),

@@ -113,6 +113,62 @@
   overflow: hidden;
 }
 
+.term-structures-table-wrapper {
+  overflow-x: auto;
+}
+
+.term-structures-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.term-structures-table th,
+.term-structures-table td {
+  padding: 13px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.term-structures-table th {
+  background: var(--background);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.table-meta {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.details-row td {
+  padding: 0;
+  background: var(--background);
+}
+
+.details-row details {
+  padding: 10px 16px 14px;
+}
+
+.details-row summary {
+  width: fit-content;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.details-row .items-table {
+  margin-top: 10px;
+  background: var(--surface);
+}
+
 .structure-header {
   display: flex;
   justify-content: space-between;

@@ -8,7 +8,7 @@
     <div class="header-actions">
       <button type="button" class="secondary-button"
               (click)="downloadClassReportCards()"
-              [disabled]="mode !== 'byStudent' || !selectedClassId || !selectedTermId || loading">
+              [disabled]="mode !== 'byStudent' || !selectedClassId || selectedTermId === null || selectedTermId === -1 || loading">
         <i class="fa-solid fa-file-zipper"></i>
         Report Cards (ZIP)
       </button>
@@ -36,6 +36,7 @@
     <div class="filter-group">
       <label>Class</label>
       <select [(ngModel)]="selectedClassId" (ngModelChange)="loadForMode()" [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="null">All classes</option>
         @for (c of classes; track c.id) {
           <option [ngValue]="c.id">{{ c.name }}</option>
         }
@@ -47,6 +48,7 @@
       <select [(ngModel)]="selectedTermId"
               (ngModelChange)="onTermChange()"
               [ngModelOptions]="{ standalone: true }">
+        <option [ngValue]="-1">All terms</option>
         <option [ngValue]="null">Custom range</option>
         @for (t of terms; track t.id) {
           <option [ngValue]="t.id">{{ t.name }} — {{ t.academicYearName }}</option>
@@ -92,7 +94,7 @@
     @if (lessonRows.length === 0) {
       <div class="empty-state">
         <h3>No Attendance Records</h3>
-        <p>No attendance was marked for this class in the selected range.</p>
+        <p>No attendance was marked for the selected filters and date range.</p>
       </div>
     } @else {
       <div class="table-wrapper">
@@ -139,7 +141,7 @@
     @if (classRows.length === 0) {
       <div class="empty-state">
         <h3>No Attendance Records</h3>
-        <p>No attendance was marked for any student in this class in the selected range.</p>
+        <p>No attendance was marked for any student in the selected filters and date range.</p>
       </div>
     } @else {
       <div class="table-wrapper">
@@ -178,7 +180,7 @@
                   <button type="button" class="link-button" (click)="openStudent(row.studentId)">View</button>
                   <button type="button" class="link-button"
                           (click)="downloadStudentReportCard(row.studentId)"
-                          [disabled]="!selectedTermId">
+                          [disabled]="selectedTermId === null || selectedTermId === -1">
                     Report Card
                   </button>
                 </td>

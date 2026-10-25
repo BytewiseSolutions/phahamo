@@ -21,7 +21,7 @@
           <label for="subjectId">Subject</label>
           <select id="subjectId" formControlName="subjectId">
             <option [ngValue]="null" disabled>Select subject</option>
-            @for (subject of subjects; track subject.id) {
+            @for (subject of availableSubjects; track subject.id) {
               <option [ngValue]="subject.id">{{ subject.name }}</option>
             }
           </select>

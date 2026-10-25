@@ -10,6 +10,8 @@ export interface Timetable {
   periodStartTime: string;
   periodEndTime: string;
   assignmentId: number;
+  schoolClassId: number;
+  teacherId?: number | null;
   subjectName: string;
   schoolClassName: string;
   teacherName: string;
