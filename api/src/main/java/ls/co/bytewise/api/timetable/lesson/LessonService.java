@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.timetable.lesson;
 
 import ls.co.bytewise.api.school.School;
+import ls.co.bytewise.api.school.SchoolRepository;
+import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.holiday.HolidayService;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.teacher.Teacher;
@@ -27,20 +29,24 @@ public class LessonService {
     private final TimetableRepository timetableRepository;
     private final TeacherRepository teacherRepository;
     private final HolidayService holidayService;
+    private final SchoolRepository schoolRepository;
 
     public LessonService(LessonRepository lessonRepository,
                             TimetableRepository timetableRepository,
                             TeacherRepository teacherRepository,
-                            HolidayService holidayService) {
+                            HolidayService holidayService,
+                            SchoolRepository schoolRepository) {
         this.lessonRepository = lessonRepository;
         this.timetableRepository = timetableRepository;
         this.teacherRepository = teacherRepository;
         this.holidayService = holidayService;
+        this.schoolRepository = schoolRepository;
     }
 
     @Transactional
     public List<LessonDto> getOrCreateLessonsForClassAndDate(User requester, Long schoolClassId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
+        ensurePublishedOrPrivileged(requester, schoolId);
 
         if (holidayService.isHoliday(schoolId, date)) {
             return lessonRepository
@@ -70,6 +76,7 @@ public class LessonService {
     @Transactional
     public List<LessonDto> getOrCreateLessonsForTeacherAndDate(User requester, Long teacherId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
+        ensurePublishedOrPrivileged(requester, schoolId);
 
         if (holidayService.isHoliday(schoolId, date)) {
             return mergeTeacherLessons(
@@ -107,6 +114,7 @@ public class LessonService {
         validateRange(startDate, endDate);
 
         Long schoolId = TenantContext.getSchoolId();
+        ensurePublishedOrPrivileged(requester, schoolId);
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId);
         slots = slots.stream().filter(this::isLessonPeriod).toList();
@@ -144,6 +152,7 @@ public class LessonService {
         validateRange(startDate, endDate);
 
         Long schoolId = TenantContext.getSchoolId();
+        ensurePublishedOrPrivileged(requester, schoolId);
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId);
         slots = slots.stream().filter(this::isLessonPeriod).toList();
@@ -200,7 +209,8 @@ public class LessonService {
         return lessonRepository.save(lesson);
     }
 
-    public LessonDto getLesson(Long id) {
+    public LessonDto getLesson(User requester, Long id) {
+        ensurePublishedOrPrivileged(requester, TenantContext.getSchoolId());
         return new LessonDto(getLessonInCurrentSchool(id));
     }
 
@@ -330,5 +340,16 @@ public class LessonService {
                 .filter(s -> s.getId().equals(schoolId))
                 .findFirst()
                 .orElseThrow(() -> new LessonExceptions.ActiveSchoolNotFoundException("Active school not found"));
+    }
+
+    private void ensurePublishedOrPrivileged(User requester, Long schoolId) {
+        School school = schoolRepository.findById(schoolId)
+                .orElseThrow(() -> new LessonExceptions.LessonNotFoundException("School not found"));
+        boolean privileged = requester.hasRole(UserRole.SCHOOL_ADMIN)
+                || requester.hasRole(UserRole.SYSTEM_ADMIN)
+                || requester.hasRole(UserRole.PRINCIPAL);
+        if (!school.isTimetablePublished() && !privileged) {
+            throw new LessonExceptions.InvalidLessonException("The timetable has not been published yet");
+        }
     }
 }

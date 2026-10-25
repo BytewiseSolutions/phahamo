@@ -30,3 +30,9 @@ export interface TimetablePayload {
   periodId: number;
   assignmentId: number;
 }
+
+export interface TimetablePublication {
+  published: boolean;
+  publishedAt: string | null;
+  problems: string[];
+}

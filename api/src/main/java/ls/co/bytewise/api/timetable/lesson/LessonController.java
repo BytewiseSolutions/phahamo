@@ -38,8 +38,8 @@ public class LessonController {
 
     @GetMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public LessonDto getLesson(@PathVariable Long id) {
-        return lessonService.getLesson(id);
+    public LessonDto getLesson(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
+        return lessonService.getLesson(currentUser, id);
     }
 
     @PatchMapping("/{id}/status")

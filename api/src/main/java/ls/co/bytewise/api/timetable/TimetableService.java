@@ -1,6 +1,10 @@
 package ls.co.bytewise.api.timetable;
 
 import ls.co.bytewise.api.school.School;
+import ls.co.bytewise.api.school.SchoolRepository;
+import ls.co.bytewise.api.schoolclass.SchoolClass;
+import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
+import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
@@ -22,6 +26,9 @@ import java.util.List;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 @Service
 public class TimetableService {
@@ -32,19 +39,25 @@ public class TimetableService {
     private final StudentRepository studentRepository;
     private final LessonRepository lessonRepository;
     private final HolidayService holidayService;
+    private final SchoolRepository schoolRepository;
+    private final SchoolClassRepository schoolClassRepository;
 
     public TimetableService(TimetableRepository timetableRepository,
                             PeriodRepository periodRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
                             StudentRepository studentRepository,
                             LessonRepository lessonRepository,
-                            HolidayService holidayService) {
+                            HolidayService holidayService,
+                            SchoolRepository schoolRepository,
+                            SchoolClassRepository schoolClassRepository) {
         this.timetableRepository = timetableRepository;
         this.periodRepository = periodRepository;
         this.assignmentRepository = assignmentRepository;
         this.studentRepository = studentRepository;
         this.lessonRepository = lessonRepository;
         this.holidayService = holidayService;
+        this.schoolRepository = schoolRepository;
+        this.schoolClassRepository = schoolClassRepository;
     }
 
     @Transactional
@@ -192,12 +205,113 @@ public class TimetableService {
                 .toList();
     }
 
-    public List<TimetableDto> listByTeacher(Long teacherId) {
-        return listByTeacher(teacherId, null);
+    @Transactional(readOnly = true)
+    public TimetablePublicationDto publication() {
+        School school = currentSchool();
+        return publicationDto(school, publicationProblems(school.getId()));
     }
 
-    public List<TimetableDto> listByTeacher(Long teacherId, LocalDate date) {
+    @Transactional
+    public TimetablePublicationDto publish(User publisher, boolean confirmProblems) {
+        School school = currentSchool();
+        List<String> problems = publicationProblems(school.getId());
+        if (!problems.isEmpty() && !confirmProblems) {
+            return publicationDto(school, problems);
+        }
+
+        school.setTimetablePublished(true);
+        school.setTimetablePublishedAt(java.time.Instant.now());
+        school.setTimetablePublishedBy(publisher);
+        School saved = schoolRepository.save(school);
+        return publicationDto(saved, problems);
+    }
+
+    private TimetablePublicationDto publicationDto(School school, List<String> problems) {
+        TimetablePublicationDto dto = new TimetablePublicationDto();
+        dto.setPublished(school.isTimetablePublished());
+        dto.setPublishedAt(school.getTimetablePublishedAt());
+        dto.setProblems(problems);
+        return dto;
+    }
+
+    private List<String> publicationProblems(Long schoolId) {
+        List<Timetable> slots = timetableRepository.findAllBySchoolId(schoolId);
+        List<String> problems = new ArrayList<>();
+        Set<DayOfWeek> schoolDays = Set.of(
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+
+        for (SchoolClass schoolClass : schoolClassRepository.findAllBySchool_Id(schoolId)) {
+            for (DayOfWeek day : schoolDays) {
+                boolean hasLesson = slots.stream().anyMatch(slot ->
+                        slot.getAssignment().getSchoolClass().getId().equals(schoolClass.getId())
+                                && slot.getDayOfWeek() == day
+                                && isLessonPeriod(slot.getPeriod()));
+                if (!hasLesson) {
+                    problems.add(schoolClass.getName() + " has no lessons on " + day);
+                }
+            }
+        }
+
+        Map<String, Long> assignmentDayCounts = new HashMap<>();
+        for (Timetable slot : slots) {
+            if (!isLessonPeriod(slot.getPeriod())) continue;
+            String key = slot.getAssignment().getId() + ":" + slot.getDayOfWeek();
+            assignmentDayCounts.merge(key, 1L, Long::sum);
+            if (assignmentDayCounts.get(key) == 3L) {
+                problems.add(slot.getAssignment().getSubject().getName() + " for "
+                        + slot.getAssignment().getSchoolClass().getName() + " has more than two periods on "
+                        + slot.getDayOfWeek());
+            }
+        }
+
+        for (int i = 0; i < slots.size(); i++) {
+            Timetable left = slots.get(i);
+            if (!isLessonPeriod(left.getPeriod())) continue;
+            for (int j = i + 1; j < slots.size(); j++) {
+                Timetable right = slots.get(j);
+                if (!isLessonPeriod(right.getPeriod()) || left.getDayOfWeek() != right.getDayOfWeek()) continue;
+                boolean overlaps = left.getPeriod().getStartTime().isBefore(right.getPeriod().getEndTime())
+                        && right.getPeriod().getStartTime().isBefore(left.getPeriod().getEndTime());
+                if (!overlaps) continue;
+                if (left.getAssignment().getSchoolClass().getId().equals(right.getAssignment().getSchoolClass().getId())) {
+                    problems.add("Class " + left.getAssignment().getSchoolClass().getName()
+                            + " has overlapping lessons on " + left.getDayOfWeek());
+                }
+                if (left.getAssignment().getTeacher() != null && right.getAssignment().getTeacher() != null
+                        && left.getAssignment().getTeacher().getId().equals(right.getAssignment().getTeacher().getId())) {
+                    problems.add("Teacher " + left.getAssignment().getTeacher().getFullName()
+                            + " has overlapping lessons on " + left.getDayOfWeek());
+                }
+            }
+        }
+        return problems.stream().distinct().toList();
+    }
+
+    private School currentSchool() {
+        return schoolRepository.findById(TenantContext.getSchoolId())
+                .orElseThrow(() -> new TimetableExceptions.TimetableNotFoundException("School not found"));
+    }
+
+    private boolean canSeeDraft(User requester) {
+        return requester.hasRole(UserRole.SCHOOL_ADMIN)
+                || requester.hasRole(UserRole.SYSTEM_ADMIN)
+                || requester.hasRole(UserRole.PRINCIPAL);
+    }
+
+    private boolean isLessonPeriod(Period period) {
+        return period.getType() == null || period.getType() == PeriodType.LESSON;
+    }
+
+    public List<TimetableDto> listByTeacher(Long teacherId) {
+        return listByTeacher(null, teacherId, null);
+    }
+
+    public List<TimetableDto> listByTeacher(User requester, Long teacherId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
+        if (!currentSchool().isTimetablePublished() && (requester == null || !canSeeDraft(requester))) {
+            return List.of();
+        }
         List<Timetable> regularSlots = timetableRepository
                 .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId);
 
@@ -229,8 +343,11 @@ public class TimetableService {
                 .toList();
     }
 
-    public List<TimetableDto> listByClass(Long schoolClassId) {
+    public List<TimetableDto> listByClass(User requester, Long schoolClassId) {
         Long schoolId = TenantContext.getSchoolId();
+        if (!currentSchool().isTimetablePublished() && (requester == null || !canSeeDraft(requester))) {
+            return List.of();
+        }
         return timetableRepository.findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId).stream()
                 .map(TimetableDto::new)
                 .toList();
@@ -279,6 +396,6 @@ public class TimetableService {
                     "Your class has not been assigned yet. Please contact the school administrator.");
         }
 
-        return listByClass(student.getCurrentClass().getId());
+        return listByClass(user, student.getCurrentClass().getId());
     }
 }

@@ -3,9 +3,10 @@ import {DayOfWeek} from '../day-of-week';
 import {Period, PeriodPayload} from '../period';
 import {SchoolClass} from '../../class/class';
 import {Teacher} from '../../teacher/teacher';
-import {Timetable, TimetablePayload} from '../timetable';
+import {Timetable, TimetablePayload, TimetablePublication} from '../timetable';
 import {BackendService} from '../../../util/backend.service';
 import {AuthService} from '../../../util/auth.service';
+import {ConfirmDialogService} from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-timetable-page',
@@ -35,6 +36,8 @@ export class TimetablePage implements OnInit {
   loadingTimetable = false;
   errorMessage = '';
   holidayName: string | null = null;
+  publication: TimetablePublication | null = null;
+  publishing = false;
 
   showPeriodForm = false;
   editingPeriod: Period | null = null;
@@ -47,7 +50,11 @@ export class TimetablePage implements OnInit {
 
   private userId: number | null = null;
 
-  constructor(private backend: BackendService, private authService: AuthService) {}
+  constructor(
+    private backend: BackendService,
+    private authService: AuthService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void {
     this.isTeacher = this.authService.hasRole('TEACHER');
@@ -58,6 +65,7 @@ export class TimetablePage implements OnInit {
     this.loadTimetable();
 
     if (!this.isTeacher && !this.isStudent) {
+      this.loadPublication();
       this.loadSchoolClasses();
       this.loadTeachers();
     }
@@ -116,6 +124,45 @@ export class TimetablePage implements OnInit {
     });
   }
 
+  loadPublication(): void {
+    this.backend.get<TimetablePublication>('/timetable/publication').subscribe({
+      next: (publication) => this.publication = publication,
+      error: () => this.publication = null
+    });
+  }
+
+  async publishTimetable(): Promise<void> {
+    if (this.publishing) return;
+
+    const problems = this.publication?.problems ?? [];
+    const confirmation = problems.length > 0
+      ? `The timetable has ${problems.length} problem(s):\n\n${problems.join('\n')}\n\nPublish anyway after confirming you have seen them?`
+      : 'Publish this timetable so teachers and students can see it?';
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Publish Timetable',
+      message: confirmation,
+      confirmText: 'Publish',
+      cancelText: 'Cancel',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.publishing = true;
+    this.backend.postSilently<TimetablePublication>('/timetable/publish', {
+      confirmProblems: problems.length > 0
+    }).subscribe({
+      next: (publication) => {
+        this.publication = publication;
+        this.publishing = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to publish timetable.';
+        this.publishing = false;
+      }
+    });
+  }
+
   togglePeriodForm(): void {
     this.editingPeriod = null;
     this.showPeriodForm = !this.showPeriodForm;
@@ -140,6 +187,7 @@ export class TimetablePage implements OnInit {
       next: () => {
         this.showPeriodForm = false;
         this.loadPeriods();
+        this.loadPublication();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to create period.';
@@ -155,6 +203,7 @@ export class TimetablePage implements OnInit {
         this.showPeriodForm = false;
         this.editingPeriod = null;
         this.loadPeriods();
+        this.loadPublication();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to update period.';
@@ -305,6 +354,7 @@ export class TimetablePage implements OnInit {
         this.prefillPeriodId = null;
         this.prefillSchoolClassId = null;
         this.loadTimetable();
+        this.loadPublication();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to create timetable slot.';
@@ -320,6 +370,7 @@ export class TimetablePage implements OnInit {
         this.showTimetableForm = false;
         this.editingTimetable = null;
         this.loadTimetable();
+        this.loadPublication();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to update timetable slot.';
@@ -333,6 +384,7 @@ export class TimetablePage implements OnInit {
     this.backend.delete<void>(`/timetable/${slot.id}`).subscribe({
       next: () => {
         this.loadTimetable();
+        this.loadPublication();
       },
       error: (err: any) => {
         this.errorMessage = err.error?.message || 'Failed to delete timetable slot.';
