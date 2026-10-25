@@ -36,6 +36,70 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
+.fees-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.fee-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--background);
+}
+
+.fee-detail-item span,
+.fee-detail-item strong {
+    display: block;
+}
+
+.fee-detail-item span {
+    margin-bottom: .25rem;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.fee-detail-item strong {
+    font-size: 14px;
+}
+
+.previous-balance-section {
+    margin-bottom: 1.5rem;
+}
+
+.previous-balance-section h2 {
+    margin: 0 0 .25rem;
+    font-size: 18px;
+}
+
+.previous-balance-section p {
+    margin-bottom: .75rem;
+}
+
+.payment-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.link-button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

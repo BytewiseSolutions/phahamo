@@ -15,6 +15,7 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountDto;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountService;
 import ls.co.bytewise.api.studentfee.StudentFeeExceptions;
+import ls.co.bytewise.api.studentfee.FeeStatementService;
 import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
@@ -35,6 +36,7 @@ public class ParentPortalService {
     private final StudentFeeAccountService feeAccountService;
     private final AnnouncementService announcementService;
     private final ReportCardService reportCardService;
+    private final FeeStatementService feeStatementService;
 
     public ParentPortalService(ParentRepository parentRepository,
                                StudentRepository studentRepository,
@@ -43,7 +45,8 @@ public class ParentPortalService {
                                TermResultService termResultService,
                                StudentFeeAccountService feeAccountService,
                                AnnouncementService announcementService,
-                               ReportCardService reportCardService) {
+                               ReportCardService reportCardService,
+                               FeeStatementService feeStatementService) {
         this.parentRepository = parentRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -52,6 +55,7 @@ public class ParentPortalService {
         this.feeAccountService = feeAccountService;
         this.announcementService = announcementService;
         this.reportCardService = reportCardService;
+        this.feeStatementService = feeStatementService;
     }
 
     @Transactional(readOnly = true)
@@ -138,6 +142,13 @@ public class ParentPortalService {
         Student student = child(user, studentId);
         term(termId);
         return reportCardService.renderPdf(student.getId(), termId, user);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] feeStatement(User user, Long studentId, Long termId) {
+        Student student = child(user, studentId);
+        term(termId);
+        return feeStatementService.renderForStudentTerm(student.getId(), termId);
     }
 
     @Transactional(readOnly = true)

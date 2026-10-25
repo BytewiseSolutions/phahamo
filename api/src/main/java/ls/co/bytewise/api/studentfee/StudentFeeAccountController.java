@@ -127,7 +127,7 @@ public class StudentFeeAccountController {
     }
 
     @GetMapping("/payments/{paymentId}/receipt")
-    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER", "ROLE_STUDENT"})
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_FINANCE_OFFICER", "ROLE_STUDENT", "ROLE_PARENT"})
     public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long paymentId,
                                                   @AuthenticationPrincipal User currentUser) {
         byte[] pdf = feeService.generateReceipt(paymentId, currentUser);

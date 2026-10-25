@@ -31,6 +31,7 @@ export class ParentPortal implements OnInit {
 
   loading = false;
   downloadingReportCard = false;
+  downloadingFeeStatement = false;
   errorMessage = '';
 
   constructor(
@@ -173,6 +174,42 @@ export class ParentPortal implements OnInit {
     });
   }
 
+  downloadReceipt(paymentId: number): void {
+    this.backend.downloadBlob(`/student-fees/payments/${paymentId}/receipt`).subscribe({
+      next: (blob) => this.saveBlob(blob, `receipt-${paymentId}.pdf`),
+      error: (err) => this.errorMessage = err.error?.message || 'Failed to download receipt.'
+    });
+  }
+
+  downloadFeeStatement(): void {
+    if (!this.selectedChildId || !this.selectedTermId || !this.fees) {
+      return;
+    }
+
+    this.downloadingFeeStatement = true;
+    this.backend.downloadBlob(
+      `/parent/children/${this.selectedChildId}/fee-statement?termId=${this.selectedTermId}`
+    ).subscribe({
+      next: (blob) => {
+        this.saveBlob(blob, `fee-statement-${this.selectedChildId}-term-${this.selectedTermId}.pdf`);
+        this.downloadingFeeStatement = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to download fee statement.';
+        this.downloadingFeeStatement = false;
+      }
+    });
+  }
+
+  private saveBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   formatDate(value: string): string {
     if (!value) {
       return '—';
@@ -183,6 +220,10 @@ export class ParentPortal implements OnInit {
       month: 'short',
       year: 'numeric'
     });
+  }
+
+  todayIso(): string {
+    return this.iso(new Date());
   }
 
   private iso(date: Date): string {

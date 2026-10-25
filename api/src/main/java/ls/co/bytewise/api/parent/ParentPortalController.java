@@ -60,6 +60,19 @@ public class ParentPortalController {
                 .body(pdf);
     }
 
+    @GetMapping("/children/{studentId}/fee-statement")
+    public ResponseEntity<byte[]> feeStatement(@AuthenticationPrincipal User user,
+                                               @PathVariable Long studentId,
+                                               @RequestParam Long termId) {
+        byte[] pdf = parentPortalService.feeStatement(user, studentId, termId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"fee-statement-" + studentId + "-term-" + termId + ".pdf\"")
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+
     @GetMapping("/children/{studentId}/fees")
     public StudentFeeAccountDto fees(@AuthenticationPrincipal User user,
                                      @PathVariable Long studentId,
