@@ -2,45 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
 import { Term } from '../../terms/term';
-
-interface ParentChild {
-  id: number;
-  name: string;
-  admissionNumber: string;
-  className?: string;
-}
-
-interface AttendanceReport {
-  summary: {
-    total: number;
-    present: number;
-    absent: number;
-    late: number;
-    excused: number;
-    presentPercent: number;
-  };
-}
-
-interface FeeAccount {
-  totalFees: number;
-  totalAdjustments: number;
-  amountPaid: number;
-  balance: number;
-  payments: {
-    id: number;
-    amount: number;
-    paidAt: string;
-    method: string;
-    reference?: string;
-  }[];
-}
-
-interface ParentResult {
-  subjectName: string;
-  finalMark: number;
-  grade: string;
-  remark: string;
-}
+import { ParentAttendanceReport } from './parent-attendance-report';
+import { ParentChild } from './parent-child';
+import { ParentDashboard } from './parent-dashboard';
+import { ParentFeeAccount } from './parent-fee-account';
+import { ParentResult } from './parent-result';
 
 @Component({
   selector: 'app-parent-portal',
@@ -53,13 +19,15 @@ export class ParentPortal implements OnInit {
   section = 'children';
 
   children: ParentChild[] = [];
+  dashboard: ParentDashboard | null = null;
+  selectedDashboardChildId: number | null = null;
   terms: Term[] = [];
   selectedChildId: number | null = null;
   selectedTermId: number | null = null;
 
-  attendance: AttendanceReport | null = null;
+  attendance: ParentAttendanceReport | null = null;
   results: ParentResult[] = [];
-  fees: FeeAccount | null = null;
+  fees: ParentFeeAccount | null = null;
 
   loading = false;
   errorMessage = '';
@@ -71,7 +39,29 @@ export class ParentPortal implements OnInit {
 
   ngOnInit(): void {
     this.section = this.route.snapshot.data['section'] ?? 'children';
-    this.loadChildren();
+    if (this.section === 'children') {
+      this.loadDashboard();
+    } else {
+      this.loadChildren();
+    }
+  }
+
+  loadDashboard(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.backend.get<ParentDashboard>('/parent/dashboard').subscribe({
+      next: (dashboard) => {
+        this.dashboard = dashboard;
+        this.children = dashboard.children.map(summary => summary.child);
+        this.selectedDashboardChildId = dashboard.children[0]?.child.id ?? null;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to load your parent dashboard.';
+        this.loading = false;
+      }
+    });
   }
 
   loadChildren(): void {
@@ -118,14 +108,14 @@ export class ParentPortal implements OnInit {
     const path = `/parent/children/${this.selectedChildId}/${this.section}`
       + `?termId=${this.selectedTermId}`;
 
-    this.backend.get<AttendanceReport | ParentResult[] | FeeAccount>(path).subscribe({
+    this.backend.get<ParentAttendanceReport | ParentResult[] | ParentFeeAccount>(path).subscribe({
       next: (value) => {
         if (this.section === 'attendance') {
-          this.attendance = value as AttendanceReport;
+          this.attendance = value as ParentAttendanceReport;
         } else if (this.section === 'results') {
           this.results = value as ParentResult[];
         } else {
-          this.fees = value as FeeAccount;
+          this.fees = value as ParentFeeAccount;
         }
         this.loading = false;
       },
@@ -141,6 +131,20 @@ export class ParentPortal implements OnInit {
       return '—';
     }
     return `M ${value.toFixed(2)}`;
+  }
+
+  attendanceLabel(status: string): string {
+    return {
+      PRESENT: 'Present',
+      ABSENT: 'Absent',
+      LATE: 'Late',
+      EXCUSED: 'Excused',
+      NOT_MARKED: 'Not marked'
+    }[status] ?? 'Not marked';
+  }
+
+  selectDashboardChild(childId: number): void {
+    this.selectedDashboardChildId = childId;
   }
 
   formatDate(value: string): string {

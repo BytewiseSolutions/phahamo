@@ -12,20 +12,64 @@
   }
 
   @if (section === 'children') {
-    <div class="card">
-      @if (children.length === 0) {
-        <div class="empty">No children are linked to your account yet.</div>
-      } @else {
-        @for (child of children; track child.id) {
-          <div class="child">
-            <div>
-              <strong>{{ child.name }}</strong>
-              <span>{{ child.admissionNumber }} · {{ child.className || 'No class' }}</span>
+    @if (loading) {
+      <div class="card empty">Loading your dashboard...</div>
+    } @else if (!dashboard || dashboard.children.length === 0) {
+      <div class="card empty">No children are linked to your account yet.</div>
+    } @else {
+      <div class="dashboard-grid">
+        @for (summary of dashboard.children; track summary.child.id) {
+          <button class="child-card"
+                  [class.selected]="selectedDashboardChildId === summary.child.id"
+                  type="button"
+                  (click)="selectDashboardChild(summary.child.id)">
+            <div class="child-card-header">
+              <div>
+                <span class="eyebrow">{{ summary.child.admissionNumber }}</span>
+                <h2>{{ summary.child.name }}</h2>
+              </div>
+              <span class="child-card-arrow">›</span>
             </div>
+            <p class="child-class">{{ summary.child.className || 'No class assigned' }}</p>
+            <div class="dashboard-stats">
+              <div class="dashboard-stat">
+                <span>Today</span>
+                <strong>{{ attendanceLabel(summary.todayAttendance) }}</strong>
+              </div>
+              <div class="dashboard-stat">
+                <span>Fee balance</span>
+                <strong>{{ formatAmount(summary.feeBalance) }}</strong>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+
+      <div class="card announcements-card">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">School updates</span>
+            <h2>Recent announcements</h2>
+          </div>
+        </div>
+
+        @if (dashboard.announcements.length === 0) {
+          <div class="empty">No recent announcements for parents.</div>
+        } @else {
+          <div class="announcement-list">
+            @for (announcement of dashboard.announcements; track announcement.id) {
+              <article class="announcement">
+                <div class="announcement-meta">
+                  <strong>{{ announcement.title }}</strong>
+                  <span>{{ formatDate(announcement.publishAt) }}</span>
+                </div>
+                <p>{{ announcement.body }}</p>
+              </article>
+            }
           </div>
         }
-      }
-    </div>
+      </div>
+    }
   }
 
   @if (section !== 'children') {

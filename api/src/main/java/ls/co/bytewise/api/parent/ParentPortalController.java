@@ -25,6 +25,11 @@ public class ParentPortalController {
         return parentPortalService.children(user);
     }
 
+    @GetMapping("/dashboard")
+    public ParentDashboardDto dashboard(@AuthenticationPrincipal User user) {
+        return parentPortalService.dashboard(user);
+    }
+
     @GetMapping("/children/{studentId}/attendance")
     public StudentAttendanceReportDto attendance(@AuthenticationPrincipal User user,
                                                  @PathVariable Long studentId,

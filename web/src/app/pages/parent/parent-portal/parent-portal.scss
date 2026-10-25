@@ -36,6 +36,122 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.child-card {
+    width: 100%;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.child-card:hover,
+.child-card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgb(0 0 0 / .08);
+    transform: translateY(-2px);
+}
+
+.child-card-header,
+.section-heading,
+.announcement-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.child-card h2,
+.section-heading h2 {
+    margin: .25rem 0 0;
+    font-size: 18px;
+}
+
+.eyebrow {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.child-card-arrow {
+    color: var(--primary);
+    font-size: 24px;
+    line-height: 1;
+}
+
+.child-class {
+    margin: .6rem 0 1.25rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.dashboard-stat {
+    padding: .75rem;
+    border-radius: 8px;
+    background: var(--background);
+}
+
+.dashboard-stat span,
+.dashboard-stat strong {
+    display: block;
+}
+
+.dashboard-stat span {
+    margin-bottom: .25rem;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dashboard-stat strong {
+    font-size: 14px;
+}
+
+.announcements-card {
+    margin-bottom: 24px;
+}
+
+.announcement-list {
+    margin-top: 1rem;
+}
+
+.announcement {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.announcement:last-child {
+    border-bottom: 0;
+}
+
+.announcement-meta span {
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.announcement p {
+    margin-top: .5rem;
+    white-space: pre-line;
+}
+
 .child div {
     display: grid;
     gap: .3rem;
@@ -170,5 +286,9 @@ td {
     .stats {
         grid-template-columns: 1fr;
         display: grid;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: 1fr;
     }
 }
