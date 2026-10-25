@@ -24,11 +24,14 @@ public class HolidayDto extends BaseDto {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
+    private boolean recurring;
+
     public HolidayDto(Holiday holiday) {
         super(holiday);
         this.name = holiday.getName();
         this.startDate = holiday.getStartDate();
         this.endDate = holiday.getEndDate();
+        this.recurring = holiday.isRecurring();
     }
 
     @AssertTrue(message = "End date must be on or after start date")

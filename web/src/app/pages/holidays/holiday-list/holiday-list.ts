@@ -59,30 +59,16 @@ export class HolidayList implements OnInit {
     this.editing = null;
   }
 
-  save(payload: HolidayPayload): void {
+  onSave(event: { id: number | null; payload: HolidayPayload }): void {
     this.clearMessages();
-    if (!payload.name) {
-      this.errorMessage = 'Holiday name is required.';
-      return;
-    }
-    if (!payload.startDate || !payload.endDate) {
-      this.errorMessage = 'Start date and end date are required.';
-      return;
-    }
-    if (payload.endDate < payload.startDate) {
-      this.errorMessage = 'End date must be on or after start date.';
-      return;
-    }
-
     this.saving = true;
 
-    const request = this.editing
-      ? this.backend.put<Holiday>(`/holidays/${this.editing.id}`, payload)
-      : this.backend.post<Holiday>('/holidays', payload);
+    const request = event.id
+      ? this.backend.putSilently<Holiday>(`/holidays/${event.id}`, event.payload)
+      : this.backend.postSilently<Holiday>('/holidays', event.payload);
 
     request.subscribe({
       next: () => {
-        this.successMessage = this.editing ? 'Holiday updated.' : 'Holiday added.';
         this.saving = false;
         this.closeForm();
         this.loadHolidays();

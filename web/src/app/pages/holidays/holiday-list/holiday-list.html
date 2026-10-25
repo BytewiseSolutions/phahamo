@@ -12,14 +12,13 @@
   @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
   @if (successMessage) { <div class="success-banner">{{ successMessage }}</div> }
 
-  @if (showForm) {
-    <app-holiday-form
-      [holiday]="editing"
-      [saving]="saving"
-      (submitted)="save($event)"
-      (cancelled)="closeForm()">
-    </app-holiday-form>
-  }
+  <app-holiday-form
+    [visible]="showForm"
+    [editing]="editing"
+    [saving]="saving"
+    (closed)="closeForm()"
+    (save)="onSave($event)">
+  </app-holiday-form>
 
   @if (loading) {
     <div class="loading-state">Loading holidays...</div>
@@ -36,7 +35,13 @@
           <div class="holiday-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
           <div class="holiday-details">
             <h2>{{ holiday.name }}</h2>
-            <p>{{ formatDate(holiday.startDate) }} <span>to</span> {{ formatDate(holiday.endDate) }}</p>
+            <p>
+              {{ formatDate(holiday.startDate) }}
+              @if (holiday.endDate !== holiday.startDate) {
+                <span>to</span> {{ formatDate(holiday.endDate) }}
+              }
+              @if (holiday.recurring) { <span class="recurring-label">· Every year</span> }
+            </p>
           </div>
           <div class="holiday-actions">
             <button type="button" class="link-button" (click)="openEdit(holiday)">Edit</button>

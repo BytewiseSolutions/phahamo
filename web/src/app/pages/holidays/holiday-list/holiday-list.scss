@@ -123,6 +123,7 @@
 .holiday-details { flex: 1; min-width: 0; }
 .holiday-details h2 { font-size: 15px; }
 .holiday-details p span { margin: 0 5px; color: var(--text-muted); }
+.holiday-details p .recurring-label { color: var(--primary); font-weight: 600; }
 .holiday-actions { display: flex; gap: 12px; }
 
 .empty-state { text-align: center; }

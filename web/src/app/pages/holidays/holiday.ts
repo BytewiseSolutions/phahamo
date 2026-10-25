@@ -3,6 +3,7 @@ export interface Holiday {
   name: string;
   startDate: string;
   endDate: string;
+  recurring: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -11,4 +12,5 @@ export interface HolidayPayload {
   name: string;
   startDate: string;
   endDate: string;
+  recurring: boolean;
 }

@@ -5,7 +5,7 @@ import { Holiday, HolidayPayload } from '../holiday';
   selector: 'app-holiday-form',
   standalone: false,
   templateUrl: './holiday-form.html',
-  styleUrl: './holiday-form.scss'
+  styleUrls: ['./holiday-form.scss']
 })
 export class HolidayForm implements OnChanges {
   @Input() visible = false;
@@ -17,6 +17,8 @@ export class HolidayForm implements OnChanges {
   name = '';
   startDate = '';
   endDate = '';
+  isRange = false;
+  recurring = false;
   errorMessage = '';
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -26,6 +28,8 @@ export class HolidayForm implements OnChanges {
         this.name = this.editing.name;
         this.startDate = this.editing.startDate;
         this.endDate = this.editing.endDate;
+        this.isRange = this.editing.startDate !== this.editing.endDate;
+        this.recurring = this.editing.recurring;
       } else {
         this.startDate = this.iso(new Date());
         this.endDate = this.startDate;
@@ -39,11 +43,13 @@ export class HolidayForm implements OnChanges {
       this.errorMessage = 'Holiday name is required.';
       return;
     }
-    if (!this.startDate || !this.endDate) {
-      this.errorMessage = 'Start and end dates are required.';
+    if (!this.startDate || (this.isRange && !this.endDate)) {
+      this.errorMessage = this.isRange
+        ? 'Start and end dates are required.'
+        : 'Holiday date is required.';
       return;
     }
-    if (this.endDate < this.startDate) {
+    if (this.isRange && this.endDate < this.startDate) {
       this.errorMessage = 'End date must be on or after start date.';
       return;
     }
@@ -53,7 +59,8 @@ export class HolidayForm implements OnChanges {
       payload: {
         name: this.name.trim(),
         startDate: this.startDate,
-        endDate: this.endDate
+        endDate: this.isRange ? this.endDate : this.startDate,
+        recurring: this.recurring
       }
     });
   }
@@ -68,6 +75,8 @@ export class HolidayForm implements OnChanges {
     this.name = '';
     this.startDate = '';
     this.endDate = '';
+    this.isRange = false;
+    this.recurring = false;
     this.errorMessage = '';
   }
 

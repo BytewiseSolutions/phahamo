@@ -23,4 +23,7 @@ public class Holiday extends SchoolScopedEntity {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @Column(nullable = false)
+    private boolean recurring;
 }

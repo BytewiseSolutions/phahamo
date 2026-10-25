@@ -12,7 +12,9 @@ import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.DateTimeException;
 import java.util.List;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class HolidayService {
@@ -36,7 +38,9 @@ public class HolidayService {
         Long schoolId = TenantContext.getSchoolId();
         List<Holiday> holidays;
         if (from != null && to != null) {
-            holidays = holidayRepository.findOverlapping(schoolId, from, to);
+            holidays = holidayRepository.findAllBySchoolIdOrderByStartDateAsc(schoolId).stream()
+                    .filter(holiday -> overlaps(holiday, from, to))
+                    .toList();
         } else {
             holidays = holidayRepository.findAllBySchoolIdOrderByStartDateAsc(schoolId);
         }
@@ -58,6 +62,7 @@ public class HolidayService {
         holiday.setName(dto.getName().trim());
         holiday.setStartDate(dto.getStartDate());
         holiday.setEndDate(dto.getEndDate());
+        holiday.setRecurring(dto.isRecurring());
         holiday.setSchool(school);
         holiday.setCreatedBy(creator);
         holiday.setUpdatedBy(creator);
@@ -74,6 +79,7 @@ public class HolidayService {
         holiday.setName(dto.getName().trim());
         holiday.setStartDate(dto.getStartDate());
         holiday.setEndDate(dto.getEndDate());
+        holiday.setRecurring(dto.isRecurring());
         holiday.setUpdatedBy(editor);
         Holiday saved = holidayRepository.save(holiday);
         cancelLessonsAndAttendance(editor, saved.getSchool().getId(), saved.getStartDate(), saved.getEndDate());
@@ -86,12 +92,52 @@ public class HolidayService {
     }
 
     public boolean isHoliday(Long schoolId, LocalDate date) {
-        return !holidayRepository.findBySchoolIdAndDate(schoolId, date).isEmpty();
+        return holidayRepository.findAllBySchoolIdOrderByStartDateAsc(schoolId).stream()
+                .anyMatch(holiday -> appliesOn(holiday, date));
     }
 
     public List<HolidayDto> findForDate(Long schoolId, LocalDate date) {
-        return holidayRepository.findBySchoolIdAndDate(schoolId, date)
-                .stream().map(HolidayDto::new).toList();
+        return holidayRepository.findAllBySchoolIdOrderByStartDateAsc(schoolId).stream()
+                .filter(holiday -> appliesOn(holiday, date))
+                .map(HolidayDto::new).toList();
+    }
+
+    private boolean appliesOn(Holiday holiday, LocalDate date) {
+        if (!holiday.isRecurring()) {
+            return !date.isBefore(holiday.getStartDate()) && !date.isAfter(holiday.getEndDate());
+        }
+
+        long duration = ChronoUnit.DAYS.between(holiday.getStartDate(), holiday.getEndDate()) + 1L;
+        for (int year = date.getYear() - 1; year <= date.getYear(); year++) {
+            LocalDate occurrenceStart = recurringDate(holiday.getStartDate(), year);
+            if (occurrenceStart == null) continue;
+            LocalDate occurrenceEnd = occurrenceStart.plusDays(duration - 1);
+            if (!date.isBefore(occurrenceStart) && !date.isAfter(occurrenceEnd)) return true;
+        }
+        return false;
+    }
+
+    private boolean overlaps(Holiday holiday, LocalDate from, LocalDate to) {
+        if (!holiday.isRecurring()) {
+            return !holiday.getStartDate().isAfter(to) && !holiday.getEndDate().isBefore(from);
+        }
+
+        for (int year = from.getYear() - 1; year <= to.getYear(); year++) {
+            LocalDate occurrenceStart = recurringDate(holiday.getStartDate(), year);
+            if (occurrenceStart == null) continue;
+            long duration = ChronoUnit.DAYS.between(holiday.getStartDate(), holiday.getEndDate()) + 1L;
+            LocalDate occurrenceEnd = occurrenceStart.plusDays(duration - 1);
+            if (!occurrenceStart.isAfter(to) && !occurrenceEnd.isBefore(from)) return true;
+        }
+        return false;
+    }
+
+    private LocalDate recurringDate(LocalDate source, int year) {
+        try {
+            return LocalDate.of(year, source.getMonth(), source.getDayOfMonth());
+        } catch (DateTimeException ignored) {
+            return null;
+        }
     }
 
     private void cancelLessonsAndAttendance(User editor, Long schoolId,
