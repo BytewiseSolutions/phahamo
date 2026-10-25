@@ -87,8 +87,8 @@
             <td>{{ user.phone }}</td>
             <td>{{ user.roles.join(', ') }}</td>
             <td>
-              <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
-                {{ user.status }}
+              <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE' || isLocked(user)">
+                {{ isLocked(user) ? 'LOCKED' : user.status }}
               </span>
             </td>
             <td class="actions-cell">
@@ -96,7 +96,11 @@
               @if (canManageUsers) {
                 <button type="button" class="link-button edit" (click)="onEdit(user)">Edit</button>
                 @if (user.status === 'ACTIVE') {
-                  <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
+                  @if (isLocked(user)) {
+                    <button type="button" class="link-button" (click)="onUnlock(user)">Unlock</button>
+                  } @else {
+                    <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
+                  }
                 } @else {
                   <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
                 }

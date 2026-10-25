@@ -86,6 +86,14 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/unlock")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public ResponseEntity<Void> unlockUser(@AuthenticationPrincipal User currentUser,
+                                           @PathVariable Long id) {
+        userService.unlockUser(currentUser, id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public UserDto getUser(@PathVariable Long id) {

@@ -85,6 +85,10 @@ export class UserList implements OnInit {
     return this.users.filter(u => u.roles.includes(role)).length;
   }
 
+  isLocked(user: User): boolean {
+    return !!user.lockedUntil && new Date(user.lockedUntil).getTime() > Date.now();
+  }
+
   setTab(role: string): void {
     this.activeTab = role;
     this.currentPage = 1;
@@ -211,6 +215,24 @@ export class UserList implements OnInit {
       next: () => this.loadUsers(),
       error: () => {
         this.errorMessage = 'Failed to activate user.';
+      }
+    });
+  }
+
+  async onUnlock(user: User): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Unlock User Account',
+      message: `Unlock "${user.firstName} ${user.lastName}" so they can try logging in again?`,
+      confirmText: 'Unlock'
+    });
+
+    if (!confirmed) return;
+
+    this.errorMessage = '';
+    this.backend.patch<void>(`/users/${user.id}/unlock`, {}).subscribe({
+      next: () => this.loadUsers(),
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to unlock user account.';
       }
     });
   }

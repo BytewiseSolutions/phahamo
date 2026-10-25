@@ -321,6 +321,20 @@ public class UserService {
         User saved = userRepository.save(user);
     }
 
+    @Transactional
+    public void unlockUser(User editor, Long userId) {
+        User user = getUserInCurrentSchool(userId);
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setUpdatedBy(editor);
+        User saved = userRepository.save(user);
+        School school = saved.getSchools().stream().findFirst().orElse(null);
+        if (school != null) {
+            auditLogService.record(school, editor, AuditAction.USER_ACCOUNT_UNLOCKED,
+                    "USER", saved.getId(), "Unlocked user account " + saved.getFullName());
+        }
+    }
+
     private User getUserInCurrentSchool(Long userId) {
         Long schoolId = TenantContext.getSchoolId();
 
