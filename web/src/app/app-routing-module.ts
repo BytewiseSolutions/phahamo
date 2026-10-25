@@ -51,6 +51,7 @@ import {Profile} from './pages/profile/profile/profile';
 import {MessagesPage} from './pages/messages/messages-page/messages-page';
 import {ParentPortal} from './pages/parent/parent-portal/parent-portal';
 import {HolidayList} from './pages/holidays/holiday-list/holiday-list';
+import {AuditLogPage} from './pages/audit/audit-log-page/audit-log-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -66,6 +67,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: 'users', component: UserList },
+      { path: 'audit-log', component: AuditLogPage },
       { path: 'import', component: BulkImport },
       { path: 'users/:id', component: UserView },
       { path: 'school-profile', component: SchoolProfile },

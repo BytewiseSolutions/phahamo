@@ -20,6 +20,7 @@ const ROLE_LINKS: Record<string, SidebarLink[]> = {
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },
+    { label: 'Audit Log', path: '/audit-log', icon: 'fa-solid fa-clock-rotate-left' },
     { label: 'Messages', path: '/messages', icon: 'fa-solid fa-envelope' },
     { label: 'Timetable', path: '/timetable', icon: 'fa-solid fa-calendar-days' },
     { label: 'Lesson Ranges', path: '/lessons/range', icon: 'fa-solid fa-calendar-week' },
