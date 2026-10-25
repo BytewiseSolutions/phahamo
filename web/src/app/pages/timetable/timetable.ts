@@ -18,6 +18,9 @@ export interface Timetable {
   substituteTeacherName?: string | null;
   lessonStatus?: string | null;
   lessonDate?: string | null;
+  holidayName?: string | null;
+  holidayStartDate?: string | null;
+  holidayEndDate?: string | null;
 }
 
 export interface TimetablePayload {

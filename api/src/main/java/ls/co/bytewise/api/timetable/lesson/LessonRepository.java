@@ -52,4 +52,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     boolean existsByTimetable_IdAndDateAndSchoolId(Long timetableId, LocalDate date, Long schoolId);
 
     long countBySchoolIdAndDateAndStatus(Long schoolId, LocalDate date, LessonStatus status);
+
+    List<Lesson> findAllBySchoolIdAndDateBetween(Long schoolId, LocalDate startDate, LocalDate endDate);
 }

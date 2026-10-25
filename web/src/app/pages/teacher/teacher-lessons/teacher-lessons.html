@@ -16,6 +16,17 @@
   }
 </div>
 
+@if (holidays.length > 0) {
+  <div class="holiday-banner">
+    <i class="fa-solid fa-calendar-xmark"></i>
+    <span>
+      @for (holiday of holidays; track holiday.id; let last = $last) {
+        {{ holiday.name }} ({{ holiday.startDate }} to {{ holiday.endDate }}){{ last ? '' : ', ' }}
+      }
+    </span>
+  </div>
+}
+
 @if (errorMessage) {
   <div class="error-banner">{{ errorMessage }}</div>
 }

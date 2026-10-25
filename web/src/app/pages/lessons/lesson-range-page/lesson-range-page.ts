@@ -4,6 +4,7 @@ import { AuthService } from '../../../util/auth.service';
 import { SchoolClass } from '../../class/class';
 import { Teacher } from '../../teacher/teacher';
 import { Lesson } from '../lesson';
+import { Holiday } from '../../holidays/holiday';
 
 type Mode = 'class' | 'teacher';
 type RangePreset = 'week' | 'month' | 'quarter' | 'custom';
@@ -31,6 +32,7 @@ export class LessonRangePage implements OnInit {
   lessons: Lesson[] = [];
   loading = false;
   errorMessage = '';
+  holidays: Holiday[] = [];
 
   constructor(
     private backend: BackendService,
@@ -108,6 +110,8 @@ export class LessonRangePage implements OnInit {
   loadLessons(): void {
     if (!this.startDate || !this.endDate) return;
 
+    this.loadHolidays();
+
     let url = '';
     if (this.mode === 'class') {
       if (!this.selectedClassId) {
@@ -137,6 +141,14 @@ export class LessonRangePage implements OnInit {
         this.lessons = [];
         this.loading = false;
       }
+    });
+  }
+
+  loadHolidays(): void {
+    if (!this.startDate || !this.endDate) return;
+    this.backend.get<Holiday[]>(`/holidays?from=${this.startDate}&to=${this.endDate}`).subscribe({
+      next: (holidays) => this.holidays = holidays,
+      error: () => this.holidays = []
     });
   }
 

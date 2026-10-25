@@ -50,6 +50,7 @@ import {systemAdminGuard} from './util/system-admin.guard';
 import {Profile} from './pages/profile/profile/profile';
 import {MessagesPage} from './pages/messages/messages-page/messages-page';
 import {ParentPortal} from './pages/parent/parent-portal/parent-portal';
+import {HolidayList} from './pages/holidays/holiday-list/holiday-list';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -69,6 +70,7 @@ const routes: Routes = [
       { path: 'users/:id', component: UserView },
       { path: 'school-profile', component: SchoolProfile },
       { path: 'academic-years', component: AcademicYearList },
+      { path: 'holidays', component: HolidayList },
       { path: 'classes', component: ClassList },
       { path: 'subjects', component: SubjectList },
       { path: 'timetable', component: TimetablePage },

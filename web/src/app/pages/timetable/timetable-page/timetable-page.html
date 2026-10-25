@@ -93,6 +93,16 @@
         }
       </div>
 
+      @if (holidayName) {
+        <div class="holiday-banner">
+          <i class="fa-solid fa-calendar-xmark"></i>
+          <div>
+            <strong>{{ holidayName }}</strong>
+            <span>School is closed on this day. No lessons or attendance are expected.</span>
+          </div>
+        </div>
+      }
+
       @if (loadingPeriods || loadingTimetable) {
 
         <p class="loading-message">Loading schedule...</p>

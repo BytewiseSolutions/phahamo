@@ -100,6 +100,8 @@ import {SubscriptionInterceptor} from './util/subscription.interceptor';
 import { Profile } from './pages/profile/profile/profile';
 import { MessagesPage } from './pages/messages/messages-page/messages-page';
 import { ParentPortal } from './pages/parent/parent-portal/parent-portal';
+import { HolidayList } from './pages/holidays/holiday-list/holiday-list';
+import { HolidayForm } from './pages/holidays/holiday-form/holiday-form';
 
 @NgModule({
   declarations: [
@@ -194,6 +196,8 @@ import { ParentPortal } from './pages/parent/parent-portal/parent-portal';
     Profile,
     MessagesPage,
     ParentPortal,
+    HolidayList,
+    HolidayForm,
   ],
   imports: [
     BrowserModule,

@@ -9,6 +9,7 @@ import { DayOfWeek } from '../../timetable/day-of-week';
 import { Lesson } from '../../timetable/lesson';
 import { LessonStatus } from '../../timetable/lesson-status';
 import { Teacher } from '../../teacher/teacher';
+import { Holiday } from '../../holidays/holiday';
 
 @Component({
   selector: 'app-my-class-view',
@@ -22,6 +23,8 @@ export class MyClassView implements OnInit {
   loadingAssignment = true;
   notFound = false;
   errorMessage = '';
+  holidays: Holiday[] = [];
+  holidayName: string | null = null;
 
   activeTab: 'timetable' | 'lessons' = 'timetable';
 
@@ -114,6 +117,7 @@ export class MyClassView implements OnInit {
 
   onDayChange(day: DayOfWeek): void {
     this.activeDay = day;
+    this.loadHolidayForActiveDay();
   }
 
   // ----- Timetable -----
@@ -136,6 +140,7 @@ export class MyClassView implements OnInit {
               slot.subjectName === this.assignment?.subjectName
             );
             this.loadingTimetable = false;
+            this.loadHolidayForActiveDay();
           },
           error: (err) => {
             this.errorMessage = err.error?.message || 'Failed to load timetable.';
@@ -223,6 +228,7 @@ export class MyClassView implements OnInit {
 
     if (this.lessonFilter === 'today') {
       const today = new Date().toISOString().substring(0, 10);
+      this.loadHolidays(today, today);
 
       this.backend.get<Lesson[]>(`/lessons/teacher/${this.userId}?date=${today}`).subscribe({
         next: applyFilter,
@@ -236,6 +242,7 @@ export class MyClassView implements OnInit {
     }
 
     const { start, end } = this.getDateRange();
+    this.loadHolidays(start, end);
 
     this.backend.get<Lesson[]>(
       `/lessons/teacher/${this.userId}/range?startDate=${start}&endDate=${end}`
@@ -246,6 +253,33 @@ export class MyClassView implements OnInit {
         this.loadingLessons = false;
       }
     });
+  }
+
+  private loadHolidays(from: string, to: string): void {
+    this.backend.get<Holiday[]>(`/holidays?from=${from}&to=${to}`).subscribe({
+      next: (holidays) => this.holidays = holidays,
+      error: () => this.holidays = []
+    });
+  }
+
+  private loadHolidayForActiveDay(): void {
+    const date = this.dateForDay(this.activeDay);
+    this.backend.get<Holiday[]>(`/holidays?from=${date}&to=${date}`).subscribe({
+      next: (holidays) => this.holidayName = holidays[0]?.name ?? null,
+      error: () => this.holidayName = null
+    });
+  }
+
+  private dateForDay(day: DayOfWeek): string {
+    const today = new Date();
+    const currentDay = today.getDay() === 0 ? 7 : today.getDay();
+    const targetDay = Object.values(DayOfWeek).indexOf(day) + 1;
+    const date = new Date(today);
+    date.setDate(today.getDate() + targetDay - currentDay);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const dayOfMonth = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${dayOfMonth}`;
   }
 
   onAttendance(lesson: Lesson): void {

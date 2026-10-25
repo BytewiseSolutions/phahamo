@@ -11,6 +11,7 @@ import ls.co.bytewise.api.timetable.period.PeriodExceptions;
 import ls.co.bytewise.api.timetable.period.PeriodRepository;
 import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.timetable.lesson.LessonRepository;
+import ls.co.bytewise.api.holiday.HolidayService;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +30,20 @@ public class TimetableService {
     private final SubjectClassAssignmentRepository assignmentRepository;
     private final StudentRepository studentRepository;
     private final LessonRepository lessonRepository;
+    private final HolidayService holidayService;
 
     public TimetableService(TimetableRepository timetableRepository,
                             PeriodRepository periodRepository,
                             SubjectClassAssignmentRepository assignmentRepository,
                             StudentRepository studentRepository,
-                            LessonRepository lessonRepository) {
+                            LessonRepository lessonRepository,
+                            HolidayService holidayService) {
         this.timetableRepository = timetableRepository;
         this.periodRepository = periodRepository;
         this.assignmentRepository = assignmentRepository;
         this.studentRepository = studentRepository;
         this.lessonRepository = lessonRepository;
+        this.holidayService = holidayService;
     }
 
     @Transactional
@@ -167,9 +171,19 @@ public class TimetableService {
     }
 
     public List<TimetableDto> listAll() {
+        return listAll(null);
+    }
+
+    public List<TimetableDto> listAll(LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
         return timetableRepository.findAllBySchoolId(schoolId).stream()
-                .map(TimetableDto::new)
+                .map(slot -> {
+                    Lesson lesson = date == null ? null : lessonRepository
+                            .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
+                            .orElse(null);
+                    return new TimetableDto(slot, lesson,
+                            date == null ? null : holidayService.findForDate(schoolId, date));
+                })
                 .toList();
     }
 
@@ -193,14 +207,16 @@ public class TimetableService {
             Lesson lesson = lessonRepository
                     .findByTimetable_IdAndDateAndSchoolId(slot.getId(), date, schoolId)
                     .orElse(null);
-            result.put(slot.getId(), new TimetableDto(slot, lesson));
+            result.put(slot.getId(), new TimetableDto(slot, lesson,
+                    holidayService.findForDate(schoolId, date)));
         }
 
         for (Lesson lesson : lessonRepository
                 .findAllBySubstituteTeacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
                         teacherId, date, schoolId)) {
             result.putIfAbsent(lesson.getTimetable().getId(),
-                    new TimetableDto(lesson.getTimetable(), lesson));
+                    new TimetableDto(lesson.getTimetable(), lesson,
+                            holidayService.findForDate(schoolId, date)));
         }
 
         return result.values().stream()

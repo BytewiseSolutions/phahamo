@@ -1,0 +1,51 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editing ? 'Edit Holiday' : 'Add Holiday' }}</h2>
+        <button type="button" class="close-button" (click)="onClose()" aria-label="Close form">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+        <div class="form-group">
+          <label for="holidayName">Name</label>
+          <input id="holidayName" type="text" [(ngModel)]="name" placeholder="e.g. Public holiday" [ngModelOptions]="{ standalone: true }">
+        </div>
+
+        <div class="form-group">
+          <label for="holidayDate">Holiday Date</label>
+          <input id="holidayDate" type="date" [(ngModel)]="startDate" [ngModelOptions]="{ standalone: true }">
+        </div>
+
+        <label class="range-toggle">
+          <input type="checkbox" [(ngModel)]="isRange" [ngModelOptions]="{ standalone: true }">
+          <span>This holiday lasts more than one day</span>
+        </label>
+
+        <label class="range-toggle">
+          <input type="checkbox" [(ngModel)]="recurring" [ngModelOptions]="{ standalone: true }">
+          <span>Repeats every year</span>
+        </label>
+
+        @if (isRange) {
+          <div class="form-group">
+            <label for="holidayEndDate">End Date</label>
+            <input id="holidayEndDate" type="date" [(ngModel)]="endDate" [ngModelOptions]="{ standalone: true }">
+          </div>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="primary-button" [disabled]="saving" (click)="onSubmit()">
+          {{ saving ? 'Saving...' : (editing ? 'Save Changes' : 'Add Holiday') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

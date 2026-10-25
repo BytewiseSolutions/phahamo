@@ -16,6 +16,7 @@ const COMMON_LINKS: SidebarLink[] = [
 const ROLE_LINKS: Record<string, SidebarLink[]> = {
   SCHOOL_ADMIN: [
     { label: 'Academic Years', path: '/academic-years', icon: 'fa-solid fa-calendar-check' },
+    { label: 'Holidays', path: '/holidays', icon: 'fa-solid fa-calendar-xmark' },
     { label: 'Classes', path: '/classes', icon: 'fa-solid fa-chalkboard' },
     { label: 'Subjects', path: '/subjects', icon: 'fa-solid fa-book' },
     { label: 'Users', path: '/users', icon: 'fa-solid fa-users' },

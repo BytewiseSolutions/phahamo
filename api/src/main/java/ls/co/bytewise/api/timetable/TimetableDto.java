@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.LocalDate;
 import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.timetable.lesson.LessonStatus;
+import ls.co.bytewise.api.holiday.HolidayDto;
 
 @Getter
 @Setter
@@ -45,6 +46,9 @@ public class TimetableDto extends BaseDto {
     private String substituteTeacherName;
     private LessonStatus lessonStatus;
     private LocalDate lessonDate;
+    private String holidayName;
+    private LocalDate holidayStartDate;
+    private LocalDate holidayEndDate;
 
     public TimetableDto(Timetable timetable) {
         super(timetable);
@@ -67,6 +71,10 @@ public class TimetableDto extends BaseDto {
     }
 
     public TimetableDto(Timetable timetable, Lesson lesson) {
+        this(timetable, lesson, null);
+    }
+
+    public TimetableDto(Timetable timetable, Lesson lesson, java.util.List<HolidayDto> holidays) {
         this(timetable);
         if (lesson != null) {
             this.lessonStatus = lesson.getStatus();
@@ -74,6 +82,12 @@ public class TimetableDto extends BaseDto {
             if (lesson.getSubstituteTeacher() != null) {
                 this.substituteTeacherName = lesson.getSubstituteTeacher().getFullName();
             }
+        }
+        if (holidays != null && !holidays.isEmpty()) {
+            HolidayDto holiday = holidays.get(0);
+            this.holidayName = holiday.getName();
+            this.holidayStartDate = holiday.getStartDate();
+            this.holidayEndDate = holiday.getEndDate();
         }
     }
 }

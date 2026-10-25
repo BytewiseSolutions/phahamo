@@ -5,9 +5,24 @@
 }
 
 @media (min-width: 768px) {
-  .page-container {
-    padding: 40px;
-  }
+.page-container {
+  padding: 40px;
+}
+
+.holiday-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border: 1px solid rgb(from var(--warning) r g b / 0.3);
+  border-radius: var(--border-radius-md);
+  background: rgb(from var(--warning) r g b / 0.1);
+}
+
+.holiday-banner > i { margin-top: 2px; color: var(--warning); }
+.holiday-banner div { display: flex; flex-direction: column; gap: 4px; }
+.holiday-banner span { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
 }
 
 .page-header {
