@@ -2,7 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
-import { CURRENCY_OPTIONS, Currency, School, SchoolProfileUpdateRequest, TERM_STRUCTURE_OPTIONS, TermStructure } from '../../util/school';
+import { School } from '../../util/school';
+import { Currency } from '../../util/currency';
+import { TermStructure } from '../../util/term-structure';
+import { CURRENCY_OPTIONS } from '../../util/currency-options';
+import { TERM_STRUCTURE_OPTIONS } from '../../util/term-structure-options';
+import { SchoolProfileUpdateRequest } from '../../util/school-profile-update-request';
 import { Subscription } from '../../util/subscription';
 
 @Component({
