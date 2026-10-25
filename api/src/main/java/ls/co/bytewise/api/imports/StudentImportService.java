@@ -6,6 +6,8 @@ import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Gender;
 import ls.co.bytewise.api.student.StudentDto;
+import ls.co.bytewise.api.student.StudentDuplicateDto;
+import ls.co.bytewise.api.student.StudentService;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserDto;
 import ls.co.bytewise.api.user.UserRepository;
@@ -35,15 +37,18 @@ public class StudentImportService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final SchoolClassRepository schoolClassRepository;
+    private final StudentService studentService;
 
     public StudentImportService(XlsxRowReader rowReader,
                                 UserService userService,
                                 UserRepository userRepository,
-                                SchoolClassRepository schoolClassRepository) {
+                                SchoolClassRepository schoolClassRepository,
+                                StudentService studentService) {
         this.rowReader = rowReader;
         this.userService = userService;
         this.userRepository = userRepository;
         this.schoolClassRepository = schoolClassRepository;
+        this.studentService = studentService;
     }
 
     public ImportResultDto process(User creator, MultipartFile file, boolean dryRun) {
@@ -81,7 +86,7 @@ public class StudentImportService {
                     result.getValidRows().add(rowResult);
                 }
             } catch (Exception e) {
-                rowResult.setReason(e.getMessage());
+                rowResult.setReason(importReason(e));
                 result.getInvalidRows().add(rowResult);
             }
         }
@@ -134,6 +139,28 @@ public class StudentImportService {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new ImportExceptions.ImportValidationException("Email already exists in system");
         }
+        StudentDto student = userDto.getStudent();
+        List<StudentDuplicateDto> matches = studentService.findPotentialDuplicates(
+                userDto.getFirstName(), userDto.getLastName(), student.getDateOfBirth());
+        if (!matches.isEmpty()) {
+            throw new ImportExceptions.ImportValidationException(formatDuplicateMatches(matches));
+        }
+    }
+
+    private String importReason(Exception exception) {
+        if (exception instanceof ls.co.bytewise.api.student.DuplicateStudentException duplicate) {
+            return duplicate.getMessage() + ": " + formatDuplicateMatches(duplicate.getMatches());
+        }
+        return exception.getMessage();
+    }
+
+    private String formatDuplicateMatches(List<StudentDuplicateDto> matches) {
+        return matches.stream()
+                .map(match -> match.getName() + " (" + match.getAdmissionNumber()
+                        + ", " + (match.getClassName() == null ? "No class" : match.getClassName())
+                        + ", " + match.getStatus() + ")")
+                .reduce((left, right) -> left + "; " + right)
+                .orElse("Existing student match found");
     }
 
     private SchoolClass resolveClass(String className, Long schoolId) {

@@ -68,6 +68,12 @@ public class UserService {
             throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
         }
 
+        if (dto.getRoles().contains(UserRole.STUDENT) && dto.getStudent() != null) {
+            studentService.ensureNoDuplicate(
+                    dto.getFirstName(), dto.getLastName(), dto.getStudent().getDateOfBirth(),
+                    dto.getStudent().isDuplicateConfirmed());
+        }
+
         boolean creatorIsSystemAdmin = creator.hasRole(UserRole.SYSTEM_ADMIN);
 
         if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN) && !creatorIsSystemAdmin) {

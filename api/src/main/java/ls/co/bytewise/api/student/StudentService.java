@@ -36,6 +36,7 @@ public class StudentService {
     @Transactional
     public StudentDto createProfileFor(User creator, User user, StudentDto dto) {
         Long schoolId = TenantContext.getSchoolId();
+        ensureNoDuplicate(user.getFirstName(), user.getLastName(), dto.getDateOfBirth(), dto.isDuplicateConfirmed());
 
         Student student = new Student();
         student.setUser(user);
@@ -57,6 +58,30 @@ public class StudentService {
         Student saved = studentRepository.save(student);
         feeAccountService.synchronizeStudentAccounts(saved, creator);
         return new StudentDto(saved);
+    }
+
+    public List<StudentDuplicateDto> findPotentialDuplicates(String firstName,
+                                                              String lastName,
+                                                              java.time.Instant dateOfBirth) {
+        if (firstName == null || lastName == null || dateOfBirth == null) {
+            return List.of();
+        }
+        return studentRepository.findPotentialDuplicates(
+                        TenantContext.getSchoolId(), firstName.trim(), lastName.trim(), dateOfBirth)
+                .stream()
+                .map(StudentDuplicateDto::new)
+                .toList();
+    }
+
+    public void ensureNoDuplicate(String firstName,
+                                  String lastName,
+                                  java.time.Instant dateOfBirth,
+                                  boolean duplicateConfirmed) {
+        if (duplicateConfirmed) return;
+        List<StudentDuplicateDto> matches = findPotentialDuplicates(firstName, lastName, dateOfBirth);
+        if (!matches.isEmpty()) {
+            throw new DuplicateStudentException(matches);
+        }
     }
 
     public Page<StudentDto> listStudents(String search, Pageable pageable) {
