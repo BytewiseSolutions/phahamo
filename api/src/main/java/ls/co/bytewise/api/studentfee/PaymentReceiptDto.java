@@ -29,4 +29,8 @@ public class PaymentReceiptDto {
 
     private String receivedBy;
     private LocalDate generatedDate;
+    private boolean cancelled;
+    private String cancellationReason;
+    private String cancelledBy;
+    private LocalDate cancelledAt;
 }
