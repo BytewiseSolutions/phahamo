@@ -1,0 +1,34 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Reverse Payment</h2>
+        <button type="button" class="close-button" (click)="onClose()" aria-label="Close form">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+        <p class="warning-text">
+          This will return M {{ payment?.amount | number:'1.2-2' }} to the student's outstanding balance.
+          The payment will remain in history as reversed.
+        </p>
+        <label for="reversalReason">Reason</label>
+        <textarea id="reversalReason" [(ngModel)]="reason"
+                  placeholder="e.g. Amount entered incorrectly"
+                  maxlength="500"
+                  [ngModelOptions]="{ standalone: true }"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()">Cancel</button>
+        <button type="button" class="danger-button" [disabled]="saving" (click)="onSubmit()">
+          {{ saving ? 'Reversing...' : 'Reverse Payment' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

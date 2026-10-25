@@ -28,6 +28,8 @@
           <th class="method-column">Method</th>
           <th class="reference-column">Reference</th>
           <th class="recorded-column">Recorded By</th>
+          <th>Status</th>
+          @if (canReversePayments) { <th></th> }
         </tr>
         </thead>
         <tbody>
@@ -39,6 +41,20 @@
               <td>{{ payment.method }}</td>
               <td>{{ payment.reference || '—' }}</td>
               <td>{{ payment.receivedByName || '—' }}</td>
+              <td>
+                @if (payment.status === 'REVERSED') {
+                  <span class="status-badge reversed">Reversed</span>
+                } @else {
+                  <span class="status-badge active">Active</span>
+                }
+              </td>
+              @if (canReversePayments) {
+                <td>
+                  @if (payment.status !== 'REVERSED') {
+                    <button type="button" class="link-button danger" (click)="openReversal(payment)">Reverse</button>
+                  }
+                </td>
+              }
             </tr>
           }
         </tbody>
@@ -54,4 +70,11 @@
       </div>
     </div>
   }
+
+  <app-payment-reversal-form
+    [visible]="showReversalForm"
+    [payment]="selectedPayment"
+    (closed)="closeReversal()"
+    (saved)="onReversed()">
+  </app-payment-reversal-form>
 </div>

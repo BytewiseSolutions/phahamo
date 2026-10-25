@@ -80,6 +80,7 @@ import { StudentFeesPage } from './pages/student-fees/student-fees-page/student-
 import { StudentFeeDetail } from './pages/student-fees/student-fee-detail/student-fee-detail';
 import { AdjustmentForm } from './pages/student-fees/adjustment-form/adjustment-form';
 import { PaymentForm } from './pages/student-fees/payment-form/payment-form';
+import { PaymentReversalForm } from './pages/student-fees/payment-reversal-form/payment-reversal-form';
 import { MyFees } from './pages/student-fees/my-fees/my-fees';
 import { PaymentHistory } from './pages/student-fees/payment-history/payment-history';
 import { AnnouncementList } from './pages/announcements/announcement-list/announcement-list';
@@ -178,6 +179,7 @@ import { HolidayForm } from './pages/holidays/holiday-form/holiday-form';
     StudentFeeDetail,
     AdjustmentForm,
     PaymentForm,
+    PaymentReversalForm,
     MyFees,
     PaymentHistory,
     AnnouncementList,
