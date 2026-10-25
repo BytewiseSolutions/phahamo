@@ -73,9 +73,18 @@ public class StudentFeeAccountController {
         return feeService.addAdjustment(accountId, dto, currentUser);
     }
 
+    @PostMapping("/{accountId}/write-off")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public StudentFeeAccountDto writeOff(@AuthenticationPrincipal User currentUser,
+                                         @PathVariable Long accountId,
+                                         @RequestBody StudentFeeAdjustmentDto dto) {
+        return feeService.writeOff(accountId, dto, currentUser);
+    }
+
     @DeleteMapping("/adjustments/{adjustmentId}")
-    public StudentFeeAccountDto removeAdjustment(@PathVariable Long adjustmentId) {
-        return feeService.removeAdjustment(adjustmentId);
+    public StudentFeeAccountDto removeAdjustment(@AuthenticationPrincipal User currentUser,
+                                                 @PathVariable Long adjustmentId) {
+        return feeService.removeAdjustment(adjustmentId, currentUser);
     }
 
     @DeleteMapping("/{accountId}")

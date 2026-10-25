@@ -30,10 +30,13 @@ public class StudentFeeAccountDto extends BaseDto {
     private Double totalAdjustments;
     private Double amountPaid;
     private Double balance;
+    private Double currentTermBalance;
+    private Double previousBalance;
 
     private List<StudentFeeLineDto> lines;
     private List<StudentFeeAdjustmentDto> adjustments;
     private List<StudentFeePaymentDto> payments;
+    private List<PreviousBalanceDto> previousBalances;
 
     private Instant lastReminderSentAt;
     private Instant lastStatementSentAt;
@@ -43,6 +46,20 @@ public class StudentFeeAccountDto extends BaseDto {
 
 
     public StudentFeeAccountDto(StudentFeeAccount acc) {
+        this(acc, List.of());
+    }
+
+    public StudentFeeAccountDto(StudentFeeAccount acc, List<PreviousBalanceDto> previousBalances) {
+        this(acc, previousBalances,
+                Math.max(0.0, acc.getTotalFees() - acc.getTotalAdjustments() - acc.getAmountPaid()),
+                Math.max(0.0, acc.getTotalFees() - acc.getTotalAdjustments() - acc.getAmountPaid())
+                        + previousBalances.stream().mapToDouble(PreviousBalanceDto::getAmount).sum());
+    }
+
+    public StudentFeeAccountDto(StudentFeeAccount acc,
+                                List<PreviousBalanceDto> previousBalances,
+                                double currentTermBalance,
+                                double balance) {
         super(acc);
         this.studentId = acc.getStudent().getId();
         this.studentFirstName = acc.getStudent().getUser().getFirstName();
@@ -61,7 +78,11 @@ public class StudentFeeAccountDto extends BaseDto {
         this.totalFees = acc.getTotalFees();
         this.totalAdjustments = acc.getTotalAdjustments();
         this.amountPaid = acc.getAmountPaid();
-        this.balance = acc.getBalance();
+        this.previousBalances = previousBalances;
+        this.previousBalance = previousBalances.stream()
+                .mapToDouble(PreviousBalanceDto::getAmount).sum();
+        this.currentTermBalance = currentTermBalance;
+        this.balance = balance;
 
         this.lines = acc.getLines().stream().map(StudentFeeLineDto::new).toList();
         this.adjustments = acc.getAdjustments().stream().map(StudentFeeAdjustmentDto::new).toList();

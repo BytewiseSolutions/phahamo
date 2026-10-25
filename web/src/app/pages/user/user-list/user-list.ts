@@ -20,6 +20,8 @@ export class UserList implements OnInit {
   activeTab = 'ALL';
   searchTerm = '';
   statusFilter = 'ALL';
+  currentPage = 1;
+  readonly pageSize = 20;
 
   constructor(
     private backend: BackendService,
@@ -65,6 +67,19 @@ export class UserList implements OnInit {
     return list;
   }
 
+  get paginatedUsers(): User[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredUsers.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredUsers.length / this.pageSize));
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+  }
+
   countByRole(role: string): number {
     if (role === 'ALL') return this.users.length;
     return this.users.filter(u => u.roles.includes(role)).length;
@@ -72,7 +87,18 @@ export class UserList implements OnInit {
 
   setTab(role: string): void {
     this.activeTab = role;
+    this.currentPage = 1;
     this.errorMessage = '';
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  resetPagination(): void {
+    this.currentPage = 1;
   }
 
   ngOnInit(): void {
@@ -86,6 +112,7 @@ export class UserList implements OnInit {
     this.backend.get<User[]>('/users').subscribe({
       next: (users) => {
         this.users = users;
+        this.currentPage = 1;
         this.loading = false;
       },
       error: () => {
@@ -118,6 +145,7 @@ export class UserList implements OnInit {
   clearFilters(): void {
     this.searchTerm = '';
     this.statusFilter = 'ALL';
+    this.currentPage = 1;
   }
 
   onCreateUser(newUser: any): void {

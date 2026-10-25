@@ -157,8 +157,9 @@
           <th>Admission #</th>
           <th>Student</th>
           <th class="num">Total Fees</th>
-          <th class="num">Adjustments</th>
           <th class="num">Paid</th>
+          <th class="num">This Term Balance</th>
+          <th class="num">Previous Balance</th>
           <th class="num">Balance</th>
           <th>Last Reminder</th>
           <th></th>
@@ -181,8 +182,9 @@
                 }
               </td>
               <td class="num">{{ formatAmount(a.totalFees) }}</td>
-              <td class="num">{{ formatAmount(a.totalAdjustments) }}</td>
               <td class="num">{{ formatAmount(a.amountPaid) }}</td>
+              <td class="num">{{ formatAmount(a.currentTermBalance) }}</td>
+              <td class="num">{{ formatAmount(a.previousBalance) }}</td>
               <td class="num">
                 <span class="balance-badge" [class]="balanceClass(a.balance)">
                   {{ formatAmount(a.balance) }}

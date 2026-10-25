@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
-import { StudentFeeAccount } from '../student-fee-account';
+import { PreviousBalance, StudentFeeAccount } from '../student-fee-account';
 import { StudentFeeAdjustment } from '../student-fee-adjustment';
 import {BulkFeeEmailResult} from '../bulk-fee-email-result';
 import { StudentFeePayment } from '../student-fee-payment';
@@ -28,6 +28,8 @@ export class StudentFeeDetail implements OnInit {
   showPaymentForm = false;
   showReversalForm = false;
   selectedPayment: StudentFeePayment | null = null;
+  showWriteOffForm = false;
+  selectedPreviousBalance: PreviousBalance | null = null;
   accountId: number | null = null;
 
   sendingStatement = false;
@@ -45,6 +47,10 @@ export class StudentFeeDetail implements OnInit {
     return this.authService.hasRole('SCHOOL_ADMIN')
       || this.authService.hasRole('SYSTEM_ADMIN')
       || this.authService.hasRole('FINANCE_OFFICER');
+  }
+
+  get canWriteOff(): boolean {
+    return this.authService.hasRole('SCHOOL_ADMIN') || this.authService.hasRole('SYSTEM_ADMIN');
   }
 
   ngOnInit(): void {
@@ -109,6 +115,12 @@ export class StudentFeeDetail implements OnInit {
     this.load();
   }
 
+  totalActivePayments(): number {
+    return this.account?.payments
+      .filter(payment => payment.status !== 'REVERSED')
+      .reduce((total, payment) => total + payment.amount, 0) ?? 0;
+  }
+
   openReversal(payment: StudentFeePayment): void {
     this.selectedPayment = payment;
     this.showReversalForm = true;
@@ -121,6 +133,21 @@ export class StudentFeeDetail implements OnInit {
 
   onReversed(): void {
     this.closeReversal();
+    this.load();
+  }
+
+  openWriteOff(previous: PreviousBalance): void {
+    this.selectedPreviousBalance = previous;
+    this.showWriteOffForm = true;
+  }
+
+  closeWriteOff(): void {
+    this.showWriteOffForm = false;
+    this.selectedPreviousBalance = null;
+  }
+
+  onWrittenOff(): void {
+    this.closeWriteOff();
     this.load();
   }
 

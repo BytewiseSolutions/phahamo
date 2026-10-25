@@ -1,5 +1,6 @@
 export enum AdjustmentType {
   DISCOUNT = 'DISCOUNT',
   SCHOLARSHIP = 'SCHOLARSHIP',
-  WAIVER = 'WAIVER'
+  WAIVER = 'WAIVER',
+  WRITEOFF = 'WRITEOFF'
 }

@@ -45,6 +45,14 @@
         <span class="value negative">− {{ formatAmount(account.totalAdjustments) }}</span>
       </div>
       <div class="summary-item">
+        <span class="label">This Term Balance</span>
+        <span class="value">{{ formatAmount(account.currentTermBalance) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Previous Balance</span>
+        <span class="value">{{ formatAmount(account.previousBalance) }}</span>
+      </div>
+      <div class="summary-item">
         <span class="label">Paid</span>
         <span class="value">{{ formatAmount(account.amountPaid) }}</span>
       </div>
@@ -68,6 +76,26 @@
     </div>
 
     <div class="tab-content">
+
+      @if (account.previousBalances.length > 0) {
+        <section class="previous-balance-section">
+          <h2>Previous Balance</h2>
+          <p>Outstanding amounts carried forward from earlier terms.</p>
+          <div class="table-responsive">
+            <table class="detail-table">
+              <thead><tr><th>Original Term</th><th class="num">Amount</th></tr></thead>
+              <tbody>
+                @for (previous of account.previousBalances; track previous.accountId) {
+                  <tr>
+                    <td>{{ previous.termName }} — {{ previous.academicYearName }}</td>
+                    <td class="num">{{ formatAmount(previous.amount) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
 
       @if (activeTab === 'breakdown') {
         <div class="table-responsive">

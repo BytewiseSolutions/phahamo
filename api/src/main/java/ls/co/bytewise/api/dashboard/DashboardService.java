@@ -14,6 +14,7 @@ import ls.co.bytewise.api.student.StudentStatus;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountRepository;
 import ls.co.bytewise.api.studentfee.StudentFeePaymentDto;
 import ls.co.bytewise.api.studentfee.StudentFeePaymentRepository;
+import ls.co.bytewise.api.studentfee.StudentFeeBalanceService;
 import ls.co.bytewise.api.examination.Examination;
 import ls.co.bytewise.api.examination.ExaminationRepository;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentRepository;
@@ -67,6 +68,7 @@ public class DashboardService {
     private final AssessmentRepository assessmentRepository;
     private final MarkRepository markRepository;
     private final LessonRepository lessonRepository;
+    private final StudentFeeBalanceService feeBalanceService;
 
 
     public DashboardService(StudentRepository studentRepository,
@@ -84,7 +86,8 @@ public class DashboardService {
                             LessonService lessonService,
                             AssessmentRepository assessmentRepository,
                             MarkRepository markRepository,
-                            LessonRepository lessonRepository
+                            LessonRepository lessonRepository,
+                            StudentFeeBalanceService feeBalanceService
                             ) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
@@ -102,6 +105,7 @@ public class DashboardService {
         this.assessmentRepository = assessmentRepository;
         this.markRepository = markRepository;
         this.lessonRepository = lessonRepository;
+        this.feeBalanceService = feeBalanceService;
     }
 
     public SystemDashboardStats getSystemStats() {
@@ -359,7 +363,7 @@ public class DashboardService {
         if (currentTerm != null) {
             stats.setAttendanceRateTerm(calculateAttendanceRate(schoolId, currentTerm, student.getId()));
             feeAccountRepository.findByStudentIdAndTermIdAndSchoolId(student.getId(), currentTerm.getId(), schoolId)
-                    .ifPresent(account -> stats.setFeeBalance(account.getBalance()));
+                    .ifPresent(account -> stats.setFeeBalance(feeBalanceService.totalBalance(account)));
         }
 
         return stats;

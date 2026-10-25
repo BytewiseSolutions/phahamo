@@ -1,0 +1,31 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Write Off Previous Balance</h2>
+        <button type="button" class="close-button" (click)="onClose()" aria-label="Close form">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
+        <p class="hint">Term: <strong>{{ termLabel }}</strong></p>
+        <div class="form-group">
+          <label>Amount (M)</label>
+          <input type="number" [(ngModel)]="amount" min="0.01" [max]="maxAmount" step="0.01" [ngModelOptions]="{ standalone: true }">
+        </div>
+        <div class="form-group">
+          <label>Reason</label>
+          <textarea [(ngModel)]="reason" rows="3" placeholder="e.g. Approved hardship write-off" [ngModelOptions]="{ standalone: true }"></textarea>
+        </div>
+        <p class="hint">Maximum available to write off: <strong>M {{ maxAmount.toFixed(2) }}</strong></p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary-button" (click)="onClose()" [disabled]="saving">Cancel</button>
+        <button type="button" class="primary-button" (click)="onSave()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Write Off Balance' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

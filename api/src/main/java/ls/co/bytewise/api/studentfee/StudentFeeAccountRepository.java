@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 
 @Repository
 public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAccount, Long> {
@@ -30,6 +31,18 @@ public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAcc
             Long studentId, Long termId, Long schoolId);
 
     Optional<StudentFeeAccount> findByIdAndSchoolId(Long id, Long schoolId);
+
+    @Query("""
+            SELECT a FROM StudentFeeAccount a
+            WHERE a.student.id = :studentId
+              AND a.school.id = :schoolId
+              AND a.term.startDate < :termStart
+            ORDER BY a.term.startDate ASC
+            """)
+    List<StudentFeeAccount> findPriorAccounts(
+            @Param("studentId") Long studentId,
+            @Param("schoolId") Long schoolId,
+            @Param("termStart") Instant termStart);
 
     @Query("""
     SELECT COALESCE(SUM(a.totalFees - a.totalAdjustments), 0), COALESCE(SUM(a.amountPaid), 0)

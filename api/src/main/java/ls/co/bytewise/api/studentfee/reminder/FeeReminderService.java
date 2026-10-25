@@ -18,11 +18,14 @@ public class FeeReminderService {
 
     private final StudentFeeAccountRepository accountRepository;
     private final MailService mailService;
+    private final StudentFeeBalanceService balanceService;
 
     public FeeReminderService(StudentFeeAccountRepository accountRepository,
-                              MailService mailService) {
+                              MailService mailService,
+                              StudentFeeBalanceService balanceService) {
         this.accountRepository = accountRepository;
         this.mailService = mailService;
+        this.balanceService = balanceService;
     }
 
     public List<OutstandingStudentDto> getOutstanding(Long termId) {
@@ -33,7 +36,7 @@ public class FeeReminderService {
 
         List<OutstandingStudentDto> result = new ArrayList<>();
         for (StudentFeeAccount acc : accounts) {
-            if (acc.getBalance() == null || acc.getBalance() <= 0) continue;
+            if (balanceService.totalBalance(acc) <= 0) continue;
 
             Student student = acc.getStudent();
             if (student == null) continue;
@@ -44,7 +47,8 @@ public class FeeReminderService {
             dto.setStudentFullName(student.getUser().getFullName());
             dto.setAdmissionNumber(student.getAdmissionNumber());
             dto.setClassName(acc.getSchoolClass().getName());
-            dto.setBalance(acc.getBalance());
+            dto.setBalance(balanceService.totalBalance(acc));
+            dto.setPreviousBalance(balanceService.previousBalance(acc));
             dto.setLastReminderSentAt(acc.getLastReminderSentAt());
             dto.setLastReminderAmount(acc.getLastReminderAmount());
 
@@ -79,7 +83,7 @@ public class FeeReminderService {
         List<StudentFeeAccount> accounts = accountRepository
                 .findAllByTermIdAndSchoolId(termId, schoolId)
                 .stream()
-                .filter(a -> a.getBalance() != null && a.getBalance() > 0)
+                .filter(a -> balanceService.totalBalance(a) > 0)
                 .toList();
 
         return sendToAccounts(accounts);
@@ -109,7 +113,7 @@ public class FeeReminderService {
 
         for (StudentFeeAccount acc : accounts) {
             Student student = acc.getStudent();
-            if (acc.getBalance() == null || acc.getBalance() <= 0) {
+            if (balanceService.totalBalance(acc) <= 0) {
                 result.setSkippedPaidCount(result.getSkippedPaidCount() + 1);
                 continue;
             }
@@ -141,7 +145,7 @@ public class FeeReminderService {
 
             if (anySent) {
                 acc.setLastReminderSentAt(now);
-                acc.setLastReminderAmount(acc.getBalance());
+                acc.setLastReminderAmount(balanceService.totalBalance(acc));
                 accountRepository.save(acc);
             }
         }
@@ -155,12 +159,14 @@ public class FeeReminderService {
         String currency = acc.getSchool().getCurrency() != null
                 ? acc.getSchool().getCurrency().name()
                 : "M";
-        String balance = String.format("%.2f", acc.getBalance());
+        String balance = String.format("%.2f", balanceService.totalBalance(acc));
+        String previous = String.format("%.2f", balanceService.previousBalance(acc));
 
         return "Dear Parent,\n\n" +
                 "This is a reminder that " + student.getUser().getFullName() +
                 " has an outstanding balance of " + currency + " " + balance +
-                " for " + term.getName() + ".\n\n" +
+                " for " + term.getName() + ".\n" +
+                "Previous balance carried forward: " + currency + " " + previous + ".\n\n" +
                 "Please arrange payment at your earliest convenience.\n\n" +
                 "If you have already paid, please disregard this message.\n\n" +
                 "Regards,\n" +

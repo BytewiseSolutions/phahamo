@@ -18,11 +18,14 @@ public class FeeStatementService {
 
     private final StudentFeeAccountRepository accountRepository;
     private final MailService mailService;
+    private final StudentFeeBalanceService balanceService;
 
     public FeeStatementService(StudentFeeAccountRepository accountRepository,
-                               MailService mailService) {
+                               MailService mailService,
+                               StudentFeeBalanceService balanceService) {
         this.accountRepository = accountRepository;
         this.mailService = mailService;
+        this.balanceService = balanceService;
     }
 
     @Transactional
@@ -43,7 +46,7 @@ public class FeeStatementService {
         List<StudentFeeAccount> accounts = accountRepository
                 .findAllByTermIdAndSchoolId(termId, schoolId)
                 .stream()
-                .filter(a -> a.getBalance() != null && a.getBalance() > 0)
+                .filter(a -> balanceService.totalBalance(a) > 0)
                 .toList();
 
         BulkFeeEmailResultDto result = new BulkFeeEmailResultDto();
@@ -56,7 +59,7 @@ public class FeeStatementService {
     private void sendOne(StudentFeeAccount account, BulkFeeEmailResultDto result) {
         Student student = account.getStudent();
         School school = account.getSchool();
-        if (account.getBalance() == null || account.getBalance() <= 0) {
+        if (balanceService.totalBalance(account) <= 0) {
             result.setSkippedPaidCount(result.getSkippedPaidCount() + 1);
             return;
         }
@@ -74,7 +77,11 @@ public class FeeStatementService {
 
         byte[] pdf;
         try {
-            StudentFeeAccountDto accountDto = new StudentFeeAccountDto(account);
+            StudentFeeAccountDto accountDto = new StudentFeeAccountDto(
+                    account,
+                    balanceService.previousBalances(account),
+                    balanceService.currentTermBalance(account),
+                    balanceService.totalBalance(account));
             pdf = FeeStatementRenderer.render(accountDto, school, LocalDate.now());
         } catch (Exception e) {
             result.setFailedCount(result.getFailedCount() + 1);
@@ -117,13 +124,15 @@ public class FeeStatementService {
         String currency = account.getSchool().getCurrency() != null
                 ? account.getSchool().getCurrency().name()
                 : "M";
-        String balance = String.format("%.2f", account.getBalance());
+        String balance = String.format("%.2f", balanceService.totalBalance(account));
+        String previous = String.format("%.2f", balanceService.previousBalance(account));
 
         return "Dear Parent,\n\n" +
                 "Please find attached the fee statement for " +
                 student.getUser().getFullName() + " for " +
                 account.getTerm().getName() + ".\n\n" +
-                "Outstanding balance: " + currency + " " + balance + "\n\n" +
+                "Outstanding balance: " + currency + " " + balance + "\n" +
+                "Previous balance carried forward: " + currency + " " + previous + "\n\n" +
                 "Regards,\n" + account.getSchool().getName();
     }
 }

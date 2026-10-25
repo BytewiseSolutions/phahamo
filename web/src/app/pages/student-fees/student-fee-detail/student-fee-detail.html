@@ -65,6 +65,14 @@
         <span class="value negative">− {{ formatAmount(account.totalAdjustments) }}</span>
       </div>
       <div class="summary-item">
+        <span class="label">This Term Balance</span>
+        <span class="value">{{ formatAmount(account.currentTermBalance) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Previous Balance</span>
+        <span class="value">{{ formatAmount(account.previousBalance) }}</span>
+      </div>
+      <div class="summary-item">
         <span class="label">Paid</span>
         <span class="value">{{ formatAmount(account.amountPaid) }}</span>
       </div>
@@ -93,6 +101,28 @@
     </div>
 
     <div class="tab-content">
+      @if (account.previousBalances.length > 0) {
+        <section class="previous-balance-section">
+          <h2>Previous Balance</h2>
+          <p>Outstanding amounts carried forward from earlier terms.</p>
+          <div class="table-responsive">
+            <table class="detail-table">
+              <thead><tr><th>Original Term</th><th class="num">Amount</th>@if (canWriteOff) { <th></th> }</tr></thead>
+              <tbody>
+                @for (previous of account.previousBalances; track previous.accountId) {
+                  <tr>
+                    <td>{{ previous.termName }} — {{ previous.academicYearName }}</td>
+                    <td class="num">{{ formatAmount(previous.amount) }}</td>
+                    @if (canWriteOff) {
+                      <td><button type="button" class="link-button danger" (click)="openWriteOff(previous)">Write off</button></td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
 
       @if (activeTab === 'breakdown') {
         <div class="table-responsive">
@@ -142,7 +172,7 @@
             <tfoot>
             <tr>
               <td>Total</td>
-              <td class="num">{{ formatAmount(account.totalFees) }}</td>
+              <td class="num">{{ formatAmount(totalActivePayments()) }}</td>
               <td></td>
             </tr>
             </tfoot>
@@ -189,9 +219,11 @@
                       }
                     </td>
                     <td>
-                      <button type="button" class="link-button danger" (click)="removeAdjustment(adj)">
-                        Remove
-                      </button>
+                      @if (adj.type !== 'WRITEOFF' || canWriteOff) {
+                        <button type="button" class="link-button danger" (click)="removeAdjustment(adj)">
+                          Remove
+                        </button>
+                      }
                     </td>
                   </tr>
                 }
@@ -262,7 +294,7 @@
               <tfoot>
               <tr>
                 <td>Total Paid</td>
-                <td class="num">{{ formatAmount(account.amountPaid) }}</td>
+                <td class="num">{{ formatAmount(totalActivePayments()) }}</td>
                 <td colspan="3"></td>
               </tr>
               </tfoot>
@@ -295,6 +327,15 @@
       (closed)="closeReversal()"
       (saved)="onReversed()">
     </app-payment-reversal-form>
+
+    <app-write-off-form
+      [visible]="showWriteOffForm"
+      [accountId]="selectedPreviousBalance?.accountId ?? null"
+      [termLabel]="selectedPreviousBalance ? selectedPreviousBalance.termName + ' — ' + selectedPreviousBalance.academicYearName : ''"
+      [maxAmount]="selectedPreviousBalance?.amount ?? 0"
+      (closed)="closeWriteOff()"
+      (saved)="onWrittenOff()">
+    </app-write-off-form>
 
   }
 

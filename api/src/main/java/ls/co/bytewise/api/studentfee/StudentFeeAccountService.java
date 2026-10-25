@@ -30,6 +30,7 @@ public class StudentFeeAccountService {
     private final AnnualFeeRepository annualFeeRepository;
     private final StudentFeePaymentRepository paymentRepository;
     private final MailService mailService;
+    private final StudentFeeBalanceService balanceService;
 
     public StudentFeeAccountService(StudentFeeAccountRepository accountRepository,
                                     StudentRepository studentRepository,
@@ -37,7 +38,8 @@ public class StudentFeeAccountService {
                                     FeeStructureRepository feeStructureRepository,
                                     AnnualFeeRepository annualFeeRepository,
                                     StudentFeePaymentRepository paymentRepository,
-                                    MailService mailService) {
+                                    MailService mailService,
+                                    StudentFeeBalanceService balanceService) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -45,6 +47,7 @@ public class StudentFeeAccountService {
         this.annualFeeRepository = annualFeeRepository;
         this.paymentRepository = paymentRepository;
         this.mailService = mailService;
+        this.balanceService = balanceService;
     }
 
     @Transactional
@@ -131,7 +134,7 @@ public class StudentFeeAccountService {
         account.setAmountPaid(0.0);
 
         StudentFeeAccount saved = accountRepository.save(account);
-        return new StudentFeeAccountDto(saved);
+        return toDto(saved);
     }
 
     @Transactional
@@ -236,20 +239,20 @@ public class StudentFeeAccountService {
                 .findByStudentIdAndTermIdAndSchoolId(studentId, termId, schoolId)
                 .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException(
                         "No fee account exists for this student and term. Generate first."));
-        return new StudentFeeAccountDto(account);
+        return toDto(account);
     }
 
     public List<StudentFeeAccountDto> listForTerm(Long termId) {
         Long schoolId = TenantContext.getSchoolId();
         return accountRepository.findAllByTermIdAndSchoolId(termId, schoolId)
-                .stream().map(StudentFeeAccountDto::new).toList();
+                .stream().map(this::toDto).toList();
     }
 
     public List<StudentFeeAccountDto> listForClass(Long classId, Long termId) {
         Long schoolId = TenantContext.getSchoolId();
         return accountRepository
                 .findAllBySchoolClassIdAndTermIdAndSchoolId(classId, termId, schoolId)
-                .stream().map(StudentFeeAccountDto::new).toList();
+                .stream().map(this::toDto).toList();
     }
 
     @Transactional
@@ -258,6 +261,10 @@ public class StudentFeeAccountService {
 
         if (dto.getType() == null) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("Adjustment type is required");
+        }
+        if (dto.getType() == AdjustmentType.WRITEOFF) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException(
+                    "Write-offs must use the write-off operation");
         }
         if (dto.getAmount() == null || dto.getAmount() <= 0) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("Amount must be greater than 0");
@@ -290,11 +297,45 @@ public class StudentFeeAccountService {
         account.setUpdatedBy(approver);
 
         StudentFeeAccount saved = accountRepository.save(account);
-        return new StudentFeeAccountDto(saved);
+        return toDto(saved);
     }
 
     @Transactional
-    public StudentFeeAccountDto removeAdjustment(Long adjustmentId) {
+    public StudentFeeAccountDto writeOff(Long accountId, StudentFeeAdjustmentDto dto, User approver) {
+        StudentFeeAccount account = requireAccount(accountId);
+        if (dto.getAmount() == null || dto.getAmount() <= 0) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("Write-off amount must be greater than 0");
+        }
+        if (dto.getReason() == null || dto.getReason().isBlank()) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("Write-off reason is required");
+        }
+
+        double outstanding = balanceService.currentTermBalance(account);
+        if (dto.getAmount() > outstanding) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException(
+                    "Write-off cannot exceed this term's outstanding amount (M " + outstanding + ")");
+        }
+
+        StudentFeeAdjustment writeOff = new StudentFeeAdjustment();
+        writeOff.setAccount(account);
+        writeOff.setType(AdjustmentType.WRITEOFF);
+        writeOff.setAmount(dto.getAmount());
+        writeOff.setReason(dto.getReason().trim());
+        writeOff.setApprovedBy(approver);
+        writeOff.setAppliedAt(Instant.now());
+        writeOff.setSchool(account.getSchool());
+        writeOff.setCreatedBy(approver);
+        writeOff.setUpdatedBy(approver);
+        account.getAdjustments().add(writeOff);
+        account.setTotalAdjustments(account.getAdjustments().stream()
+                .mapToDouble(StudentFeeAdjustment::getAmount).sum());
+        account.setUpdatedBy(approver);
+
+        return toDto(accountRepository.save(account));
+    }
+
+    @Transactional
+    public StudentFeeAccountDto removeAdjustment(Long adjustmentId, User remover) {
         Long schoolId = TenantContext.getSchoolId();
 
         List<StudentFeeAccount> accounts = accountRepository.findAllBySchoolId(schoolId);
@@ -306,11 +347,17 @@ public class StudentFeeAccountService {
                     .orElse(null);
 
             if (found != null) {
+                if (found.getType() == AdjustmentType.WRITEOFF
+                        && !remover.hasRole(ls.co.bytewise.api.common.UserRole.SCHOOL_ADMIN)
+                        && !remover.hasRole(ls.co.bytewise.api.common.UserRole.SYSTEM_ADMIN)) {
+                    throw new StudentFeeExceptions.InvalidFeeOperationException(
+                            "Only a school admin can remove a write-off");
+                }
                 account.getAdjustments().remove(found);
                 account.setTotalAdjustments(account.getAdjustments().stream()
                         .mapToDouble(StudentFeeAdjustment::getAmount).sum());
                 StudentFeeAccount saved = accountRepository.save(account);
-                return new StudentFeeAccountDto(saved);
+                return toDto(saved);
             }
         }
 
@@ -339,7 +386,7 @@ public class StudentFeeAccountService {
     }
 
     public StudentFeeAccountDto getById(Long id) {
-        return new StudentFeeAccountDto(requireAccount(id));
+        return toDto(requireAccount(id));
     }
 
     @Transactional(readOnly = true)
@@ -368,12 +415,13 @@ public class StudentFeeAccountService {
             throw new StudentFeeExceptions.DuplicatePaymentException(new StudentFeePaymentDto(duplicate));
         }
 
-        if (account.getBalance() <= 0) {
+        double balance = balanceService.totalBalance(account);
+        if (balance <= 0) {
             throw new StudentFeeExceptions.InvalidFeeOperationException("This account is already fully paid");
         }
-        if (dto.getAmount() > account.getBalance()) {
+        if (dto.getAmount() > balance) {
             throw new StudentFeeExceptions.InvalidFeeOperationException(
-                    "Payment exceeds remaining balance (M " + account.getBalance() + ")");
+                    "Payment exceeds remaining balance (M " + balance + ")");
         }
 
         StudentFeePayment payment = new StudentFeePayment();
@@ -386,7 +434,7 @@ public class StudentFeeAccountService {
         payment.setStatus(PaymentStatus.ACTIVE);
         payment.setSchool(account.getSchool());
         payment.setCreatedBy(receivedBy);
-        payment.setBalanceAfter(account.getBalance() - dto.getAmount());
+        payment.setBalanceAfter(balance - dto.getAmount());
         account.setAmountPaid(account.getAmountPaid() + dto.getAmount());
         account.setUpdatedBy(receivedBy);
         account.getPayments().add(payment);
@@ -414,13 +462,13 @@ public class StudentFeeAccountService {
                     + student.getUser().getFullName() + " on " + java.time.LocalDate.now() + ".\n\n"
                     + "Receipt Number: RCPT-" + String.format("%05d", saved.getPayments().get(saved.getPayments().size() - 1).getId()) + "\n"
                     + "Payment Method: " + dto.getMethod() + "\n"
-                    + "Remaining Balance: M " + String.format("%.2f", saved.getBalance()) + "\n\n"
+                    + "Remaining Balance: M " + String.format("%.2f", balance - dto.getAmount()) + "\n\n"
                     + "Thank you for your payment.\n\n"
                     + account.getSchool().getName();
             mailService.send(recipientEmail, subject, body);
         }
 
-        return new StudentFeeAccountDto(saved);
+        return toDto(saved);
     }
 
     private StudentFeePayment findDuplicatePayment(StudentFeeAccount account, StudentFeePaymentDto dto) {
@@ -462,7 +510,7 @@ public class StudentFeeAccountService {
         payment.setReversedAt(Instant.now());
         payment.setReversedBy(reversedBy);
 
-        return new StudentFeeAccountDto(accountRepository.save(account));
+        return toDto(accountRepository.save(account));
     }
 
     public StudentFeeAccountDto getAccountForStudent(User user, Long termId) {
@@ -476,6 +524,14 @@ public class StudentFeeAccountService {
         return accountRepository.findByStudentIdAndTermIdAndSchoolId(student.getId(), termId, schoolId)
                 .map(StudentFeeAccountDto::new)
                 .orElse(null);
+    }
+
+    private StudentFeeAccountDto toDto(StudentFeeAccount account) {
+        return new StudentFeeAccountDto(
+                account,
+                balanceService.previousBalances(account),
+                balanceService.currentTermBalance(account),
+                balanceService.totalBalance(account));
     }
 
     public byte[] generateReceipt(Long paymentId, User currentUser) {

@@ -42,10 +42,11 @@
         class="search-input"
         placeholder="Search by name, email, or phone..."
         [(ngModel)]="searchTerm"
+        (ngModelChange)="resetPagination()"
         [ngModelOptions]="{ standalone: true }"/>
     </div>
 
-    <select class="status-filter" [(ngModel)]="statusFilter" [ngModelOptions]="{ standalone: true }">
+    <select class="status-filter" [(ngModel)]="statusFilter" (ngModelChange)="resetPagination()" [ngModelOptions]="{ standalone: true }">
       <option value="ALL">All statuses</option>
       <option value="ACTIVE">Active only</option>
       <option value="INACTIVE">Inactive only</option>
@@ -68,6 +69,7 @@
     <table class="users-table">
       <thead>
       <tr>
+        <th class="index-column">#</th>
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
@@ -77,8 +79,9 @@
       </tr>
       </thead>
       <tbody>
-        @for (user of filteredUsers; track user.id) {
+        @for (user of paginatedUsers; track user.id; let i = $index) {
           <tr>
+            <td class="index-column">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
             <td>{{ user.firstName }} {{ user.lastName }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.phone }}</td>
@@ -103,5 +106,31 @@
         }
       </tbody>
     </table>
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button type="button" class="pagination-button"
+                [disabled]="currentPage === 1"
+                (click)="goToPage(currentPage - 1)">
+          Previous
+        </button>
+
+        <div class="page-numbers">
+          @for (page of pageNumbers; track page) {
+            <button type="button" class="pagination-button page-number"
+                    [class.active]="currentPage === page"
+                    (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          }
+        </div>
+
+        <button type="button" class="pagination-button"
+                [disabled]="currentPage === totalPages"
+                (click)="goToPage(currentPage + 1)">
+          Next
+        </button>
+      </div>
+    }
   }
 </div>

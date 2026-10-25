@@ -17,6 +17,9 @@ export interface StudentFeeAccount {
   totalAdjustments: number;
   amountPaid: number;
   balance: number;
+  currentTermBalance: number;
+  previousBalance: number;
+  previousBalances: PreviousBalance[];
   lines: StudentFeeLine[];
   adjustments: StudentFeeAdjustment[];
   payments: StudentFeePayment[];
@@ -25,4 +28,12 @@ export interface StudentFeeAccount {
   hasEmailParent: boolean;
   parents: { fullName: string; email: string | null; phone: string | null; hasEmail: boolean }[];
   lastStatementSentAt: string | null;
+}
+
+export interface PreviousBalance {
+  accountId: number;
+  termId: number;
+  termName: string;
+  academicYearName?: string;
+  amount: number;
 }

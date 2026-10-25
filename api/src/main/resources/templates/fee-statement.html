@@ -82,6 +82,24 @@
     </tbody>
 </table>
 
+<div th:if="${!account.previousBalances.isEmpty()}" style="margin-bottom: 20px;">
+    <div class="section-title">Previous Balance Carried Forward</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Original Term</th>
+            <th class="num">Outstanding</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="previous : ${account.previousBalances}">
+            <td th:text="${previous.termName + ' — ' + previous.academicYearName}">Term 1 — 2026</td>
+            <td class="num" th:text="'M ' + ${#numbers.formatDecimal(previous.amount, 1, 2)}">M 500.00</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 <div th:if="${!account.adjustments.isEmpty()}" style="margin-bottom: 20px;">
     <div class="section-title">Adjustments</div>
     <table>
@@ -125,7 +143,7 @@
 
 <div class="totals">
     <div class="total-row">
-        <span>Total Charged</span>
+        <span>This Term's Fees</span>
         <span th:text="'M ' + ${#numbers.formatDecimal(account.totalFees, 1, 2)}">M 2,200.00</span>
     </div>
     <div class="total-row">
@@ -135,6 +153,10 @@
     <div class="total-row">
         <span>Total Paid</span>
         <span th:text="'M ' + ${#numbers.formatDecimal(account.amountPaid, 1, 2)}">M 1,500.00</span>
+    </div>
+    <div class="total-row">
+        <span>Previous Balance</span>
+        <span th:text="'M ' + ${#numbers.formatDecimal(account.previousBalance, 1, 2)}">M 500.00</span>
     </div>
     <div class="total-row balance">
         <span>Outstanding Balance</span>

@@ -16,6 +16,7 @@ public class OutstandingStudentDto {
     private String admissionNumber;
     private String className;
     private Double balance;
+    private Double previousBalance;
     private Instant lastReminderSentAt;
     private Double lastReminderAmount;
     private List<ParentContactDto> parents;
