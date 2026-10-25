@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.timetable.lesson;
 
 import ls.co.bytewise.api.school.School;
+import ls.co.bytewise.api.holiday.HolidayService;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.teacher.Teacher;
 import ls.co.bytewise.api.teacher.TeacherDto;
@@ -24,18 +25,28 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final TimetableRepository timetableRepository;
     private final TeacherRepository teacherRepository;
+    private final HolidayService holidayService;
 
     public LessonService(LessonRepository lessonRepository,
-                         TimetableRepository timetableRepository,
-                         TeacherRepository teacherRepository) {
+                            TimetableRepository timetableRepository,
+                            TeacherRepository teacherRepository,
+                            HolidayService holidayService) {
         this.lessonRepository = lessonRepository;
         this.timetableRepository = timetableRepository;
         this.teacherRepository = teacherRepository;
+        this.holidayService = holidayService;
     }
 
     @Transactional
     public List<LessonDto> getOrCreateLessonsForClassAndDate(User requester, Long schoolClassId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
+
+        if (holidayService.isHoliday(schoolId, date)) {
+            return lessonRepository
+                    .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
+                            schoolClassId, date, date, schoolId)
+                    .stream().map(LessonDto::new).toList();
+        }
 
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId).stream()
@@ -57,6 +68,16 @@ public class LessonService {
     @Transactional
     public List<LessonDto> getOrCreateLessonsForTeacherAndDate(User requester, Long teacherId, LocalDate date) {
         Long schoolId = TenantContext.getSchoolId();
+
+        if (holidayService.isHoliday(schoolId, date)) {
+            return mergeTeacherLessons(
+                    lessonRepository
+                            .findAllByTimetable_Assignment_Teacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
+                                    teacherId, date, schoolId),
+                    lessonRepository
+                            .findAllBySubstituteTeacher_IdAndDateAndSchoolIdOrderByTimetable_Period_StartTimeAsc(
+                                    teacherId, date, schoolId));
+        }
 
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId).stream()
@@ -93,6 +114,7 @@ public class LessonService {
         while (!cursor.isAfter(endDate)) {
             for (Timetable slot : slotsByDay) {
                 if (slot.getDayOfWeek() != cursor.getDayOfWeek()) continue;
+                if (holidayService.isHoliday(schoolId, cursor)) continue;
                 if (lessonRepository.existsByTimetable_IdAndDateAndSchoolId(slot.getId(), cursor, schoolId)) continue;
 
                 try {
@@ -126,6 +148,7 @@ public class LessonService {
         while (!cursor.isAfter(endDate)) {
             for (Timetable slot : slots) {
                 if (slot.getDayOfWeek() != cursor.getDayOfWeek()) continue;
+                if (holidayService.isHoliday(schoolId, cursor)) continue;
                 if (lessonRepository.existsByTimetable_IdAndDateAndSchoolId(slot.getId(), cursor, schoolId)) continue;
 
                 try {
@@ -187,6 +210,12 @@ public class LessonService {
     public LessonDto updateStatus(User editor, Long id, LessonStatus newStatus,
                                   Long substituteTeacherUserId) {
         Lesson lesson = getLessonInCurrentSchool(id);
+
+        if (holidayService.isHoliday(TenantContext.getSchoolId(), lesson.getDate())
+                && newStatus != LessonStatus.CANCELLED) {
+            throw new LessonExceptions.InvalidLessonException(
+                    "Lessons on a school holiday must remain cancelled");
+        }
 
         if (newStatus == LessonStatus.SUBSTITUTED) {
             if (substituteTeacherUserId == null) {

@@ -1,0 +1,33 @@
+<section class="holiday-form-card">
+  <div class="section-heading">
+    <div>
+      <h2>{{ holiday ? 'Edit Holiday' : 'Add Holiday' }}</h2>
+      <p>One date or a date range can be selected.</p>
+    </div>
+    <button type="button" class="icon-button" (click)="cancelled.emit()" aria-label="Close form">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="holiday-form-grid">
+    <label>
+      <span>Name</span>
+      <input type="text" [(ngModel)]="name" placeholder="e.g. Mid-term break" [ngModelOptions]="{ standalone: true }">
+    </label>
+    <label>
+      <span>Start date</span>
+      <input type="date" [(ngModel)]="startDate" [ngModelOptions]="{ standalone: true }">
+    </label>
+    <label>
+      <span>End date</span>
+      <input type="date" [(ngModel)]="endDate" [ngModelOptions]="{ standalone: true }">
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="secondary-button" (click)="cancelled.emit()">Cancel</button>
+    <button type="button" class="primary-button" [disabled]="saving" (click)="submit()">
+      {{ saving ? 'Saving...' : (holiday ? 'Save Changes' : 'Add Holiday') }}
+    </button>
+  </div>
+</section>

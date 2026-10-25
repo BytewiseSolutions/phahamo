@@ -1,0 +1,136 @@
+.holidays-page {
+  padding: 40px;
+}
+
+.page-header,
+.holiday-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 20px;
+  border-radius: var(--border-radius-md);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.primary-button {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.primary-button:hover:not(:disabled) {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondary-button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.secondary-button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.link-button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-button:hover { text-decoration: underline; }
+.link-button.danger { color: var(--error); }
+
+.page-header h1,
+.holiday-details h2 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.page-header h1 { font-size: 24px; }
+.page-header p,
+.holiday-details p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.holiday-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.holiday-list {
+  display: grid;
+  gap: 12px;
+}
+
+.holiday-card {
+  justify-content: flex-start;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.holiday-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.holiday-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: var(--border-radius-md);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.holiday-details { flex: 1; min-width: 0; }
+.holiday-details h2 { font-size: 15px; }
+.holiday-details p span { margin: 0 5px; color: var(--text-muted); }
+.holiday-actions { display: flex; gap: 12px; }
+
+.empty-state { text-align: center; }
+.empty-state > i { color: var(--primary); font-size: 26px; }
+
+@media (max-width: 760px) {
+  .holidays-page { padding: 24px 16px; }
+  .page-header { align-items: flex-start; flex-direction: column; }
+  .holiday-card { align-items: flex-start; flex-wrap: wrap; }
+  .holiday-actions { width: 100%; margin-left: 54px; }
+}

@@ -19,6 +19,8 @@ import ls.co.bytewise.api.teacher.TeacherExceptions;
 import ls.co.bytewise.api.term.TermExceptions;
 import ls.co.bytewise.api.timetable.TimetableExceptions;
 import ls.co.bytewise.api.timetable.lesson.LessonExceptions;
+import ls.co.bytewise.api.attendance.AttendanceExceptions;
+import ls.co.bytewise.api.holiday.HolidayExceptions;
 import ls.co.bytewise.api.timetable.period.PeriodExceptions;
 import ls.co.bytewise.api.user.UserExceptions;
 import ls.co.bytewise.api.user.auth.InvalidTokenException;
@@ -277,6 +279,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LessonExceptions.ActiveSchoolNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleActiveSchoolNotFound(LessonExceptions.ActiveSchoolNotFoundException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AttendanceExceptions.InvalidAttendanceException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAttendance(AttendanceExceptions.InvalidAttendanceException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(HolidayExceptions.HolidayNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleHolidayNotFound(HolidayExceptions.HolidayNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(HolidayExceptions.InvalidHolidayException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidHoliday(HolidayExceptions.InvalidHolidayException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

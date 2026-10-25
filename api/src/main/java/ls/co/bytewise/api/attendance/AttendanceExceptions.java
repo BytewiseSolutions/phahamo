@@ -17,4 +17,8 @@ public class AttendanceExceptions {
     public static class LessonNotFoundException extends RuntimeException {
         public LessonNotFoundException(String message) { super(message); }
     }
+
+    public static class InvalidAttendanceException extends RuntimeException {
+        public InvalidAttendanceException(String message) { super(message); }
+    }
 }

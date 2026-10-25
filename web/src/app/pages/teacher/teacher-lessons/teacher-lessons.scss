@@ -152,3 +152,17 @@
 .status-select:focus {
   border-color: var(--primary);
 }
+.holiday-banner {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid rgb(from var(--warning) r g b / 0.3);
+  border-radius: var(--border-radius-md);
+  background: rgb(from var(--warning) r g b / 0.1);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.holiday-banner i { color: var(--warning); }

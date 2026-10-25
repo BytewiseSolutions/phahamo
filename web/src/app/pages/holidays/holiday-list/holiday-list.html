@@ -1,0 +1,49 @@
+<div class="holidays-page">
+  <div class="page-header">
+    <div>
+      <h1>School Holidays</h1>
+      <p>Mark public holidays, closures, and breaks so lessons and attendance are not expected.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="openCreate()">
+      <i class="fa-solid fa-plus"></i> Add Holiday
+    </button>
+  </div>
+
+  @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
+  @if (successMessage) { <div class="success-banner">{{ successMessage }}</div> }
+
+  @if (showForm) {
+    <app-holiday-form
+      [holiday]="editing"
+      [saving]="saving"
+      (submitted)="save($event)"
+      (cancelled)="closeForm()">
+    </app-holiday-form>
+  }
+
+  @if (loading) {
+    <div class="loading-state">Loading holidays...</div>
+  } @else if (holidays.length === 0) {
+    <div class="empty-state">
+      <i class="fa-solid fa-calendar-check"></i>
+      <h3>No holidays added</h3>
+      <p>School closures and breaks will appear here.</p>
+    </div>
+  } @else {
+    <div class="holiday-list">
+      @for (holiday of holidays; track holiday.id) {
+        <article class="holiday-card">
+          <div class="holiday-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+          <div class="holiday-details">
+            <h2>{{ holiday.name }}</h2>
+            <p>{{ formatDate(holiday.startDate) }} <span>to</span> {{ formatDate(holiday.endDate) }}</p>
+          </div>
+          <div class="holiday-actions">
+            <button type="button" class="link-button" (click)="openEdit(holiday)">Edit</button>
+            <button type="button" class="link-button danger" (click)="remove(holiday)">Remove</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

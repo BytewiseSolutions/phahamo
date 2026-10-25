@@ -1,0 +1,71 @@
+.holiday-form-card {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.section-heading h2 { margin: 0; color: var(--text-primary); font-size: 17px; }
+.section-heading p { margin: 5px 0 0; color: var(--text-secondary); font-size: 13px; }
+
+.holiday-form-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.holiday-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.holiday-form-grid input {
+  height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.holiday-form-grid input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(from var(--primary) r g b / 0.1);
+}
+
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-button:hover { background: var(--border-light); }
+
+@media (max-width: 760px) {
+  .holiday-form-grid { grid-template-columns: 1fr; }
+}

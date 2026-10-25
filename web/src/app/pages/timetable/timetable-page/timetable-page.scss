@@ -2,6 +2,22 @@
   padding: 40px;
 }
 
+.holiday-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 13px 16px;
+  border: 1px solid rgb(from var(--warning) r g b / 0.3);
+  border-radius: var(--border-radius-md);
+  background: rgb(from var(--warning) r g b / 0.1);
+  color: var(--text-primary);
+}
+
+.holiday-banner > i { color: var(--warning); font-size: 18px; }
+.holiday-banner div { display: flex; flex-direction: column; gap: 3px; }
+.holiday-banner span { color: var(--text-secondary); font-size: 12px; }
+
 .page-header {
   display: flex;
   align-items: center;

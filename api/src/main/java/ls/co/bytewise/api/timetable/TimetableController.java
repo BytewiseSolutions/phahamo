@@ -40,8 +40,10 @@ public class TimetableController {
 
     @GetMapping
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
-    public List<TimetableDto> listAll() {
-        return timetableService.listAll();
+    public List<TimetableDto> listAll(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return timetableService.listAll(date);
     }
 
     @GetMapping("/teacher/{id}")

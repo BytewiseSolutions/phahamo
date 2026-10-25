@@ -29,7 +29,7 @@ export class AssessmentForm implements OnChanges {
     termId: number;
     name: string;
     maxMark: number;
-    weight: number | null;
+    weight: number;
     date: string;
   }>();
   assignments: SubjectClassAssignment[] = [];

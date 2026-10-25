@@ -2,6 +2,7 @@ package ls.co.bytewise.api.attendance;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,10 @@ import java.util.Optional;
 
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
+
+    @Modifying
+    @Query("delete from Attendance a where a.lesson.id in :lessonIds")
+    void deleteAllByLessonIdIn(@Param("lessonIds") List<Long> lessonIds);
 
     Optional<Attendance> findByStudentIdAndLessonIdAndSchoolId(Long studentId, Long lessonId, Long schoolId);
 

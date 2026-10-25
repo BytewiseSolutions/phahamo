@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.attendance;
 
 import ls.co.bytewise.api.common.UserRole;
+import ls.co.bytewise.api.holiday.HolidayService;
 import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.school.School;
@@ -30,6 +31,7 @@ public class AttendanceService {
     private final LessonRepository lessonRepository;
     private final AbsenceAlertLogRepository absenceAlertLogRepository;
     private final MailService mailService;
+    private final HolidayService holidayService;
 
 
     public AttendanceService(
@@ -38,7 +40,8 @@ public class AttendanceService {
             SchoolClassRepository schoolClassRepository,
             LessonRepository lessonRepository,
             AbsenceAlertLogRepository absenceAlertLogRepository,
-            MailService mailService
+            MailService mailService,
+            HolidayService holidayService
     ) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
@@ -46,11 +49,13 @@ public class AttendanceService {
         this.lessonRepository = lessonRepository;
         this.absenceAlertLogRepository = absenceAlertLogRepository;
         this.mailService = mailService;
+        this.holidayService = holidayService;
     }
 
     public List<AttendanceDto> getAttendanceForLesson(User requester, Long lessonId) {
         Long schoolId = TenantContext.getSchoolId();
         Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureNotHoliday(schoolId, lesson);
         ensureCanMarkLesson(requester, lesson);
 
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
@@ -72,6 +77,7 @@ public class AttendanceService {
     ) {
         Long schoolId = TenantContext.getSchoolId();
         Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureNotHoliday(schoolId, lesson);
         ensureCanMarkLesson(marker, lesson);
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
 
@@ -102,6 +108,7 @@ public class AttendanceService {
     ) {
         Long schoolId = TenantContext.getSchoolId();
         Lesson lesson = resolveLesson(lessonId, schoolId);
+        ensureNotHoliday(schoolId, lesson);
         ensureCanMarkLesson(marker, lesson);
         SchoolClass schoolClass = lesson.getTimetable().getAssignment().getSchoolClass();
         Attendance saved = upsert(marker, schoolClass, lesson, studentId, status);
@@ -216,6 +223,17 @@ public class AttendanceService {
 
         if (!isSubjectTeacher && !isClassTeacher) {
             throw new AttendanceExceptions.NotClassTeacherException("You are not authorised to mark attendance for this lesson");
+        }
+    }
+
+    private void ensureNotHoliday(Long schoolId, Lesson lesson) {
+        if (holidayService.isHoliday(schoolId, lesson.getDate())) {
+            throw new AttendanceExceptions.InvalidAttendanceException(
+                    "Attendance cannot be recorded on a school holiday");
+        }
+        if (lesson.getStatus() == LessonStatus.CANCELLED) {
+            throw new AttendanceExceptions.InvalidAttendanceException(
+                    "Attendance cannot be recorded for a cancelled lesson");
         }
     }
 

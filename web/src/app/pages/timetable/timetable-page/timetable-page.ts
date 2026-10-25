@@ -34,6 +34,7 @@ export class TimetablePage implements OnInit {
   loadingTeachers = false;
   loadingTimetable = false;
   errorMessage = '';
+  holidayName: string | null = null;
 
   showPeriodForm = false;
   editingPeriod: Period | null = null;
@@ -81,9 +82,7 @@ export class TimetablePage implements OnInit {
 
   onDayChange(day: DayOfWeek): void {
     this.activeDay = day;
-    if (this.isTeacher) {
-      this.loadTimetable();
-    }
+    this.loadTimetable();
   }
 
   onViewModeChange(mode: 'class' | 'teacher'): void {
@@ -198,18 +197,28 @@ export class TimetablePage implements OnInit {
     } else if (this.isStudent) {
       url = '/timetable/my-class';
     } else {
-      url = '/timetable';
+      url = `/timetable?date=${this.dateForDay(this.activeDay)}`;
     }
 
     this.backend.get<Timetable[]>(url).subscribe({
       next: (slots) => {
         this.timetableSlots = slots;
+        this.holidayName = slots.find(slot => slot.holidayName)?.holidayName ?? null;
         this.loadingTimetable = false;
+        if (this.isStudent) this.loadHolidayForActiveDay();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load timetable.';
         this.loadingTimetable = false;
       }
+    });
+  }
+
+  private loadHolidayForActiveDay(): void {
+    const date = this.dateForDay(this.activeDay);
+    this.backend.get<{ name: string }[]>(`/holidays?from=${date}&to=${date}`).subscribe({
+      next: (holidays) => this.holidayName = holidays[0]?.name ?? null,
+      error: () => this.holidayName = null
     });
   }
 

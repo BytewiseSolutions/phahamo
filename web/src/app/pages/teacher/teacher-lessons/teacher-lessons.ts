@@ -4,6 +4,7 @@ import { Lesson } from '../../timetable/lesson';
 import { LessonStatus } from '../../timetable/lesson-status';
 import { Attendance } from '../../attendance/attendance';
 import { Teacher } from '../teacher';
+import { Holiday } from '../../holidays/holiday';
 
 type LessonFilter = 'today' | 'week' | 'month' | 'quarter' | 'custom';
 
@@ -27,6 +28,7 @@ export class TeacherLessons implements OnChanges {
   attendanceByLesson: Record<number, AttendanceSummary> = {};
   loading = false;
   errorMessage = '';
+  holidays: Holiday[] = [];
 
   lessonFilter: LessonFilter = 'today';
   customStartDate: string = new Date().toISOString().substring(0, 10);
@@ -76,6 +78,7 @@ export class TeacherLessons implements OnChanges {
       ).subscribe({
         next: (lessons) => {
           this.lessons = lessons;
+          this.loadHolidays(today, today);
           this.loading = false;
           this.loaded = true;
           this.loadAttendanceForAll();
@@ -96,6 +99,7 @@ export class TeacherLessons implements OnChanges {
     ).subscribe({
       next: (lessons) => {
         this.lessons = lessons;
+        this.loadHolidays(start, end);
         this.loading = false;
         this.loaded = true;
         this.loadAttendanceForAll();
@@ -104,6 +108,13 @@ export class TeacherLessons implements OnChanges {
         this.errorMessage = err.error?.message || 'Failed to load lessons.';
         this.loading = false;
       }
+    });
+  }
+
+  private loadHolidays(from: string, to: string): void {
+    this.backend.get<Holiday[]>(`/holidays?from=${from}&to=${to}`).subscribe({
+      next: (holidays) => this.holidays = holidays,
+      error: () => this.holidays = []
     });
   }
 
