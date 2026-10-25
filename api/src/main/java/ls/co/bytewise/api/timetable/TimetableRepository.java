@@ -12,6 +12,8 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
 
     List<Timetable> findAllBySchoolId(Long schoolId);
 
+    List<Timetable> findAllByPeriodIdAndSchoolId(Long periodId, Long schoolId);
+
     List<Timetable> findAllByAssignment_Teacher_IdAndSchoolId(Long teacherId, Long schoolId);
 
     List<Timetable> findAllByAssignment_SchoolClass_IdAndSchoolId(Long schoolClassId, Long schoolId);

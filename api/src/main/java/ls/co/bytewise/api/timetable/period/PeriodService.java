@@ -3,6 +3,8 @@ package ls.co.bytewise.api.timetable.period;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.user.User;
+import ls.co.bytewise.api.timetable.Timetable;
+import ls.co.bytewise.api.timetable.TimetableRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,9 +14,11 @@ import java.util.List;
 public class PeriodService {
 
     private final PeriodRepository periodRepository;
+    private final TimetableRepository timetableRepository;
 
-    public PeriodService(PeriodRepository periodRepository) {
+    public PeriodService(PeriodRepository periodRepository, TimetableRepository timetableRepository) {
         this.periodRepository = periodRepository;
+        this.timetableRepository = timetableRepository;
     }
 
     @Transactional
@@ -32,6 +36,7 @@ public class PeriodService {
 
         Period period = new Period();
         period.setName(dto.getName());
+        period.setType(dto.getType() != null ? dto.getType() : PeriodType.LESSON);
         period.setStartTime(dto.getStartTime());
         period.setEndTime(dto.getEndTime());
         period.setSchool(school);
@@ -55,6 +60,15 @@ public class PeriodService {
 
         if (dto.getName() != null) {
             period.setName(dto.getName());
+        }
+
+        if (dto.getType() != null && dto.getType() != period.getType()) {
+            List<Timetable> slots = timetableRepository.findAllByPeriodIdAndSchoolId(id, TenantContext.getSchoolId());
+            if (!slots.isEmpty() && dto.getType() != PeriodType.LESSON) {
+                throw new PeriodExceptions.InvalidPeriodException(
+                        "Remove timetable slots before changing this period to a break or lunch period");
+            }
+            period.setType(dto.getType());
         }
 
         if (dto.getStartTime() != null) {

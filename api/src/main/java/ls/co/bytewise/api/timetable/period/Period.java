@@ -16,6 +16,10 @@ public class Period extends SchoolScopedEntity {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'LESSON'")
+    private PeriodType type = PeriodType.LESSON;
+
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 

@@ -13,6 +13,7 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.timetable.lesson.LessonRepository;
 import ls.co.bytewise.api.timetable.lesson.LessonStatus;
+import ls.co.bytewise.api.timetable.period.PeriodType;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -227,6 +228,11 @@ public class AttendanceService {
     }
 
     private void ensureNotHoliday(Long schoolId, Lesson lesson) {
+        if (lesson.getTimetable().getPeriod().getType() != null
+                && lesson.getTimetable().getPeriod().getType() != PeriodType.LESSON) {
+            throw new AttendanceExceptions.InvalidAttendanceException(
+                    "Attendance cannot be recorded for a break or lunch period");
+        }
         if (holidayService.isHoliday(schoolId, lesson.getDate())) {
             throw new AttendanceExceptions.InvalidAttendanceException(
                     "Attendance cannot be recorded on a school holiday");

@@ -67,6 +67,6 @@ export class TeacherTimetable implements OnChanges {
   }
 
   isBreak(period: Period): boolean {
-    return period.name === 'Break' || period.name === 'Lunch';
+    return period.type !== 'LESSON';
   }
 }

@@ -52,6 +52,7 @@
               <tr>
                 <th>#</th>
                 <th>Name</th>
+                <th>Type</th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Action</th>
@@ -62,6 +63,7 @@
                 <tr>
                   <td>{{ i + 1 }}</td>
                   <td>{{ period.name }}</td>
+                  <td>{{ period.type === 'LUNCH' ? 'Lunch' : period.type === 'BREAK' ? 'Break' : 'Lesson' }}</td>
                   <td>{{ period.startTime }}</td>
                   <td>{{ period.endTime }}</td>
                   <td>
@@ -128,17 +130,21 @@
               <tbody>
                 @for (period of periods; track period.id) {
                   @let slot = slotForTeacherView(activeDay, period.id);
-                  @if (slot) {
-                    <tr>
+                  @if (slot || isBreak(period)) {
+                    <tr [class.break-row]="isBreak(period)">
                       <td><div class="period-name">{{ period.name }}</div></td>
                       <td><div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div></td>
-                      <td><div class="cell-subject">{{ slot.subjectName }}</div></td>
-                      <td>
-                        <div class="cell-teacher">{{ slot.schoolClassName }}</div>
-                        @if (slot.substituteTeacherName) {
-                          <div class="substitution-note">Cover: {{ slot.substituteTeacherName }}</div>
-                        }
-                      </td>
+                      @if (isBreak(period)) {
+                        <td colspan="2" class="break-cell">{{ period.name }}</td>
+                      } @else {
+                        <td><div class="cell-subject">{{ slot?.subjectName }}</div></td>
+                        <td>
+                          <div class="cell-teacher">{{ slot?.schoolClassName }}</div>
+                          @if (slot?.substituteTeacherName) {
+                            <div class="substitution-note">Cover: {{ slot?.substituteTeacherName }}</div>
+                          }
+                        </td>
+                      }
                     </tr>
                   }
                 }
@@ -178,12 +184,12 @@
               </thead>
               <tbody>
                 @for (period of periods; track period.id) {
-                  <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+                    <tr [class.break-row]="period.type !== 'LESSON'">
                     <td class="period-col">
                       <div class="period-name">{{ period.name }}</div>
                       <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
                     </td>
-                    @if (period.name === 'Break' || period.name === 'Lunch') {
+                    @if (period.type !== 'LESSON') {
                       <td [attr.colspan]="schoolClasses.length" class="break-cell">{{ period.name }}</td>
                     } @else {
                       @for (schoolClass of schoolClasses; track schoolClass.id) {
@@ -218,12 +224,12 @@
               </thead>
               <tbody>
                 @for (period of periods; track period.id) {
-                  <tr [class.break-row]="period.name === 'Break' || period.name === 'Lunch'">
+                    <tr [class.break-row]="period.type !== 'LESSON'">
                     <td class="period-col">
                       <div class="period-name">{{ period.name }}</div>
                       <div class="period-time">{{ period.startTime }}–{{ period.endTime }}</div>
                     </td>
-                    @if (period.name === 'Break' || period.name === 'Lunch') {
+                    @if (period.type !== 'LESSON') {
                       <td [attr.colspan]="teachers.length" class="break-cell">{{ period.name }}</td>
                     } @else {
                       @for (teacher of teachers; track teacher.id) {

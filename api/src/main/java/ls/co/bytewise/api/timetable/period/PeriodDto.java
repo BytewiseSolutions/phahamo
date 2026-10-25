@@ -17,6 +17,8 @@ public class PeriodDto extends BaseDto {
     @NotBlank
     private String name;
 
+    private PeriodType type = PeriodType.LESSON;
+
     @NotNull
     private LocalTime startTime;
 
@@ -26,6 +28,7 @@ public class PeriodDto extends BaseDto {
     public PeriodDto(Period period) {
         super(period);
         this.name = period.getName();
+        this.type = period.getType() != null ? period.getType() : PeriodType.LESSON;
         this.startTime = period.getStartTime();
         this.endTime = period.getEndTime();
     }

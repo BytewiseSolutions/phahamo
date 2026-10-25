@@ -8,6 +8,7 @@ import ls.co.bytewise.api.teacher.TeacherDto;
 import ls.co.bytewise.api.teacher.TeacherRepository;
 import ls.co.bytewise.api.timetable.Timetable;
 import ls.co.bytewise.api.timetable.TimetableRepository;
+import ls.co.bytewise.api.timetable.period.PeriodType;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +46,12 @@ public class LessonService {
             return lessonRepository
                     .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
                             schoolClassId, date, date, schoolId)
-                    .stream().map(LessonDto::new).toList();
+                    .stream().filter(this::isLesson).map(LessonDto::new).toList();
         }
 
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId).stream()
+                .filter(this::isLessonPeriod)
                 .filter(t -> t.getDayOfWeek() == date.getDayOfWeek())
                 .toList();
 
@@ -62,7 +64,7 @@ public class LessonService {
         return lessonRepository
                 .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
                         schoolClassId, date, date, schoolId)
-                .stream().map(LessonDto::new).toList();
+                .stream().filter(this::isLesson).map(LessonDto::new).toList();
     }
 
     @Transactional
@@ -81,6 +83,7 @@ public class LessonService {
 
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId).stream()
+                .filter(this::isLessonPeriod)
                 .filter(t -> t.getDayOfWeek() == date.getDayOfWeek())
                 .toList();
 
@@ -106,6 +109,7 @@ public class LessonService {
         Long schoolId = TenantContext.getSchoolId();
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_SchoolClass_IdAndSchoolId(schoolClassId, schoolId);
+        slots = slots.stream().filter(this::isLessonPeriod).toList();
 
         School school = resolveActiveSchool(requester, schoolId);
 
@@ -130,6 +134,7 @@ public class LessonService {
                 .findAllByTimetable_Assignment_SchoolClass_IdAndDateBetweenAndSchoolIdOrderByDateAscTimetable_Period_StartTimeAsc(
                         schoolClassId, startDate, endDate, schoolId)
                 .stream()
+                .filter(this::isLesson)
                 .map(LessonDto::new)
                 .toList();
     }
@@ -141,6 +146,7 @@ public class LessonService {
         Long schoolId = TenantContext.getSchoolId();
         List<Timetable> slots = timetableRepository
                 .findAllByAssignment_Teacher_IdAndSchoolId(teacherId, schoolId);
+        slots = slots.stream().filter(this::isLessonPeriod).toList();
 
         School school = resolveActiveSchool(requester, schoolId);
 
@@ -201,9 +207,20 @@ public class LessonService {
     private List<LessonDto> mergeTeacherLessons(List<Lesson> regularLessons,
                                                 List<Lesson> substituteLessons) {
         java.util.Map<Long, Lesson> merged = new java.util.LinkedHashMap<>();
-        regularLessons.forEach(lesson -> merged.put(lesson.getId(), lesson));
-        substituteLessons.forEach(lesson -> merged.putIfAbsent(lesson.getId(), lesson));
+        regularLessons.stream().filter(this::isLesson)
+                .forEach(lesson -> merged.put(lesson.getId(), lesson));
+        substituteLessons.stream().filter(this::isLesson)
+                .forEach(lesson -> merged.putIfAbsent(lesson.getId(), lesson));
         return merged.values().stream().map(LessonDto::new).toList();
+    }
+
+    private boolean isLessonPeriod(Timetable timetable) {
+        return timetable.getPeriod().getType() == null
+                || timetable.getPeriod().getType() == PeriodType.LESSON;
+    }
+
+    private boolean isLesson(Lesson lesson) {
+        return isLessonPeriod(lesson.getTimetable());
     }
 
     @Transactional

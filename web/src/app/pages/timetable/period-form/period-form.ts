@@ -7,7 +7,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Period, PeriodPayload } from '../period';
+import { Period, PeriodPayload, PeriodType } from '../period';
 
 @Component({
   selector: 'app-period-form',
@@ -29,6 +29,7 @@ export class PeriodForm implements OnChanges {
   constructor(private fb: FormBuilder) {
     this.periodForm = this.fb.group({
       name: ['', Validators.required],
+      type: ['LESSON', Validators.required],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required]
     });
@@ -43,6 +44,7 @@ export class PeriodForm implements OnChanges {
       if (this.editingPeriod) {
         this.periodForm.patchValue({
           name: this.editingPeriod.name,
+          type: this.editingPeriod.type || 'LESSON',
           startTime: this.editingPeriod.startTime?.substring(0, 5) || '',
           endTime: this.editingPeriod.endTime?.substring(0, 5) || ''
         });
@@ -62,6 +64,7 @@ export class PeriodForm implements OnChanges {
 
     const payload: PeriodPayload = {
       name: formValue.name.trim(),
+      type: formValue.type as PeriodType,
       startTime: formValue.startTime,
       endTime: formValue.endTime
     };
@@ -89,6 +92,7 @@ export class PeriodForm implements OnChanges {
   private resetForm(): void {
     this.periodForm.reset({
       name: '',
+      type: 'LESSON',
       startTime: '',
       endTime: '',
       orderIndex: ''

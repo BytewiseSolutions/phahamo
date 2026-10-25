@@ -1,4 +1,5 @@
 import {DayOfWeek} from './day-of-week';
+import {PeriodType} from './period';
 
 export interface Timetable {
   id: number;
@@ -7,6 +8,7 @@ export interface Timetable {
   dayOfWeek: DayOfWeek;
   periodId: number;
   periodName: string;
+  periodType: PeriodType;
   periodStartTime: string;
   periodEndTime: string;
   assignmentId: number;

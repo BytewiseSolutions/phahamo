@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.timetable.lesson.LessonStatus;
 import ls.co.bytewise.api.holiday.HolidayDto;
+import ls.co.bytewise.api.timetable.period.PeriodType;
 
 @Getter
 @Setter
@@ -25,6 +26,8 @@ public class TimetableDto extends BaseDto {
     private Long periodId;
 
     private String periodName;
+
+    private PeriodType periodType;
 
     private LocalTime periodStartTime;
 
@@ -56,6 +59,8 @@ public class TimetableDto extends BaseDto {
 
         this.periodId = timetable.getPeriod().getId();
         this.periodName = timetable.getPeriod().getName();
+        this.periodType = timetable.getPeriod().getType() != null
+                ? timetable.getPeriod().getType() : PeriodType.LESSON;
         this.periodStartTime = timetable.getPeriod().getStartTime();
         this.periodEndTime = timetable.getPeriod().getEndTime();
 

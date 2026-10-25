@@ -20,6 +20,16 @@
           }
         </div>
 
+        <div class="form-group">
+          <label for="type">Type <span class="required">*</span></label>
+          <select id="type" formControlName="type">
+            <option value="LESSON">Lesson</option>
+            <option value="BREAK">Break</option>
+            <option value="LUNCH">Lunch</option>
+          </select>
+          <small class="form-hint">Break and lunch periods are shown on timetables but cannot contain lessons.</small>
+        </div>
+
         <div class="form-row">
 
           <div class="form-group">

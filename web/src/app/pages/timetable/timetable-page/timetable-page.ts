@@ -97,6 +97,10 @@ export class TimetablePage implements OnInit {
     return `${teacher.firstName} ${teacher.lastName}`;
   }
 
+  isBreak(period: Period): boolean {
+    return period.type !== 'LESSON';
+  }
+
   loadPeriods(): void {
     this.loadingPeriods = true;
 

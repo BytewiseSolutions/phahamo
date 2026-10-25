@@ -9,6 +9,7 @@ import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentR
 import ls.co.bytewise.api.timetable.period.Period;
 import ls.co.bytewise.api.timetable.period.PeriodExceptions;
 import ls.co.bytewise.api.timetable.period.PeriodRepository;
+import ls.co.bytewise.api.timetable.period.PeriodType;
 import ls.co.bytewise.api.timetable.lesson.Lesson;
 import ls.co.bytewise.api.timetable.lesson.LessonRepository;
 import ls.co.bytewise.api.holiday.HolidayService;
@@ -52,6 +53,8 @@ public class TimetableService {
 
         Period period = periodRepository.findById(dto.getPeriodId())
                 .orElseThrow(() -> new PeriodExceptions.PeriodNotFoundException("Period not found"));
+
+        ensureLessonPeriod(period);
 
         SubjectClassAssignment assignment = assignmentRepository.findById(dto.getAssignmentId())
                 .orElseThrow(() -> new TimetableExceptions.TimetableNotFoundException("Assignment not found"));
@@ -110,6 +113,8 @@ public class TimetableService {
             newPeriod = periodRepository.findById(dto.getPeriodId())
                     .orElseThrow(() -> new PeriodExceptions.PeriodNotFoundException("Period not found"));
         }
+
+        ensureLessonPeriod(newPeriod);
 
         SubjectClassAssignment newAssignment = timetable.getAssignment();
         if (dto.getAssignmentId() != null) {
@@ -252,6 +257,13 @@ public class TimetableService {
         }
 
         return timetable;
+    }
+
+    private void ensureLessonPeriod(Period period) {
+        if (period.getType() != null && period.getType() != PeriodType.LESSON) {
+            throw new TimetableExceptions.TimetableConflictException(
+                    "Lessons cannot be added to a break or lunch period");
+        }
     }
 
     public List<TimetableDto> listForStudent(User user) {

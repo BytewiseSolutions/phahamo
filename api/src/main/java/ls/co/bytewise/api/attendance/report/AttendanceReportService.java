@@ -10,6 +10,7 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.term.*;
+import ls.co.bytewise.api.timetable.period.PeriodType;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -44,6 +45,7 @@ public class AttendanceReportService {
 
         List<Attendance> rows = attendanceRepository.findForReport(
                 schoolId, fromDate, toDate, classId, subjectId, null);
+        rows = rows.stream().filter(this::isLessonAttendance).toList();
 
         Map<Long, List<Attendance>> byLesson = rows.stream()
                 .collect(Collectors.groupingBy(a -> a.getLesson().getId(),
@@ -96,6 +98,7 @@ public class AttendanceReportService {
 
         List<Attendance> rows = attendanceRepository.findForReport(
                 schoolId, fromDate, toDate, classId, subjectId, null);
+        rows = rows.stream().filter(this::isLessonAttendance).toList();
 
         Map<Long, List<Attendance>> byStudent = rows.stream()
                 .collect(Collectors.groupingBy(a -> a.getStudent().getId()));
@@ -153,6 +156,7 @@ public class AttendanceReportService {
 
         List<Attendance> rows = attendanceRepository.findForReport(
                 schoolId, fromDate, toDate, classId, subjectId, studentId);
+        rows = rows.stream().filter(this::isLessonAttendance).toList();
 
         StudentAttendanceSummaryDto summary = new StudentAttendanceSummaryDto();
         summary.setStudentId(student.getId());
@@ -185,6 +189,11 @@ public class AttendanceReportService {
     private double pct(int n, int total) {
         if (total == 0) return 0.0;
         return Math.round((n * 10000.0) / total) / 100.0;
+    }
+
+    private boolean isLessonAttendance(Attendance attendance) {
+        PeriodType type = attendance.getLesson().getTimetable().getPeriod().getType();
+        return type == null || type == PeriodType.LESSON;
     }
 
     public StudentAttendanceReportDto studentReportForUser(User user,
