@@ -5,6 +5,8 @@ import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { StudentFeeAccount } from '../student-fee-account';
 import { StudentFeeAdjustment } from '../student-fee-adjustment';
 import {BulkFeeEmailResult} from '../bulk-fee-email-result';
+import { StudentFeePayment } from '../student-fee-payment';
+import { AuthService } from '../../../util/auth.service';
 
 type Tab = 'breakdown' | 'adjustments' | 'payments';
 
@@ -24,6 +26,8 @@ export class StudentFeeDetail implements OnInit {
 
   showAdjustmentForm = false;
   showPaymentForm = false;
+  showReversalForm = false;
+  selectedPayment: StudentFeePayment | null = null;
   accountId: number | null = null;
 
   sendingStatement = false;
@@ -33,8 +37,15 @@ export class StudentFeeDetail implements OnInit {
     private backend: BackendService,
     private route: ActivatedRoute,
     private router: Router,
-    private confirmDialog: ConfirmDialogService
+    private confirmDialog: ConfirmDialogService,
+    private authService: AuthService
   ) {}
+
+  get canReversePayments(): boolean {
+    return this.authService.hasRole('SCHOOL_ADMIN')
+      || this.authService.hasRole('SYSTEM_ADMIN')
+      || this.authService.hasRole('FINANCE_OFFICER');
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('accountId');
@@ -95,6 +106,21 @@ export class StudentFeeDetail implements OnInit {
 
   onPaymentSaved(): void {
     this.showPaymentForm = false;
+    this.load();
+  }
+
+  openReversal(payment: StudentFeePayment): void {
+    this.selectedPayment = payment;
+    this.showReversalForm = true;
+  }
+
+  closeReversal(): void {
+    this.showReversalForm = false;
+    this.selectedPayment = null;
+  }
+
+  onReversed(): void {
+    this.closeReversal();
     this.load();
   }
 

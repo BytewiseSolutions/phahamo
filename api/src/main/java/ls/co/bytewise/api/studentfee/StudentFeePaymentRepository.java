@@ -21,6 +21,7 @@ public interface StudentFeePaymentRepository extends JpaRepository<StudentFeePay
             WHERE p.school.id = :schoolId
             AND p.paidAt >= :from
             AND p.paidAt < :to
+            AND (p.status IS NULL OR p.status <> ls.co.bytewise.api.studentfee.PaymentStatus.REVERSED)
             """)
     List<Object[]> summarizePaymentsBetween(
             @org.springframework.data.repository.query.Param("schoolId") Long schoolId,

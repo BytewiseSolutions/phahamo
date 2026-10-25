@@ -10,6 +10,10 @@ export interface StudentFeePayment {
   receivedById?: number;
   receivedByName?: string;
   studentName?: string;
+  status: 'ACTIVE' | 'REVERSED';
+  reversalReason?: string;
+  reversedAt?: string;
+  reversedByName?: string;
 }
 
 export type StudentFeePaymentInput = Pick<

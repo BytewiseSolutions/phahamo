@@ -42,7 +42,21 @@ public class StudentFeePayment extends SchoolScopedEntity {
     @Column(nullable = false)
     private Instant paidAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PaymentStatus status = PaymentStatus.ACTIVE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "received_by")
     private User receivedBy;
+
+    @Column(name = "reversal_reason", length = 500)
+    private String reversalReason;
+
+    @Column(name = "reversed_at")
+    private Instant reversedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reversed_by")
+    private User reversedBy;
 }

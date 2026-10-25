@@ -375,6 +375,7 @@ public class StudentFeeAccountService {
         payment.setReference(dto.getReference());
         payment.setPaidAt(dto.getPaidAt() != null ? dto.getPaidAt() : Instant.now());
         payment.setReceivedBy(receivedBy);
+        payment.setStatus(PaymentStatus.ACTIVE);
         payment.setSchool(account.getSchool());
         payment.setCreatedBy(receivedBy);
         payment.setBalanceAfter(account.getBalance() - dto.getAmount());
@@ -412,6 +413,32 @@ public class StudentFeeAccountService {
         }
 
         return new StudentFeeAccountDto(saved);
+    }
+
+    @Transactional
+    public StudentFeeAccountDto reversePayment(Long paymentId, PaymentReversalDto dto, User reversedBy) {
+        if (dto == null || dto.getReason() == null || dto.getReason().isBlank()) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("A reversal reason is required");
+        }
+
+        Long schoolId = TenantContext.getSchoolId();
+        StudentFeePayment payment = paymentRepository.findByIdAndAccount_SchoolId(paymentId, schoolId)
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Payment not found"));
+
+        if (payment.getStatus() == PaymentStatus.REVERSED) {
+            throw new StudentFeeExceptions.InvalidFeeOperationException("This payment has already been reversed");
+        }
+
+        StudentFeeAccount account = payment.getAccount();
+        account.setAmountPaid(Math.max(0.0, account.getAmountPaid() - payment.getAmount()));
+        account.setUpdatedBy(reversedBy);
+
+        payment.setStatus(PaymentStatus.REVERSED);
+        payment.setReversalReason(dto.getReason().trim());
+        payment.setReversedAt(Instant.now());
+        payment.setReversedBy(reversedBy);
+
+        return new StudentFeeAccountDto(accountRepository.save(account));
     }
 
     public StudentFeeAccountDto getAccountForStudent(User user, Long termId) {
@@ -464,6 +491,14 @@ public class StudentFeeAccountService {
         dto.setReference(payment.getReference());
         dto.setPaymentDate(payment.getPaidAt().atZone(java.time.ZoneOffset.UTC).toLocalDate());
         dto.setBalanceAfter(payment.getBalanceAfter());
+        dto.setCancelled(payment.getStatus() == PaymentStatus.REVERSED);
+        dto.setCancellationReason(payment.getReversalReason());
+        if (payment.getReversedBy() != null) {
+            dto.setCancelledBy(payment.getReversedBy().getFullName());
+        }
+        if (payment.getReversedAt() != null) {
+            dto.setCancelledAt(payment.getReversedAt().atZone(java.time.ZoneOffset.UTC).toLocalDate());
+        }
 
         if (payment.getReceivedBy() != null) {
             dto.setReceivedBy(payment.getReceivedBy().getFullName());

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { StudentFeePayment } from '../student-fee-payment';
 import { PaymentPage } from './payment-page';
+import { AuthService } from '../../../util/auth.service';
 
 @Component({
   selector: 'app-payment-history',
@@ -16,8 +17,16 @@ export class PaymentHistory implements OnInit {
   totalElements = 0;
   loading = false;
   errorMessage = '';
+  showReversalForm = false;
+  selectedPayment: StudentFeePayment | null = null;
 
-  constructor(private backend: BackendService) {}
+  get canReversePayments(): boolean {
+    return this.authService.hasRole('SCHOOL_ADMIN')
+      || this.authService.hasRole('SYSTEM_ADMIN')
+      || this.authService.hasRole('FINANCE_OFFICER');
+  }
+
+  constructor(private backend: BackendService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -54,6 +63,21 @@ export class PaymentHistory implements OnInit {
       this.page++;
       this.load();
     }
+  }
+
+  openReversal(payment: StudentFeePayment): void {
+    this.selectedPayment = payment;
+    this.showReversalForm = true;
+  }
+
+  closeReversal(): void {
+    this.showReversalForm = false;
+    this.selectedPayment = null;
+  }
+
+  onReversed(): void {
+    this.closeReversal();
+    this.load();
   }
 
   formatDate(value: string): string {

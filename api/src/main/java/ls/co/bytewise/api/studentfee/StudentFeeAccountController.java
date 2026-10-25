@@ -1,5 +1,6 @@
 package ls.co.bytewise.api.studentfee;
 
+import jakarta.validation.Valid;
 import ls.co.bytewise.api.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -99,6 +100,14 @@ public class StudentFeeAccountController {
                                               @PathVariable Long accountId,
                                               @RequestBody StudentFeePaymentDto dto) {
         return feeService.recordPayment(accountId, dto, currentUser);
+    }
+
+    @PostMapping("/payments/{paymentId}/reverse")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_FINANCE_OFFICER"})
+    public StudentFeeAccountDto reversePayment(@AuthenticationPrincipal User currentUser,
+                                               @PathVariable Long paymentId,
+                                               @Valid @RequestBody PaymentReversalDto dto) {
+        return feeService.reversePayment(paymentId, dto, currentUser);
     }
 
     @GetMapping("/me")
