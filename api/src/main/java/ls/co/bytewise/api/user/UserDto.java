@@ -34,6 +34,7 @@ public class UserDto extends BaseDto {
     private String phone;
     private Instant dateOfBirth;
     private Status status;
+    private Instant lockedUntil;
     private Set<UserRole> roles;
 
     @Valid
@@ -56,6 +57,7 @@ public class UserDto extends BaseDto {
         this.phone = user.getPhone();
         this.dateOfBirth = user.getDateOfBirth();
         this.status = user.getStatus();
+        this.lockedUntil = user.getLockedUntil();
         this.roles = user.getRoles();
     }
 }

@@ -8,5 +8,6 @@ export interface User {
   phone: string;
   dateOfBirth?: string | null;
   status: string;
+  lockedUntil?: string | null;
   roles: string[];
 }

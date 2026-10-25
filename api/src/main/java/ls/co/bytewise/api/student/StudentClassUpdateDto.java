@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class StudentClassUpdateDto {
     private Long schoolClassId;
+    private boolean confirmFeeChange;
 }

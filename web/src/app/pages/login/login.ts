@@ -57,7 +57,7 @@ export class Login implements OnInit {
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
         this.errorMessage = err.status === 401
-          ? 'Invalid email or password.'
+          ? (err.error?.message || 'Invalid email or password.')
           : 'Something went wrong. Please try again.';
       }
     });

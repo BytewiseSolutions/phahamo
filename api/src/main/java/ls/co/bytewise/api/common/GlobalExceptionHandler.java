@@ -56,6 +56,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(StudentExceptions.DuplicateStudentException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateStudent(
+            StudentExceptions.DuplicateStudentException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        body.put("matches", ex.getMatches());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(StudentExceptions.FeeChangeConfirmationRequiredException.class)
+    public ResponseEntity<Map<String, Object>> handleFeeChangeConfirmation(
+            StudentExceptions.FeeChangeConfirmationRequiredException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        body.put("preview", ex.getPreview());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();

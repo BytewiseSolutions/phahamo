@@ -68,6 +68,12 @@ public class UserService {
             throw new UserExceptions.InvalidRoleAssignmentException("At least one role is required");
         }
 
+        if (dto.getRoles().contains(UserRole.STUDENT) && dto.getStudent() != null) {
+            studentService.ensureNoDuplicate(
+                    dto.getFirstName(), dto.getLastName(), dto.getStudent().getDateOfBirth(),
+                    dto.getStudent().isDuplicateConfirmed());
+        }
+
         boolean creatorIsSystemAdmin = creator.hasRole(UserRole.SYSTEM_ADMIN);
 
         if (dto.getRoles().contains(UserRole.SYSTEM_ADMIN) && !creatorIsSystemAdmin) {
@@ -319,6 +325,20 @@ public class UserService {
         User user = getUserInCurrentSchool(userId);
         user.setStatus(Status.ACTIVE);
         User saved = userRepository.save(user);
+    }
+
+    @Transactional
+    public void unlockUser(User editor, Long userId) {
+        User user = getUserInCurrentSchool(userId);
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setUpdatedBy(editor);
+        User saved = userRepository.save(user);
+        School school = saved.getSchools().stream().findFirst().orElse(null);
+        if (school != null) {
+            auditLogService.record(school, editor, AuditAction.USER_ACCOUNT_UNLOCKED,
+                    "USER", saved.getId(), "Unlocked user account " + saved.getFullName());
+        }
     }
 
     private User getUserInCurrentSchool(Long userId) {

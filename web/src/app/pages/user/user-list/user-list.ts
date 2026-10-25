@@ -4,6 +4,7 @@ import { User } from '../../../util/user';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import {Router} from '@angular/router';
 import {AuthService} from '../../../util/auth.service';
+import { StudentDuplicate } from '../../../util/student-duplicate';
 
 @Component({
   selector: 'app-user-list',
@@ -22,6 +23,8 @@ export class UserList implements OnInit {
   statusFilter = 'ALL';
   currentPage = 1;
   readonly pageSize = 20;
+  duplicateMatches: StudentDuplicate[] = [];
+  pendingDuplicatePayload: any | null = null;
 
   constructor(
     private backend: BackendService,
@@ -83,6 +86,10 @@ export class UserList implements OnInit {
   countByRole(role: string): number {
     if (role === 'ALL') return this.users.length;
     return this.users.filter(u => u.roles.includes(role)).length;
+  }
+
+  isLocked(user: User): boolean {
+    return !!user.lockedUntil && new Date(user.lockedUntil).getTime() > Date.now();
   }
 
   setTab(role: string): void {
@@ -150,10 +157,11 @@ export class UserList implements OnInit {
 
   onCreateUser(newUser: any): void {
     this.errorMessage = '';
-    this.showCreateForm = false;
-
     this.backend.postSilently<User>('/users', newUser).subscribe({
       next: (created) => {
+        this.showCreateForm = false;
+        this.duplicateMatches = [];
+        this.pendingDuplicatePayload = null;
         this.users = [created, ...this.users];
 
         const createdRole = created.roles?.[0];
@@ -162,9 +170,47 @@ export class UserList implements OnInit {
         }
       },
       error: (err) => {
-        this.errorMessage = err.status === 409
-          ? (err.error?.message || 'A user with this email already exists.')
-          : 'Something went wrong. Please try again.';
+        if (err.status === 409 && err.error?.matches?.length) {
+          this.duplicateMatches = err.error.matches;
+          this.pendingDuplicatePayload = newUser;
+          this.showCreateForm = false;
+          return;
+        }
+        this.errorMessage = err.error?.message || 'Something went wrong. Please try again.';
+      }
+    });
+  }
+
+  cancelDuplicateRegistration(): void {
+    this.duplicateMatches = [];
+    this.pendingDuplicatePayload = null;
+  }
+
+  confirmDuplicateRegistration(): void {
+    if (!this.pendingDuplicatePayload) return;
+    const payload = {
+      ...this.pendingDuplicatePayload,
+      student: {
+        ...this.pendingDuplicatePayload.student,
+        duplicateConfirmed: true
+      }
+    };
+    this.cancelDuplicateRegistration();
+    this.onCreateUserConfirmed(payload);
+  }
+
+  openDuplicateStudent(student: StudentDuplicate): void {
+    this.router.navigate(['/users', student.userId]);
+  }
+
+  private onCreateUserConfirmed(payload: any): void {
+    this.backend.postSilently<User>('/users', payload).subscribe({
+      next: (created) => {
+        this.showCreateForm = false;
+        this.users = [created, ...this.users];
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to create user.';
       }
     });
   }
@@ -211,6 +257,24 @@ export class UserList implements OnInit {
       next: () => this.loadUsers(),
       error: () => {
         this.errorMessage = 'Failed to activate user.';
+      }
+    });
+  }
+
+  async onUnlock(user: User): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Unlock User Account',
+      message: `Unlock "${user.firstName} ${user.lastName}" so they can try logging in again?`,
+      confirmText: 'Unlock'
+    });
+
+    if (!confirmed) return;
+
+    this.errorMessage = '';
+    this.backend.patch<void>(`/users/${user.id}/unlock`, {}).subscribe({
+      next: () => this.loadUsers(),
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to unlock user account.';
       }
     });
   }

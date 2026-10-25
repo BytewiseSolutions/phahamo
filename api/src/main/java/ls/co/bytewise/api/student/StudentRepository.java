@@ -28,6 +28,21 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     @Query("""
         SELECT s FROM Student s
+        JOIN FETCH s.user
+        LEFT JOIN FETCH s.currentClass
+        WHERE s.school.id = :schoolId
+          AND LOWER(s.user.firstName) = LOWER(:firstName)
+          AND LOWER(s.user.lastName) = LOWER(:lastName)
+          AND s.dateOfBirth = :dateOfBirth
+        """)
+    List<Student> findPotentialDuplicates(
+            @Param("schoolId") Long schoolId,
+            @Param("firstName") String firstName,
+            @Param("lastName") String lastName,
+            @Param("dateOfBirth") java.time.Instant dateOfBirth);
+
+    @Query("""
+        SELECT s FROM Student s
         WHERE s.school.id = :schoolId
           AND s.dateOfBirth IS NOT NULL
           AND FUNCTION('MONTH', s.dateOfBirth) = :month

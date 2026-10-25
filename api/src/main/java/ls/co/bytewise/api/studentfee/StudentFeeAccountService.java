@@ -11,7 +11,10 @@ import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
+import ls.co.bytewise.api.student.StudentClassFeePreviewDto;
+import ls.co.bytewise.api.student.StudentClassFeePreviewLineDto;
 import ls.co.bytewise.api.student.StudentRepository;
+import ls.co.bytewise.api.student.StudentStatus;
 import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
@@ -179,6 +182,153 @@ public class StudentFeeAccountService {
         studentRepository.findAllBySchoolIdAndCurrentClassId(schoolId, classId).stream()
                 .filter(student -> student.getStatus() == ls.co.bytewise.api.student.StudentStatus.ACTIVE)
                 .forEach(student -> synchronizeStudentTerm(student, structure, creator));
+    }
+
+    @Transactional(readOnly = true)
+    public StudentClassFeePreviewDto previewClassChange(Student student, SchoolClass newClass) {
+        Long schoolId = TenantContext.getSchoolId();
+        List<StudentClassFeePreviewLineDto> lines = accountRepository
+                .findAllByStudentIdAndSchoolId(student.getId(), schoolId)
+                .stream()
+                .map(account -> previewLine(account, newClass, schoolId))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        boolean changed = lines.stream().anyMatch(StudentClassFeePreviewLineDto::isWillUpdate);
+        return new StudentClassFeePreviewDto(
+                student.getId(),
+                student.getCurrentClass() == null ? null : student.getCurrentClass().getName(),
+                newClass.getName(),
+                changed,
+                lines);
+    }
+
+    @Transactional
+    public void applyClassChange(Student student, SchoolClass newClass, User editor) {
+        Long schoolId = TenantContext.getSchoolId();
+        List<StudentFeeAccount> accounts = accountRepository
+                .findAllByStudentIdAndSchoolId(student.getId(), schoolId);
+
+        for (StudentFeeAccount account : accounts) {
+            FeeStructure structure = feeStructureRepository
+                    .findAllBySchoolClassIdAndTermIdAndSchoolId(
+                            newClass.getId(), account.getTerm().getId(), schoolId)
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            if (structure == null || !account.getPayments().isEmpty()) {
+                continue;
+            }
+
+            double oldTotal = account.getTotalFees();
+            replaceAccountFees(account, structure, student, newClass, editor, schoolId);
+            double newTotal = account.getTotalFees();
+
+            if (Double.compare(oldTotal, newTotal) != 0) {
+                auditLogService.record(account.getSchool(), editor,
+                        AuditAction.STUDENT_FEE_CLASS_CHANGED,
+                        "STUDENT_FEE_ACCOUNT", account.getId(),
+                        "Class fee changed for " + student.getUser().getFullName()
+                                + " in " + account.getTerm().getName()
+                                + " from M " + String.format("%.2f", oldTotal)
+                                + " to M " + String.format("%.2f", newTotal));
+            }
+        }
+
+        synchronizeStudentAccounts(student, editor);
+    }
+
+    private StudentClassFeePreviewLineDto previewLine(StudentFeeAccount account,
+                                                       SchoolClass newClass,
+                                                       Long schoolId) {
+        FeeStructure structure = feeStructureRepository
+                .findAllBySchoolClassIdAndTermIdAndSchoolId(
+                        newClass.getId(), account.getTerm().getId(), schoolId)
+                .stream()
+                .findFirst()
+                .orElse(null);
+        if (structure == null) return null;
+
+        double oldTotal = account.getTotalFees();
+        double newTotal = account.getPayments().isEmpty()
+                ? calculateStructureTotal(structure, newClass, schoolId)
+                : oldTotal;
+        double amountPaid = account.getAmountPaid();
+        double oldBalance = oldTotal - account.getTotalAdjustments() - amountPaid;
+        double newBalance = newTotal - account.getTotalAdjustments() - amountPaid;
+        boolean willUpdate = account.getPayments().isEmpty()
+                && Double.compare(oldTotal, newTotal) != 0;
+
+        return new StudentClassFeePreviewLineDto(
+                account.getTerm().getName(), oldTotal, newTotal, amountPaid,
+                oldBalance, newBalance, willUpdate);
+    }
+
+    private double calculateStructureTotal(FeeStructure structure,
+                                           SchoolClass schoolClass,
+                                           Long schoolId) {
+        double total = structure.getItems().stream()
+                .mapToDouble(FeeItem::getAmount)
+                .sum();
+        AcademicYear academicYear = structure.getTerm().getAcademicYear();
+        if (academicYear != null && isFirstTermOfYear(structure.getTerm(), academicYear, schoolId)) {
+            total += annualFeeRepository
+                    .findAllBySchoolClassIdAndAcademicYearIdAndSchoolId(
+                            schoolClass.getId(), academicYear.getId(), schoolId)
+                    .stream()
+                    .mapToDouble(AnnualFee::getAmount)
+                    .sum();
+        }
+        return total;
+    }
+
+    private void replaceAccountFees(StudentFeeAccount account,
+                                     FeeStructure structure,
+                                     Student student,
+                                     SchoolClass schoolClass,
+                                     User editor,
+                                     Long schoolId) {
+        account.setSchoolClass(schoolClass);
+        account.getLines().clear();
+        for (FeeItem item : structure.getItems()) {
+            StudentFeeLine line = new StudentFeeLine();
+            line.setAccount(account);
+            line.setName(item.getName());
+            line.setAmount(item.getAmount());
+            line.setMandatory(item.getMandatory());
+            line.setDescription(item.getDescription());
+            line.setFromAnnualFee(false);
+            line.setSchool(account.getSchool());
+            line.setCreatedBy(editor);
+            line.setUpdatedBy(editor);
+            account.getLines().add(line);
+        }
+
+        AcademicYear academicYear = structure.getTerm().getAcademicYear();
+        if (academicYear != null && isFirstTermOfYear(structure.getTerm(), academicYear, schoolId)) {
+            annualFeeRepository
+                    .findAllBySchoolClassIdAndAcademicYearIdAndSchoolId(
+                            schoolClass.getId(), academicYear.getId(), schoolId)
+                    .forEach(annualFee -> {
+                        StudentFeeLine line = new StudentFeeLine();
+                        line.setAccount(account);
+                        line.setName(annualFee.getName());
+                        line.setAmount(annualFee.getAmount());
+                        line.setMandatory(true);
+                        line.setDescription(annualFee.getDescription());
+                        line.setFromAnnualFee(true);
+                        line.setSchool(account.getSchool());
+                        line.setCreatedBy(editor);
+                        line.setUpdatedBy(editor);
+                        account.getLines().add(line);
+                    });
+        }
+
+        account.setTotalFees(account.getLines().stream()
+                .mapToDouble(StudentFeeLine::getAmount).sum());
+        account.setUpdatedBy(editor);
+        accountRepository.save(account);
     }
 
     private void synchronizeStudentTerm(Student student, FeeStructure structure, User creator) {

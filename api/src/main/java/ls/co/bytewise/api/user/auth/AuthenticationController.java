@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,8 +22,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return authenticationService.login(request);
+    public LoginResponse login(@Valid @RequestBody LoginRequest request,
+                               HttpServletRequest httpRequest) {
+        return authenticationService.login(request, httpRequest.getRemoteAddr());
     }
 
     @PostMapping("/logout")

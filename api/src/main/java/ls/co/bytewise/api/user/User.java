@@ -46,6 +46,12 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private boolean mustChangePassword = false;
 
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts = 0;
+
+    @Column(name = "locked_until")
+    private Instant lockedUntil;
+
     @Column(nullable = false)
     private String phone;
 

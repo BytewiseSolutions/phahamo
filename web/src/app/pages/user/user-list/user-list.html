@@ -25,6 +25,43 @@
     (userUpdated)="onUpdateUser($event)">
   </app-user-form>
 
+  @if (duplicateMatches.length > 0) {
+    <div class="duplicate-overlay">
+      <div class="duplicate-modal">
+        <div class="duplicate-modal-header">
+          <div>
+            <span class="eyebrow">Possible duplicate</span>
+            <h2>Student may already exist</h2>
+          </div>
+          <button type="button" class="close-button" (click)="cancelDuplicateRegistration()">×</button>
+        </div>
+        <p class="duplicate-message">
+          A student with the same name and date of birth already exists in this school.
+          Review the match before continuing.
+        </p>
+        <div class="duplicate-list">
+          @for (match of duplicateMatches; track match.id) {
+            <div class="duplicate-row">
+              <div>
+                <strong>{{ match.name }}</strong>
+                <span>{{ match.admissionNumber }} · {{ match.className || 'No class' }} · {{ match.status }}</span>
+              </div>
+              <button type="button" class="link-button view" (click)="openDuplicateStudent(match)">
+                Open student
+              </button>
+            </div>
+          }
+        </div>
+        <div class="duplicate-actions">
+          <button type="button" class="secondary-button" (click)="cancelDuplicateRegistration()">Cancel</button>
+          <button type="button" class="primary-button" (click)="confirmDuplicateRegistration()">
+            Confirm different student
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="tabs">
     @for (tab of tabs; track tab.role) {
       <button class="tab" [class.active]="activeTab === tab.role" (click)="setTab(tab.role)">
@@ -87,8 +124,8 @@
             <td>{{ user.phone }}</td>
             <td>{{ user.roles.join(', ') }}</td>
             <td>
-              <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
-                {{ user.status }}
+              <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE' || isLocked(user)">
+                {{ isLocked(user) ? 'LOCKED' : user.status }}
               </span>
             </td>
             <td class="actions-cell">
@@ -96,7 +133,11 @@
               @if (canManageUsers) {
                 <button type="button" class="link-button edit" (click)="onEdit(user)">Edit</button>
                 @if (user.status === 'ACTIVE') {
-                  <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
+                  @if (isLocked(user)) {
+                    <button type="button" class="link-button" (click)="onUnlock(user)">Unlock</button>
+                  } @else {
+                    <button type="button" class="link-button danger" (click)="onDeactivate(user)">Deactivate</button>
+                  }
                 } @else {
                   <button type="button" class="link-button" (click)="onActivate(user.id)">Activate</button>
                 }

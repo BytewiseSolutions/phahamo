@@ -35,6 +35,7 @@ public class StudentDto extends BaseDto {
     private StudentStatus status;
 
     private Long schoolClassId;
+    private boolean duplicateConfirmed;
 
     private String currentClassName;
 
