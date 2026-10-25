@@ -56,6 +56,21 @@ public class FeeStatementService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public byte[] renderForStudentTerm(Long studentId, Long termId) {
+        Long schoolId = TenantContext.getSchoolId();
+        StudentFeeAccount account = accountRepository
+                .findByStudentIdAndTermIdAndSchoolId(studentId, termId, schoolId)
+                .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Fee account not found"));
+
+        StudentFeeAccountDto accountDto = new StudentFeeAccountDto(
+                account,
+                balanceService.previousBalances(account),
+                balanceService.currentTermBalance(account),
+                balanceService.totalBalance(account));
+        return FeeStatementRenderer.render(accountDto, account.getSchool(), LocalDate.now());
+    }
+
     private void sendOne(StudentFeeAccount account, BulkFeeEmailResultDto result) {
         Student student = account.getStudent();
         School school = account.getSchool();

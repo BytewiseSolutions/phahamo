@@ -12,20 +12,64 @@
   }
 
   @if (section === 'children') {
-    <div class="card">
-      @if (children.length === 0) {
-        <div class="empty">No children are linked to your account yet.</div>
-      } @else {
-        @for (child of children; track child.id) {
-          <div class="child">
-            <div>
-              <strong>{{ child.name }}</strong>
-              <span>{{ child.admissionNumber }} · {{ child.className || 'No class' }}</span>
+    @if (loading) {
+      <div class="card empty">Loading your dashboard...</div>
+    } @else if (!dashboard || dashboard.children.length === 0) {
+      <div class="card empty">No children are linked to your account yet.</div>
+    } @else {
+      <div class="dashboard-grid">
+        @for (summary of dashboard.children; track summary.child.id) {
+          <button class="child-card"
+                  [class.selected]="selectedDashboardChildId === summary.child.id"
+                  type="button"
+                  (click)="selectDashboardChild(summary.child.id)">
+            <div class="child-card-header">
+              <div>
+                <span class="eyebrow">{{ summary.child.admissionNumber }}</span>
+                <h2>{{ summary.child.name }}</h2>
+              </div>
+              <span class="child-card-arrow">›</span>
             </div>
+            <p class="child-class">{{ summary.child.className || 'No class assigned' }}</p>
+            <div class="dashboard-stats">
+              <div class="dashboard-stat">
+                <span>Today</span>
+                <strong>{{ attendanceLabel(summary.todayAttendance) }}</strong>
+              </div>
+              <div class="dashboard-stat">
+                <span>Fee balance</span>
+                <strong>{{ formatAmount(summary.feeBalance) }}</strong>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+
+      <div class="card announcements-card">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">School updates</span>
+            <h2>Recent announcements</h2>
+          </div>
+        </div>
+
+        @if (dashboard.announcements.length === 0) {
+          <div class="empty">No recent announcements for parents.</div>
+        } @else {
+          <div class="announcement-list">
+            @for (announcement of dashboard.announcements; track announcement.id) {
+              <article class="announcement">
+                <div class="announcement-meta">
+                  <strong>{{ announcement.title }}</strong>
+                  <span>{{ formatDate(announcement.publishAt) }}</span>
+                </div>
+                <p>{{ announcement.body }}</p>
+              </article>
+            }
           </div>
         }
-      }
-    </div>
+      </div>
+    }
   }
 
   @if (section !== 'children') {
@@ -77,9 +121,47 @@
             <span class="value">{{ attendance.summary.late }}</span>
           </div>
         </div>
+
+        @if (attendance.records.length > 0) {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody>
+              @for (record of attendance.records; track record.id) {
+                <tr>
+                  <td>{{ formatDate(record.date) }}</td>
+                  <td>
+                    <span class="attendance-status" [class]="'status-' + record.status.toLowerCase()">
+                      {{ attendanceLabel(record.status) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="empty">No attendance records for this term.</div>
+        }
       }
 
       @if (!loading && section === 'results' && results.length > 0) {
+        <div class="results-header">
+          <div>
+            <h2>Finalised results</h2>
+            <p>Only results released by the school are shown.</p>
+          </div>
+          <button type="button" class="secondary-button"
+                  (click)="downloadReportCard()"
+                  [disabled]="downloadingReportCard">
+            {{ downloadingReportCard ? 'Preparing...' : 'Download report card' }}
+          </button>
+        </div>
         <table>
           <thead>
           <tr>
@@ -103,6 +185,37 @@
       }
 
       @if (!loading && section === 'fees' && fees) {
+        <div class="fee-details-grid">
+          <div class="fee-detail-item">
+            <span>Student</span>
+            <strong>{{ fees.studentFirstName }} {{ fees.studentLastName }}</strong>
+          </div>
+          <div class="fee-detail-item">
+            <span>Admission No.</span>
+            <strong>{{ fees.admissionNumber }}</strong>
+          </div>
+          <div class="fee-detail-item">
+            <span>Class</span>
+            <strong>{{ fees.className }}</strong>
+          </div>
+          <div class="fee-detail-item">
+            <span>Term</span>
+            <strong>{{ fees.termName }} — {{ fees.academicYearName }}</strong>
+          </div>
+          <div class="fee-detail-item">
+            <span>Generated</span>
+            <strong>{{ formatDate(todayIso()) }}</strong>
+          </div>
+        </div>
+
+        <div class="fees-actions">
+          <button type="button" class="secondary-button"
+                  (click)="downloadFeeStatement()"
+                  [disabled]="downloadingFeeStatement">
+            {{ downloadingFeeStatement ? 'Preparing...' : 'Download fee statement' }}
+          </button>
+        </div>
+
         <div class="stats">
           <div>
             <strong>{{ formatAmount(fees.totalFees) }}</strong>
@@ -118,11 +231,36 @@
           </div>
         </div>
 
+        @if (fees.previousBalances.length > 0) {
+          <section class="previous-balance-section">
+            <h2>Previous balance</h2>
+            <p>Outstanding amounts carried forward from earlier terms.</p>
+            <table>
+              <thead>
+              <tr><th>Original term</th><th>Amount</th></tr>
+              </thead>
+              <tbody>
+              @for (previous of fees.previousBalances; track previous.accountId) {
+                <tr>
+                  <td>{{ previous.termName }} — {{ previous.academicYearName }}</td>
+                  <td>{{ formatAmount(previous.amount) }}</td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </section>
+        }
+
         <h3>Payments</h3>
         @for (payment of fees.payments; track payment.id) {
           <div class="payment">
             <span>{{ formatDate(payment.paidAt) }} · {{ payment.method }}</span>
-            <strong>{{ formatAmount(payment.amount) }}</strong>
+            <span class="payment-actions">
+              <strong>{{ formatAmount(payment.amount) }}</strong>
+              <button type="button" class="link-button" (click)="downloadReceipt(payment.id)">
+                Receipt
+              </button>
+            </span>
           </div>
         }
       }

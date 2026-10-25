@@ -72,6 +72,11 @@ export class Dashboard implements OnInit {
     this.isParent = this.authService.hasRole('PARENT');
     this.isStaff = this.isAdmin || this.isTeacher || this.authService.hasRole('FINANCE_OFFICER');
 
+    if (this.isParent) {
+      this.router.navigate(['/parent/children']);
+      return;
+    }
+
     if (this.isSystemAdmin) {
       this.loadSystemStats();
       this.loadSchoolsForPicker();

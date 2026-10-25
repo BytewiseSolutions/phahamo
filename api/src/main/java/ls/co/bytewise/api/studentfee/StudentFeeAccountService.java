@@ -6,6 +6,7 @@ import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.fee.*;
 import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.parent.Parent;
+import ls.co.bytewise.api.parent.ParentRepository;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.security.TenantContext;
@@ -14,6 +15,7 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
+import ls.co.bytewise.api.common.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,7 @@ public class StudentFeeAccountService {
     private final MailService mailService;
     private final StudentFeeBalanceService balanceService;
     private final AuditLogService auditLogService;
+    private final ParentRepository parentRepository;
 
     public StudentFeeAccountService(StudentFeeAccountRepository accountRepository,
                                     StudentRepository studentRepository,
@@ -43,7 +46,8 @@ public class StudentFeeAccountService {
                                     StudentFeePaymentRepository paymentRepository,
                                     MailService mailService,
                                     StudentFeeBalanceService balanceService,
-                                    AuditLogService auditLogService) {
+                                    AuditLogService auditLogService,
+                                    ParentRepository parentRepository) {
         this.accountRepository = accountRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -53,6 +57,7 @@ public class StudentFeeAccountService {
         this.mailService = mailService;
         this.balanceService = balanceService;
         this.auditLogService = auditLogService;
+        this.parentRepository = parentRepository;
     }
 
     @Transactional
@@ -558,10 +563,22 @@ public class StudentFeeAccountService {
         StudentFeePayment payment = paymentRepository.findByIdAndAccount_SchoolId(paymentId, schoolId)
                 .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Payment not found"));
 
-        if (currentUser.hasRole(ls.co.bytewise.api.common.UserRole.STUDENT)) {
+        if (currentUser.hasRole(UserRole.STUDENT)) {
             Student student = studentRepository.findByUserId(currentUser.getId())
                     .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Student not found"));
             if (!payment.getAccount().getStudent().getId().equals(student.getId())) {
+                throw new StudentFeeExceptions.AccountNotFoundException("Payment not found");
+            }
+        }
+
+        if (currentUser.hasRole(UserRole.PARENT)) {
+            Parent parent = parentRepository.findByUserId(currentUser.getId())
+                    .filter(p -> p.isLoginEnabled()
+                            && p.getSchool().getId().equals(schoolId))
+                    .orElseThrow(() -> new StudentFeeExceptions.AccountNotFoundException("Payment not found"));
+            boolean linked = payment.getAccount().getStudent().getParents().stream()
+                    .anyMatch(parentLink -> parentLink.getId().equals(parent.getId()));
+            if (!linked) {
                 throw new StudentFeeExceptions.AccountNotFoundException("Payment not found");
             }
         }
