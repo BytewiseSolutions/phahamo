@@ -13,6 +13,8 @@ import ls.co.bytewise.api.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @Entity
@@ -22,6 +24,12 @@ public class Parent extends SchoolScopedEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    @Column(name = "login_enabled", nullable = false, columnDefinition = "boolean default true")
+    private boolean loginEnabled = true;
+
+    @Column(name = "invited_at")
+    private Instant invitedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

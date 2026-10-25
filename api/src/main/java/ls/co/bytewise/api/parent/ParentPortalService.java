@@ -78,6 +78,7 @@ public class ParentPortalService {
         Long schoolId = TenantContext.getSchoolId();
         return parentRepository.findByUserId(user.getId())
                 .filter(parent -> parent.getSchool().getId().equals(schoolId))
+                .filter(Parent::isLoginEnabled)
                 .orElseThrow(() -> new IllegalArgumentException("Parent account is not linked to this school"));
     }
 

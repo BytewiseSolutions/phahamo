@@ -3,9 +3,12 @@ package ls.co.bytewise.api.parent;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import ls.co.bytewise.api.common.BaseDto;
+import ls.co.bytewise.api.common.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -13,6 +16,8 @@ import lombok.Setter;
 public class ParentDto extends BaseDto {
 
     private Long userId;
+    private boolean loginEnabled;
+    private Instant invitedAt;
 
     @NotBlank(message = "First name is required")
     private String firstName;
@@ -41,5 +46,9 @@ public class ParentDto extends BaseDto {
         }
 
         this.relationship = parent.getRelationship();
+        this.loginEnabled = parent.isLoginEnabled()
+                && parent.getUser() != null
+                && parent.getUser().getStatus() == Status.ACTIVE;
+        this.invitedAt = parent.getInvitedAt();
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -56,6 +57,8 @@ public class ParentService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("User is not attached to active school")));
         parent.setRelationship(dto.getRelationship());
+        parent.setLoginEnabled(true);
+        parent.setInvitedAt(Instant.now());
         parent.setCreatedBy(creator);
         parent.setUpdatedBy(creator);
 
@@ -105,7 +108,7 @@ public class ParentService {
         user.setPhone(dto.getPhone());
         user.setPassword(passwordEncoder.encode(temporaryPassword));
         user.setMustChangePassword(true);
-        user.setStatus(Status.ACTIVE);
+        user.setStatus(Status.INACTIVE);
         user.setRoles(Set.of(UserRole.PARENT));
         user.setSchools(Set.of(student.getSchool()));
         user.setCreatedBy(creator);
@@ -117,6 +120,7 @@ public class ParentService {
         parent.setUser(savedUser);
         parent.setSchool(student.getSchool());
         parent.setRelationship(dto.getRelationship());
+        parent.setLoginEnabled(false);
         parent.setCreatedBy(creator);
         parent.setUpdatedBy(creator);
 
@@ -126,13 +130,41 @@ public class ParentService {
         student.setUpdatedBy(creator);
         studentRepository.save(student);
 
-        sendWelcomeEmail(
-                savedUser.getEmail(),
-                savedUser.getFirstName(),
-                temporaryPassword,
-                student.getSchool().getName());
-
         return new StudentParentDto(savedParent);
+    }
+
+    @Transactional
+    public StudentParentDto inviteParent(User inviter, Long parentId) {
+        Parent parent = findOrThrow(parentId);
+        User user = parent.getUser();
+        String temporaryPassword = generateTemporaryPassword();
+
+        user.setPassword(passwordEncoder.encode(temporaryPassword));
+        user.setMustChangePassword(true);
+        user.setStatus(Status.ACTIVE);
+        user.setUpdatedBy(inviter);
+        parent.setLoginEnabled(true);
+        parent.setInvitedAt(Instant.now());
+        parent.setUpdatedBy(inviter);
+        userRepository.save(user);
+        Parent saved = parentRepository.save(parent);
+
+        sendWelcomeEmail(user.getEmail(), user.getFirstName(), temporaryPassword,
+                parent.getSchool().getName());
+        return new StudentParentDto(saved);
+    }
+
+    @Transactional
+    public void disableParentLogin(User editor, Long parentId) {
+        Parent parent = findOrThrow(parentId);
+        parent.setLoginEnabled(false);
+        parent.setUpdatedBy(editor);
+        parentRepository.save(parent);
+
+        User user = parent.getUser();
+        user.setStatus(Status.INACTIVE);
+        user.setUpdatedBy(editor);
+        userRepository.save(user);
     }
 
     @Transactional

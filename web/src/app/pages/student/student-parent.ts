@@ -4,4 +4,6 @@ export interface StudentParent {
   lastName: string;
   email: string;
   phone: string;
+  loginEnabled: boolean;
+  invitedAt: string | null;
 }

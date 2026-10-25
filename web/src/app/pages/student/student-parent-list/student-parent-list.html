@@ -38,6 +38,8 @@
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
+        <th>Portal access</th>
+        <th>Actions</th>
       </tr>
       </thead>
       <tbody>
@@ -46,6 +48,21 @@
             <td>{{ parent.firstName }} {{ parent.lastName }}</td>
             <td>{{ parent.email }}</td>
             <td>{{ parent.phone }}</td>
+            <td>
+              @if (parent.loginEnabled) {
+                <span class="login-status enabled">Enabled</span>
+              } @else {
+                <span class="login-status disabled">Not invited</span>
+              }
+            </td>
+            <td class="actions-cell">
+              <button type="button" class="link-button invite" (click)="onInvite(parent)">
+                {{ parent.loginEnabled ? 'Re-invite' : 'Invite' }}
+              </button>
+              @if (parent.loginEnabled) {
+                <button type="button" class="link-button danger" (click)="onDisableLogin(parent)">Disable</button>
+              }
+            </td>
           </tr>
         }
       </tbody>

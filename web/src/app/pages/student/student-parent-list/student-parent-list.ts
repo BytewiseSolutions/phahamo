@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { StudentParent } from '../student-parent';
 import { ParentPayload } from '../../parent/parent';
+import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 
 @Component({
   selector: 'app-student-parent-list',
@@ -22,7 +23,10 @@ export class StudentParentList implements OnChanges {
 
   private loaded = false;
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['studentId'] && this.studentId && !this.loaded) {
@@ -86,6 +90,38 @@ export class StudentParentList implements OnChanges {
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to link parent.';
       }
+    });
+  }
+
+  async onInvite(parent: StudentParent): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: parent.loginEnabled ? 'Re-invite Parent' : 'Invite Parent',
+      message: `Send login credentials to ${parent.email}?`,
+      confirmText: parent.loginEnabled ? 'Re-invite' : 'Invite',
+      cancelText: 'Cancel',
+      danger: false
+    });
+    if (!confirmed) return;
+
+    this.backend.postSilently<StudentParent>(`/parents/${parent.id}/invite`, {}).subscribe({
+      next: () => this.loadParents(),
+      error: (err) => this.errorMessage = err.error?.message || 'Failed to invite parent.'
+    });
+  }
+
+  async onDisableLogin(parent: StudentParent): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Disable Parent Login',
+      message: `Disable portal access for ${parent.firstName} ${parent.lastName}? Email statements will continue to work.`,
+      confirmText: 'Disable login',
+      cancelText: 'Cancel',
+      danger: true
+    });
+    if (!confirmed) return;
+
+    this.backend.postSilently<void>(`/parents/${parent.id}/disable-login`, {}).subscribe({
+      next: () => this.loadParents(),
+      error: (err) => this.errorMessage = err.error?.message || 'Failed to disable parent login.'
     });
   }
 }

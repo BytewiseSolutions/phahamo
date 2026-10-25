@@ -65,4 +65,19 @@ public class ParentController {
         StudentParentDto created = parentService.createAndLinkParent(currentUser, studentId, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
+
+    @PostMapping("/api/parents/{parentId}/invite")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentParentDto invite(@AuthenticationPrincipal User currentUser,
+                                   @PathVariable Long parentId) {
+        return parentService.inviteParent(currentUser, parentId);
+    }
+
+    @PostMapping("/api/parents/{parentId}/disable-login")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public ResponseEntity<Void> disableLogin(@AuthenticationPrincipal User currentUser,
+                                              @PathVariable Long parentId) {
+        parentService.disableParentLogin(currentUser, parentId);
+        return ResponseEntity.noContent().build();
+    }
 }
