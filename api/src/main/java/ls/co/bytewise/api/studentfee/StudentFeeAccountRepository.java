@@ -30,6 +30,8 @@ public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAcc
     Optional<StudentFeeAccount> findByStudentIdAndTermIdAndSchoolId(
             Long studentId, Long termId, Long schoolId);
 
+    List<StudentFeeAccount> findAllByStudentIdAndSchoolId(Long studentId, Long schoolId);
+
     Optional<StudentFeeAccount> findByIdAndSchoolId(Long id, Long schoolId);
 
     @Query("""

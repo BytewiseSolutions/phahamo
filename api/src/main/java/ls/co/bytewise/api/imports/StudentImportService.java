@@ -148,7 +148,7 @@ public class StudentImportService {
     }
 
     private String importReason(Exception exception) {
-        if (exception instanceof ls.co.bytewise.api.student.DuplicateStudentException duplicate) {
+        if (exception instanceof ls.co.bytewise.api.student.StudentExceptions.DuplicateStudentException duplicate) {
             return duplicate.getMessage() + ": " + formatDuplicateMatches(duplicate.getMatches());
         }
         return exception.getMessage();

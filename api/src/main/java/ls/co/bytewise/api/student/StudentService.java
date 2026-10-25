@@ -80,7 +80,7 @@ public class StudentService {
         if (duplicateConfirmed) return;
         List<StudentDuplicateDto> matches = findPotentialDuplicates(firstName, lastName, dateOfBirth);
         if (!matches.isEmpty()) {
-            throw new DuplicateStudentException(matches);
+            throw new StudentExceptions.DuplicateStudentException(matches);
         }
     }
 
@@ -120,26 +120,41 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentDto assignClass(User editor, Long studentId, Long schoolClassId) {
+    public StudentDto assignClass(User editor, Long studentId, StudentClassUpdateDto dto) {
         Long schoolId = TenantContext.getSchoolId();
         Student student = findOrThrow(studentId);
         StudentStatus previousStatus = student.getStatus();
+        Long schoolClassId = dto.getSchoolClassId();
 
         if (schoolClassId == null) {
             student.setCurrentClass(null);
         } else {
-            student.setCurrentClass(resolveClass(schoolClassId, schoolId));
+            SchoolClass targetClass = resolveClass(schoolClassId, schoolId);
+            StudentClassFeePreviewDto preview = feeAccountService.previewClassChange(student, targetClass);
+            if (preview.isFeesChanged() && !dto.isConfirmFeeChange()) {
+                throw new StudentExceptions.FeeChangeConfirmationRequiredException(preview);
+            }
+            student.setCurrentClass(targetClass);
             // Assigning a student to a current class re-enrols them in the school.
             // This also restores students previously marked as COMPLETED.
             student.setStatus(StudentStatus.ACTIVE);
+            feeAccountService.applyClassChange(student, targetClass, editor);
         }
 
         student.setUpdatedBy(editor);
 
         Student saved = studentRepository.save(student);
         recordStatusChange(editor, saved, previousStatus);
-        feeAccountService.synchronizeStudentAccounts(saved, editor);
+        if (schoolClassId == null) {
+            feeAccountService.synchronizeStudentAccounts(saved, editor);
+        }
         return new StudentDto(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentClassFeePreviewDto previewClassChange(Long studentId, Long schoolClassId) {
+        Student student = findOrThrow(studentId);
+        return feeAccountService.previewClassChange(student, resolveClass(schoolClassId, TenantContext.getSchoolId()));
     }
 
     @Transactional

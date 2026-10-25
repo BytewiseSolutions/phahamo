@@ -8,6 +8,7 @@ import { SuccessDialogService } from '../../../util/success-dialog.service';
 import { Page } from '../../../util/page';
 import { Student } from '../../student/student';
 import { SchoolClass } from '../class';
+import { StudentClassFeePreview } from '../student-class-fee-preview';
 
 interface StudentOption extends Student {
   fullLabel: string;
@@ -179,18 +180,46 @@ export class ClassStudentList implements OnChanges, OnDestroy {
     const targetClass = this.classes.find(c => c.id === event.schoolClassId);
     const student = this.transferringStudent;
 
+    this.errorMessage = '';
+    this.backend.get<StudentClassFeePreview>(
+      `/students/${event.studentId}/class-fee-preview?schoolClassId=${event.schoolClassId}`
+    ).subscribe({
+      next: (preview) => this.confirmTransfer(event, preview, student, targetClass),
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to preview the fee change.';
+      }
+    });
+  }
+
+  private async confirmTransfer(
+    event: { studentId: number; schoolClassId: number },
+    preview: StudentClassFeePreview,
+    student: Student | null,
+    targetClass: SchoolClass | undefined
+  ): Promise<void> {
+    let message = `Transfer "${student?.firstName} ${student?.lastName}" to "${targetClass?.name ?? 'the selected class'}"?`;
+
+    if (preview.feesChanged) {
+      const changes = preview.terms
+        .filter(line => line.willUpdate)
+        .map(line => `${line.termName}: fees ${this.formatAmount(line.oldTotalFees)} → ${this.formatAmount(line.newTotalFees)}, balance ${this.formatAmount(line.oldBalance)} → ${this.formatAmount(line.newBalance)}`)
+        .join('\n');
+      message += `\n\nUnpaid fees will be replaced with the new class fees. Paid amounts stay unchanged.\n\n${changes}`;
+    } else {
+      message += '\n\nNo unpaid fee amounts will change.';
+    }
+
     const confirmed = await this.confirmDialog.confirm({
       title: 'Transfer Student',
-      message: `Transfer "${student?.firstName} ${student?.lastName}" to "${targetClass?.name ?? 'the selected class'}"?`,
+      message,
       confirmText: 'Transfer'
     });
 
     if (!confirmed) return;
 
-    this.errorMessage = '';
-
     this.backend.put(`/students/${event.studentId}/class`, {
-      schoolClassId: event.schoolClassId
+      schoolClassId: event.schoolClassId,
+      confirmFeeChange: true
     }).subscribe({
       next: () => {
         this.transferringStudent = null;
@@ -201,6 +230,10 @@ export class ClassStudentList implements OnChanges, OnDestroy {
         this.errorMessage = err.error?.message || 'Failed to transfer student.';
       }
     });
+  }
+
+  private formatAmount(value: number): string {
+    return `M ${value.toFixed(2)}`;
   }
 
   async onRemove(student: Student): Promise<void> {

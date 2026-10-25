@@ -58,8 +58,15 @@ public class StudentController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
     public StudentDto assignClass(@AuthenticationPrincipal User currentUser,
                                   @PathVariable Long id,
-                                  @RequestBody StudentClassUpdateDto dto) {
-        return studentService.assignClass(currentUser, id, dto.getSchoolClassId());
+                             @RequestBody StudentClassUpdateDto dto) {
+        return studentService.assignClass(currentUser, id, dto);
+    }
+
+    @GetMapping("/{id}/class-fee-preview")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL"})
+    public StudentClassFeePreviewDto previewClassChange(@PathVariable Long id,
+                                                        @RequestParam Long schoolClassId) {
+        return studentService.previewClassChange(id, schoolClassId);
     }
 
     @PutMapping("/{id}/reactivate")

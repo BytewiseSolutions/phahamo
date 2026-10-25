@@ -12,7 +12,6 @@ import ls.co.bytewise.api.school.SchoolExceptions;
 import ls.co.bytewise.api.schoolclass.SchoolClassExceptions;
 import ls.co.bytewise.api.security.MissingTenantException;
 import ls.co.bytewise.api.student.StudentExceptions;
-import ls.co.bytewise.api.student.DuplicateStudentException;
 import ls.co.bytewise.api.studentfee.StudentFeeExceptions;
 import ls.co.bytewise.api.subject.SubjectExceptions;
 import ls.co.bytewise.api.subject.subjectclassassignment.SubjectClassAssignmentExceptions;
@@ -57,13 +56,25 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(DuplicateStudentException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicateStudent(DuplicateStudentException ex) {
+    @ExceptionHandler(StudentExceptions.DuplicateStudentException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateStudent(
+            StudentExceptions.DuplicateStudentException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now());
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("message", ex.getMessage());
         body.put("matches", ex.getMatches());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(StudentExceptions.FeeChangeConfirmationRequiredException.class)
+    public ResponseEntity<Map<String, Object>> handleFeeChangeConfirmation(
+            StudentExceptions.FeeChangeConfirmationRequiredException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        body.put("preview", ex.getPreview());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
