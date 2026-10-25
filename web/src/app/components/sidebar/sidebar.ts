@@ -151,7 +151,9 @@ export class Sidebar implements OnInit {
       }
     };
 
-    addAll(COMMON_LINKS);
+    if (!roles.includes('PARENT')) {
+      addAll(COMMON_LINKS);
+    }
     for (const role of roles) {
       addAll(ROLE_LINKS[role] ?? []);
     }

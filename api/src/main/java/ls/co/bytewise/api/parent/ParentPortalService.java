@@ -7,6 +7,8 @@ import ls.co.bytewise.api.attendance.report.AttendanceReportService;
 import ls.co.bytewise.api.attendance.report.StudentAttendanceReportDto;
 import ls.co.bytewise.api.result.TermResultDto;
 import ls.co.bytewise.api.result.TermResultService;
+import ls.co.bytewise.api.result.TermResultStatus;
+import ls.co.bytewise.api.reportcard.ReportCardService;
 import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentRepository;
@@ -32,6 +34,7 @@ public class ParentPortalService {
     private final TermResultService termResultService;
     private final StudentFeeAccountService feeAccountService;
     private final AnnouncementService announcementService;
+    private final ReportCardService reportCardService;
 
     public ParentPortalService(ParentRepository parentRepository,
                                StudentRepository studentRepository,
@@ -39,7 +42,8 @@ public class ParentPortalService {
                                AttendanceReportService attendanceReportService,
                                TermResultService termResultService,
                                StudentFeeAccountService feeAccountService,
-                               AnnouncementService announcementService) {
+                               AnnouncementService announcementService,
+                               ReportCardService reportCardService) {
         this.parentRepository = parentRepository;
         this.studentRepository = studentRepository;
         this.termRepository = termRepository;
@@ -47,6 +51,7 @@ public class ParentPortalService {
         this.termResultService = termResultService;
         this.feeAccountService = feeAccountService;
         this.announcementService = announcementService;
+        this.reportCardService = reportCardService;
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +128,16 @@ public class ParentPortalService {
     public List<TermResultDto> results(User user, Long studentId, Long termId) {
         Student student = child(user, studentId);
         term(termId);
-        return termResultService.listForStudentAndTerm(student.getId(), termId);
+        return termResultService.listForStudentAndTerm(student.getId(), termId).stream()
+                .filter(result -> result.getStatus() == TermResultStatus.FINALISED)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] reportCard(User user, Long studentId, Long termId) {
+        Student student = child(user, studentId);
+        term(termId);
+        return reportCardService.renderPdf(student.getId(), termId, user);
     }
 
     @Transactional(readOnly = true)

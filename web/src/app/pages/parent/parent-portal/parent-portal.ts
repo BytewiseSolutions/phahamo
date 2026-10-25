@@ -30,6 +30,7 @@ export class ParentPortal implements OnInit {
   fees: ParentFeeAccount | null = null;
 
   loading = false;
+  downloadingReportCard = false;
   errorMessage = '';
 
   constructor(
@@ -145,6 +146,31 @@ export class ParentPortal implements OnInit {
 
   selectDashboardChild(childId: number): void {
     this.selectedDashboardChildId = childId;
+  }
+
+  downloadReportCard(): void {
+    if (!this.selectedChildId || !this.selectedTermId || this.results.length === 0) {
+      return;
+    }
+
+    this.downloadingReportCard = true;
+    this.backend.downloadBlob(
+      `/parent/children/${this.selectedChildId}/report-card?termId=${this.selectedTermId}`
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `report-card-${this.selectedChildId}-term-${this.selectedTermId}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.downloadingReportCard = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to download report card.';
+        this.downloadingReportCard = false;
+      }
+    });
   }
 
   formatDate(value: string): string {

@@ -224,6 +224,72 @@ p {
     margin-bottom: 24px;
 }
 
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.attendance-status {
+    display: inline-flex;
+    padding: .3rem .6rem;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-present {
+    background: rgb(34 197 94 / .12);
+    color: #15803d;
+}
+
+.status-absent {
+    background: rgb(239 68 68 / .12);
+    color: #b91c1c;
+}
+
+.status-late {
+    background: rgb(245 158 11 / .16);
+    color: #b45309;
+}
+
+.status-excused {
+    background: rgb(59 130 246 / .12);
+    color: #1d4ed8;
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.results-header h2 {
+    margin: 0 0 .25rem;
+    font-size: 18px;
+}
+
+.secondary-button {
+    padding: .65rem .9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-md);
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.secondary-button:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.secondary-button:disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
 .summary-item {
     display: flex;
     flex-direction: column;
@@ -290,5 +356,10 @@ td {
 
     .dashboard-stats {
         grid-template-columns: 1fr;
+    }
+
+    .results-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

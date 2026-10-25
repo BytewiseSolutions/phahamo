@@ -121,9 +121,47 @@
             <span class="value">{{ attendance.summary.late }}</span>
           </div>
         </div>
+
+        @if (attendance.records.length > 0) {
+          <div class="table-wrapper">
+            <table>
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody>
+              @for (record of attendance.records; track record.id) {
+                <tr>
+                  <td>{{ formatDate(record.date) }}</td>
+                  <td>
+                    <span class="attendance-status" [class]="'status-' + record.status.toLowerCase()">
+                      {{ attendanceLabel(record.status) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="empty">No attendance records for this term.</div>
+        }
       }
 
       @if (!loading && section === 'results' && results.length > 0) {
+        <div class="results-header">
+          <div>
+            <h2>Finalised results</h2>
+            <p>Only results released by the school are shown.</p>
+          </div>
+          <button type="button" class="secondary-button"
+                  (click)="downloadReportCard()"
+                  [disabled]="downloadingReportCard">
+            {{ downloadingReportCard ? 'Preparing...' : 'Download report card' }}
+          </button>
+        </div>
         <table>
           <thead>
           <tr>
