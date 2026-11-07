@@ -8,6 +8,17 @@
   padding: 32px;
 }
 
+.legal-consent {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 22px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.legal-consent input { margin-right: 8px; }
+.legal-consent a { color: var(--primary); }
+
 .auth-container {
   width: 100%;
   max-width: 1180px;

@@ -14,6 +14,7 @@ export class AuthService {
   private fullNameKey = 'sms_full_name';
   private schoolNameKey = 'sms_school_name';
   private userIdKey = 'sms_user_id';
+  private legalAcceptanceKey = 'sms_legal_acceptance_required';
 
   constructor(private backend: BackendService, private router: Router) {}
 
@@ -28,6 +29,7 @@ export class AuthService {
     localStorage.setItem(this.userIdKey, String(response.userId));
     localStorage.setItem(this.fullNameKey, response.fullName);
     localStorage.setItem(this.schoolNameKey, response.schoolName ?? '');
+    localStorage.setItem(this.legalAcceptanceKey, String(response.requiresLegalAcceptance));
     if (response.schoolIds && response.schoolIds.length > 0) {
       localStorage.setItem(this.schoolIdKey, String(response.schoolIds[0]));
     }
@@ -55,6 +57,7 @@ export class AuthService {
     localStorage.removeItem(this.schoolIdKey);
     localStorage.removeItem(this.fullNameKey);
     localStorage.removeItem(this.schoolNameKey);
+    localStorage.removeItem(this.legalAcceptanceKey);
     this.router.navigate(['/login']);
   }
   logout(): void {
@@ -71,11 +74,20 @@ export class AuthService {
     localStorage.removeItem(this.schoolIdKey);
     localStorage.removeItem(this.fullNameKey);
     localStorage.removeItem(this.schoolNameKey);
+    localStorage.removeItem(this.legalAcceptanceKey);
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
+  }
+
+  requiresLegalAcceptance(): boolean {
+    return localStorage.getItem(this.legalAcceptanceKey) === 'true';
+  }
+
+  clearLegalAcceptanceRequired(): void {
+    localStorage.removeItem(this.legalAcceptanceKey);
   }
 
   getActiveSchoolId(): string | null {

@@ -6,5 +6,7 @@ export interface SchoolRegistration {
   email: string;
   password: string;
   phone: string;
+  termsAccepted: boolean;
+  privacyAccepted: boolean;
   school: Pick<School, 'schoolName' | 'schoolAddress' | 'schoolContactEmail' | 'schoolContactPhone'>;
 }

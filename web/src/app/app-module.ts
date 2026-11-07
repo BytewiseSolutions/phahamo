@@ -105,6 +105,8 @@ import { ParentPortal } from './pages/parent/parent-portal/parent-portal';
 import { HolidayList } from './pages/holidays/holiday-list/holiday-list';
 import { HolidayForm } from './pages/holidays/holiday-form/holiday-form';
 import { AuditLogPage } from './pages/audit/audit-log-page/audit-log-page';
+import { LegalPage } from './pages/legal/legal-page';
+import { LegalAcceptance } from './pages/legal/legal-acceptance';
 
 @NgModule({
   declarations: [
@@ -204,6 +206,8 @@ import { AuditLogPage } from './pages/audit/audit-log-page/audit-log-page';
     HolidayList,
     HolidayForm,
     AuditLogPage,
+    LegalPage,
+    LegalAcceptance,
   ],
   imports: [
     BrowserModule,

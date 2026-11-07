@@ -52,6 +52,8 @@ import {MessagesPage} from './pages/messages/messages-page/messages-page';
 import {ParentPortal} from './pages/parent/parent-portal/parent-portal';
 import {HolidayList} from './pages/holidays/holiday-list/holiday-list';
 import {AuditLogPage} from './pages/audit/audit-log-page/audit-log-page';
+import {LegalPage} from './pages/legal/legal-page';
+import {LegalAcceptance} from './pages/legal/legal-acceptance';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -59,6 +61,9 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPassword },
   { path: 'reset-password', component: ResetPassword },
   { path: 'auth/callback', component: AuthCallback },
+  { path: 'terms', component: LegalPage, data: { documentType: 'terms' } },
+  { path: 'privacy', component: LegalPage, data: { documentType: 'privacy' } },
+  { path: 'legal-acceptance', component: LegalAcceptance, canActivate: [authGuard] },
   { path: 'subscription-expired', component: SubscriptionExpired },
   {
     path: '',

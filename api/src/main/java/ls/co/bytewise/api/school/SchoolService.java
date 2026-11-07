@@ -1,6 +1,7 @@
 package ls.co.bytewise.api.school;
 
 import ls.co.bytewise.api.common.*;
+import ls.co.bytewise.api.legal.LegalPolicy;
 import ls.co.bytewise.api.subscription.Subscription;
 import ls.co.bytewise.api.subscription.SubscriptionPlan;
 import ls.co.bytewise.api.subscription.SubscriptionRepository;
@@ -53,6 +54,10 @@ public class SchoolService {
         }
 
         SchoolDto school = admin.getSchool();
+        if (!Boolean.TRUE.equals(admin.getTermsAccepted())
+                || !Boolean.TRUE.equals(admin.getPrivacyAccepted())) {
+            throw new IllegalArgumentException("You must accept the Terms of Use and Privacy Policy");
+        }
         validateRegistration(admin.getEmail(), school.getSchoolContactEmail());
 
         School newSchool = new School();
@@ -85,6 +90,11 @@ public class SchoolService {
         newAdmin.setPhone(admin.getPhone());
         newAdmin.setPassword(passwordEncoder.encode(admin.getPassword()));
         newAdmin.setStatus(Status.ACTIVE);
+        Instant acceptedAt = Instant.now();
+        newAdmin.setTermsAcceptedAt(acceptedAt);
+        newAdmin.setTermsVersion(LegalPolicy.TERMS_VERSION);
+        newAdmin.setPrivacyAcceptedAt(acceptedAt);
+        newAdmin.setPrivacyVersion(LegalPolicy.PRIVACY_VERSION);
         newAdmin.setRoles(Set.of(UserRole.SCHOOL_ADMIN));
 
         newAdmin.add(savedSchool);
