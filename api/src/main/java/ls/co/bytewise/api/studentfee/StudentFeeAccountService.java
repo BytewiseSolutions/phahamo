@@ -632,7 +632,7 @@ public class StudentFeeAccountService {
                     + "Remaining Balance: M " + String.format("%.2f", balance - dto.getAmount()) + "\n\n"
                     + "Thank you for your payment.\n\n"
                     + account.getSchool().getName();
-            mailService.send(recipientEmail, subject, body);
+            mailService.send(recipientEmail, subject, body, account.getSchool());
         }
 
         return toDto(saved);
