@@ -54,7 +54,9 @@ export class Login implements OnInit {
     const { email, password } = this.loginForm.value;
 
     this.authService.login({ email, password }).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: (response) => this.router.navigate([
+        response.requiresLegalAcceptance ? '/legal-acceptance' : '/dashboard'
+      ]),
       error: (err) => {
         this.errorMessage = err.status === 401
           ? (err.error?.message || 'Invalid email or password.')

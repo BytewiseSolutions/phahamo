@@ -4,6 +4,7 @@ import ls.co.bytewise.api.audit.AuditAction;
 import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.mail.MailService;
+import ls.co.bytewise.api.legal.LegalPolicy;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.JwtService;
 import ls.co.bytewise.api.security.PasswordResetToken;
@@ -130,8 +131,30 @@ public class AuthenticationService {
                 user.getRoles(),
                 user.getSchools().stream().map(school -> school.getId()).collect(Collectors.toSet()),
                 schoolName,
-                user.isMustChangePassword()
+                user.isMustChangePassword(),
+                requiresLegalAcceptance(user),
+                LegalPolicy.TERMS_VERSION,
+                LegalPolicy.PRIVACY_VERSION
         );
+    }
+
+    @Transactional
+    public void acceptCurrentLegalPolicies(User user, LegalAcceptanceRequest request) {
+        if (!request.isTermsAccepted() || !request.isPrivacyAccepted()) {
+            throw new IllegalArgumentException("You must accept the Terms of Use and Privacy Policy");
+        }
+        Instant acceptedAt = Instant.now();
+        user.setTermsAcceptedAt(acceptedAt);
+        user.setTermsVersion(LegalPolicy.TERMS_VERSION);
+        user.setPrivacyAcceptedAt(acceptedAt);
+        user.setPrivacyVersion(LegalPolicy.PRIVACY_VERSION);
+        userRepository.save(user);
+    }
+
+    private boolean requiresLegalAcceptance(User user) {
+        return user.hasRole(ls.co.bytewise.api.common.UserRole.SCHOOL_ADMIN)
+                && (!LegalPolicy.TERMS_VERSION.equals(user.getTermsVersion())
+                || !LegalPolicy.PRIVACY_VERSION.equals(user.getPrivacyVersion()));
     }
 
     public void logout(String token, User user) {

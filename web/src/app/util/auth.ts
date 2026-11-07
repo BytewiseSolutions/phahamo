@@ -11,6 +11,9 @@ export interface LoginResponse {
   schoolIds: number[];
   schoolName: string;
   mustChangePassword: boolean;
+  requiresLegalAcceptance: boolean;
+  termsVersion: string;
+  privacyVersion: string;
 }
 
 export interface ForgotPasswordRequest {

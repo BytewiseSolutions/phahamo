@@ -19,4 +19,7 @@ public class LoginResponse {
     private Set<Long> schoolIds;
     private String schoolName;
     private boolean mustChangePassword;
+    private boolean requiresLegalAcceptance;
+    private String termsVersion;
+    private String privacyVersion;
 }

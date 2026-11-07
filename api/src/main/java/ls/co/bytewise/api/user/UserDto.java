@@ -36,6 +36,8 @@ public class UserDto extends BaseDto {
     private Status status;
     private Instant lockedUntil;
     private Set<UserRole> roles;
+    private Boolean termsAccepted;
+    private Boolean privacyAccepted;
 
     @Valid
     private SchoolDto school;

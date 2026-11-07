@@ -1,0 +1,16 @@
+<main class="legal-page">
+  <section class="legal-card acceptance-card">
+    <p class="eyebrow">ACTION REQUIRED</p>
+    <h1>Please review our legal documents</h1>
+    <p>The Terms of Use or Privacy Policy has changed. Please read and accept both documents before continuing.</p>
+    @if (errorMessage) { <div class="error-banner">{{ errorMessage }}</div> }
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="check-row"><input type="checkbox" formControlName="termsAccepted"> I accept the <a
+          routerLink="/terms" target="_blank">Terms of Use</a>.</label>
+      <label class="check-row"><input type="checkbox" formControlName="privacyAccepted"> I accept the <a
+          routerLink="/privacy" target="_blank">Privacy Policy</a>.</label>
+      <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Accept and continue'
+        }}</button>
+    </form>
+  </section>
+</main>

@@ -23,6 +23,7 @@ export class AuthCallback implements OnInit {
     }
 
     this.auth.acceptToken(token);
-    this.router.navigate(['/dashboard']);
+    this.router.navigate([this.route.snapshot.queryParamMap.get('legal') === 'true'
+      ? '/legal-acceptance' : '/dashboard']);
   }
 }

@@ -53,4 +53,11 @@ public class AuthenticationController {
         authenticationService.changePassword(currentUser, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/legal-acceptance")
+    public ResponseEntity<Void> acceptLegalPolicies(@AuthenticationPrincipal User currentUser,
+                                                    @Valid @RequestBody LegalAcceptanceRequest request) {
+        authenticationService.acceptCurrentLegalPolicies(currentUser, request);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -28,6 +28,8 @@ export class Register {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       phone: ['', Validators.required],
+      termsAccepted: [false, Validators.requiredTrue],
+      privacyAccepted: [false, Validators.requiredTrue],
       schoolName: ['', Validators.required],
       schoolAddress: ['', Validators.required],
       schoolContactEmail: ['', [Validators.required, Validators.email]],
@@ -89,6 +91,8 @@ export class Register {
       email: formValue.email,
       password: formValue.password,
       phone: formValue.phone,
+      termsAccepted: formValue.termsAccepted,
+      privacyAccepted: formValue.privacyAccepted,
       school: {
         schoolName: formValue.schoolName,
         schoolAddress: formValue.schoolAddress,

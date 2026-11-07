@@ -62,6 +62,18 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
+    @Column(name = "terms_accepted_at")
+    private Instant termsAcceptedAt;
+
+    @Column(name = "terms_version", length = 32)
+    private String termsVersion;
+
+    @Column(name = "privacy_accepted_at")
+    private Instant privacyAcceptedAt;
+
+    @Column(name = "privacy_version", length = 32)
+    private String privacyVersion;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

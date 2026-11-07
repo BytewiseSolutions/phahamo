@@ -43,9 +43,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         User user = (email == null) ? null : userRepository.findByEmail(email).orElse(null);
 
         if (user == null) {
-            response.sendRedirect(UriComponentsBuilder
-                    .fromUriString(frontendUrl + "/login")
-                    .queryParam("error", "no_account")
+                response.sendRedirect(UriComponentsBuilder
+                        .fromUriString(frontendUrl + "/login")
+                        .queryParam("error", "no_account")
                     .build().toUriString());
             return;
         }
@@ -63,6 +63,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect(UriComponentsBuilder
                 .fromUriString(frontendUrl + "/auth/callback")
                 .queryParam("token", loginResponse.getToken())
+                .queryParam("legal", loginResponse.isRequiresLegalAcceptance())
                 .build().toUriString());
     }
 }
