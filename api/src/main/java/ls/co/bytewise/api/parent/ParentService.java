@@ -10,6 +10,7 @@ import ls.co.bytewise.api.student.StudentRepository;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +34,20 @@ public class ParentService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final String frontendUrl;
 
     public ParentService(ParentRepository parentRepository,
                          StudentRepository studentRepository,
                          UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
-                         MailService mailService) {
+                         MailService mailService,
+                         @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.parentRepository = parentRepository;
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
+        this.frontendUrl = frontendUrl.replaceAll("/$", "");
     }
 
     @Transactional
@@ -278,7 +282,7 @@ public class ParentService {
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
-                        "http://localhost:4200/login";
+                        frontendUrl + "/login";
         mailService.send(toEmail, "Your " + schoolName + " account", body);
     }
 }

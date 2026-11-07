@@ -15,6 +15,7 @@ import ls.co.bytewise.api.student.StudentService;
 import ls.co.bytewise.api.teacher.TeacherDto;
 import ls.co.bytewise.api.teacher.TeacherService;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,6 +39,7 @@ public class UserService {
     private final ParentService parentService;
     private final TeacherService teacherService;
     private final AuditLogService auditLogService;
+    private final String frontendUrl;
 
     public UserService(UserRepository userRepository,
                        SchoolRepository schoolRepository,
@@ -46,7 +48,8 @@ public class UserService {
                        StudentService studentService,
                        ParentService parentService,
                        TeacherService teacherService,
-                       AuditLogService auditLogService
+                       AuditLogService auditLogService,
+                       @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl
                        ) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
@@ -56,6 +59,7 @@ public class UserService {
         this.parentService = parentService;
         this.teacherService = teacherService;
         this.auditLogService = auditLogService;
+        this.frontendUrl = frontendUrl.replaceAll("/$", "");
     }
 
     @Transactional
@@ -378,7 +382,7 @@ public class UserService {
                         "Email: " + toEmail + "\n" +
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
-                        "http://localhost:4200/login";
+                        frontendUrl + "/login";
         mailService.send(toEmail, "Your " + schoolName + " account", body);
     }
 

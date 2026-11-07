@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { BackendService } from './backend.service';
 import { LoginRequest, LoginResponse, JwtPayload } from './auth';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,8 @@ export class AuthService {
   }
 
   loginWithGoogle(): void {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    const apiRoot = environment.apiUrl.replace(/\/api\/?$/, '');
+    window.location.href = `${apiRoot}/oauth2/authorization/google`;
   }
 
   acceptToken(token: string): void {

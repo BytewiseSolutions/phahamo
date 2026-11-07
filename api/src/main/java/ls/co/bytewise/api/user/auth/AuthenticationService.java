@@ -11,6 +11,7 @@ import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class AuthenticationService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JavaMailSender mailSender;
     private final AuditLogService auditLogService;
+    private final String frontendUrl;
     private final ConcurrentMap<String, IpAttemptWindow> ipAttempts = new ConcurrentHashMap<>();
 
     public AuthenticationService(UserRepository userRepository,
@@ -46,7 +48,8 @@ public class AuthenticationService {
                                  TokenBlacklistService tokenBlacklistService,
                                  PasswordResetTokenRepository passwordResetTokenRepository,
                                  JavaMailSender mailSender,
-                                 AuditLogService auditLogService) {
+                                 AuditLogService auditLogService,
+                                 @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -54,6 +57,7 @@ public class AuthenticationService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.mailSender = mailSender;
         this.auditLogService = auditLogService;
+        this.frontendUrl = frontendUrl.replaceAll("/$", "");
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -252,7 +256,7 @@ public class AuthenticationService {
     }
 
     private void sendResetEmail(String toEmail, String rawToken) {
-        String resetLink = "http://localhost:4200/reset-password?token=" + rawToken;
+        String resetLink = frontendUrl + "/reset-password?token=" + rawToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

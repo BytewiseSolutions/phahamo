@@ -12,22 +12,23 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 
 @Component
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String FRONTEND_CALLBACK = "http://localhost:4200/auth/callback";
-    private static final String FRONTEND_LOGIN    = "http://localhost:4200/login";
-
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
+    private final String frontendUrl;
 
     public OAuth2SuccessHandler(UserRepository userRepository,
-                                AuthenticationService authenticationService) {
+                                AuthenticationService authenticationService,
+                                @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.userRepository = userRepository;
         this.authenticationService = authenticationService;
+        this.frontendUrl = frontendUrl.replaceAll("/$", "");
     }
 
     @Override
@@ -43,7 +44,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         if (user == null) {
             response.sendRedirect(UriComponentsBuilder
-                    .fromUriString(FRONTEND_LOGIN)
+                    .fromUriString(frontendUrl + "/login")
                     .queryParam("error", "no_account")
                     .build().toUriString());
             return;
@@ -51,7 +52,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         if (user.getStatus() != Status.ACTIVE) {
             response.sendRedirect(UriComponentsBuilder
-                    .fromUriString(FRONTEND_LOGIN)
+                    .fromUriString(frontendUrl + "/login")
                     .queryParam("error", "inactive")
                     .build().toUriString());
             return;
@@ -60,7 +61,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         LoginResponse loginResponse = authenticationService.issueLoginResponse(user);
 
         response.sendRedirect(UriComponentsBuilder
-                .fromUriString(FRONTEND_CALLBACK)
+                .fromUriString(frontendUrl + "/auth/callback")
                 .queryParam("token", loginResponse.getToken())
                 .build().toUriString());
     }
