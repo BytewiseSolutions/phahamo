@@ -135,7 +135,7 @@ public class FeeReminderService {
             boolean anySent = false;
             for (Parent parent : parentsWithEmail) {
                 try {
-                    mailService.send(parent.getUser().getEmail(), subject, body);
+                    mailService.send(parent.getUser().getEmail(), subject, body, acc.getSchool());
                     result.setSentCount(result.getSentCount() + 1);
                     anySent = true;
                 } catch (Exception e) {

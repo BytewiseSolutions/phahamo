@@ -154,7 +154,7 @@ public class AnnouncementService {
                     + a.getBody() + "\n\n"
                     + "Log in to view more details.\n\n"
                     + a.getSchool().getName();
-            mailService.send(u.getEmail(), "New Announcement: " + a.getTitle(), body);
+            mailService.send(u.getEmail(), "New Announcement: " + a.getTitle(), body, a.getSchool());
         }
     }
 

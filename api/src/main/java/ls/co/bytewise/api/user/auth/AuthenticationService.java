@@ -3,14 +3,14 @@ package ls.co.bytewise.api.user.auth;
 import ls.co.bytewise.api.audit.AuditAction;
 import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.Status;
+import ls.co.bytewise.api.mail.MailService;
+import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.JwtService;
 import ls.co.bytewise.api.security.PasswordResetToken;
 import ls.co.bytewise.api.security.PasswordResetTokenRepository;
 import ls.co.bytewise.api.security.TokenBlacklistService;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +37,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    private final JavaMailSender mailSender;
+    private final MailService mailService;
     private final AuditLogService auditLogService;
     private final String frontendUrl;
     private final ConcurrentMap<String, IpAttemptWindow> ipAttempts = new ConcurrentHashMap<>();
@@ -47,7 +47,7 @@ public class AuthenticationService {
                                  JwtService jwtService,
                                  TokenBlacklistService tokenBlacklistService,
                                  PasswordResetTokenRepository passwordResetTokenRepository,
-                                 JavaMailSender mailSender,
+                                 MailService mailService,
                                  AuditLogService auditLogService,
                                  @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
         this.userRepository = userRepository;
@@ -55,7 +55,7 @@ public class AuthenticationService {
         this.jwtService = jwtService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
-        this.mailSender = mailSender;
+        this.mailService = mailService;
         this.auditLogService = auditLogService;
         this.frontendUrl = frontendUrl.replaceAll("/$", "");
     }
@@ -190,19 +190,13 @@ public class AuthenticationService {
 
     private void sendLockoutEmail(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) return;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("Your school account has been temporarily locked");
-        message.setText("Hi " + user.getFirstName() + ",\n\n"
+        String body = "Hi " + user.getFirstName() + ",\n\n"
                 + "Your Phahamo account was temporarily locked after 5 failed login attempts.\n"
                 + "You can try again in 15 minutes, or contact your school administrator to unlock it sooner.\n\n"
                 + "If this was not you, please reset your password.\n\n"
-                + "Phahamo");
-        try {
-            mailSender.send(message);
-        } catch (Exception ignored) {
-            // Login protection must still work when the notification provider is unavailable.
-        }
+                + "Phahamo";
+        mailService.send(user.getEmail(), "Your school account has been temporarily locked", body,
+                primarySchool(user));
     }
 
     private static final class IpAttemptWindow {
@@ -235,7 +229,7 @@ public class AuthenticationService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        sendResetEmail(user.getEmail(), rawToken);
+        sendResetEmail(user, rawToken);
     }
 
     @Transactional
@@ -255,15 +249,15 @@ public class AuthenticationService {
         passwordResetTokenRepository.save(resetToken);
     }
 
-    private void sendResetEmail(String toEmail, String rawToken) {
+    private void sendResetEmail(User user, String rawToken) {
         String resetLink = frontendUrl + "/reset-password?token=" + rawToken;
+        mailService.send(user.getEmail(), "Reset your Phahamo password",
+                "Click the link below to reset your password. This link expires in 1 hour.\n\n" + resetLink,
+                primarySchool(user));
+    }
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Reset your Phahamo password");
-        message.setText("Click the link below to reset your password. This link expires in 1 hour.\n\n" + resetLink);
-
-        mailSender.send(message);
+    private School primarySchool(User user) {
+        return user.getSchools().stream().findFirst().orElse(null);
     }
 
     @Transactional

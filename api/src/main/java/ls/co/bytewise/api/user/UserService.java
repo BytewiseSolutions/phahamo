@@ -144,7 +144,8 @@ public class UserService {
                 saved.getEmail(),
                 saved.getFirstName(),
                 temporaryPassword,
-                school != null ? school.getName() : "Phahamo");
+                school != null ? school.getName() : "Phahamo",
+                school);
 
         if (school != null) {
             auditLogService.record(school, creator, AuditAction.USER_CREATED,
@@ -375,7 +376,8 @@ public class UserService {
     private void sendWelcomeEmail(String toEmail,
                                   String firstName,
                                   String temporaryPassword,
-                                  String schoolName) {
+                                  String schoolName,
+                                  School school) {
         String body =
                 "Hi " + firstName + ",\n\n" +
                         "An account has been created for you on " + schoolName + ".\n\n" +
@@ -383,7 +385,7 @@ public class UserService {
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
                         frontendUrl + "/login";
-        mailService.send(toEmail, "Your " + schoolName + " account", body);
+        mailService.send(toEmail, "Your " + schoolName + " account", body, school);
     }
 
     public UserDto getUser(Long userId) {

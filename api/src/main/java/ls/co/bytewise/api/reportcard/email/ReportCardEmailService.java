@@ -159,7 +159,8 @@ public class ReportCardEmailService {
                         body,
                         filename,
                         pdf,
-                        MIME_PDF
+                        MIME_PDF,
+                        student.getSchool()
                 );
                 result.setSentCount(result.getSentCount() + 1);
                 anySent = true;

@@ -165,7 +165,7 @@ public class AttendanceService {
         for (Parent parent : student.getParents()) {
             String email = parent.getUser() != null ? parent.getUser().getEmail() : null;
             if (email != null && !email.isBlank()) {
-                mailService.send(email, subject, body);
+                mailService.send(email, subject, body, school);
             }
         }
     }

@@ -119,7 +119,8 @@ public class FeeStatementService {
                         body,
                         filename,
                         pdf,
-                        "application/pdf"
+                        "application/pdf",
+                        school
                 );
                 result.setSentCount(result.getSentCount() + 1);
                 anySent = true;

@@ -4,6 +4,7 @@ import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.common.UserRole;
 import ls.co.bytewise.api.mail.MailService;
 import ls.co.bytewise.api.security.TenantContext;
+import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.student.Student;
 import ls.co.bytewise.api.student.StudentExceptions;
 import ls.co.bytewise.api.student.StudentRepository;
@@ -154,7 +155,7 @@ public class ParentService {
         Parent saved = parentRepository.save(parent);
 
         sendWelcomeEmail(user.getEmail(), user.getFirstName(), temporaryPassword,
-                parent.getSchool().getName());
+                parent.getSchool().getName(), parent.getSchool());
         return new StudentParentDto(saved);
     }
 
@@ -275,7 +276,8 @@ public class ParentService {
     private void sendWelcomeEmail(String toEmail,
                                   String firstName,
                                   String temporaryPassword,
-                                  String schoolName) {
+                                  String schoolName,
+                                  School school) {
         String body =
                 "Hi " + firstName + ",\n\n" +
                         "An account has been created for you on " + schoolName + ".\n\n" +
@@ -283,6 +285,6 @@ public class ParentService {
                         "Temporary password: " + temporaryPassword + "\n\n" +
                         "Please log in and change your password immediately.\n\n" +
                         frontendUrl + "/login";
-        mailService.send(toEmail, "Your " + schoolName + " account", body);
+        mailService.send(toEmail, "Your " + schoolName + " account", body, school);
     }
 }
