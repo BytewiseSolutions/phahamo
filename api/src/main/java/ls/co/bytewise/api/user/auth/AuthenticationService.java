@@ -190,10 +190,10 @@ public class AuthenticationService {
         message.setTo(user.getEmail());
         message.setSubject("Your school account has been temporarily locked");
         message.setText("Hi " + user.getFirstName() + ",\n\n"
-                + "Your School Management System account was temporarily locked after 5 failed login attempts.\n"
+                + "Your Phahamo account was temporarily locked after 5 failed login attempts.\n"
                 + "You can try again in 15 minutes, or contact your school administrator to unlock it sooner.\n\n"
                 + "If this was not you, please reset your password.\n\n"
-                + "School Management System");
+                + "Phahamo");
         try {
             mailSender.send(message);
         } catch (Exception ignored) {
@@ -256,7 +256,7 @@ public class AuthenticationService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Reset your School Management System password");
+        message.setSubject("Reset your Phahamo password");
         message.setText("Click the link below to reset your password. This link expires in 1 hour.\n\n" + resetLink);
 
         mailSender.send(message);

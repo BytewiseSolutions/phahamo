@@ -140,7 +140,7 @@ public class UserService {
                 saved.getEmail(),
                 saved.getFirstName(),
                 temporaryPassword,
-                school != null ? school.getName() : "School Management System");
+                school != null ? school.getName() : "Phahamo");
 
         if (school != null) {
             auditLogService.record(school, creator, AuditAction.USER_CREATED,
