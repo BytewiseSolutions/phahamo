@@ -4,10 +4,7 @@
     @if (schoolClass) {
       <h1>{{ schoolClass.name }}</h1>
     }
-
-    <button type="button" class="link-button" (click)="onBack()">
-      &larr; Back to classes
-    </button>
+    <button type="button" class="link-button" (click)="onBack()">&larr; Back to classes</button>
   </div>
 
   @if (schoolClass) {

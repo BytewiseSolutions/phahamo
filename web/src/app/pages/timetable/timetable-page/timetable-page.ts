@@ -48,7 +48,7 @@ export class TimetablePage implements OnInit {
   prefillPeriodId: number | null = null;
   prefillSchoolClassId: number | null = null;
 
-  private userId: number | null = null;
+  userId: number | null = null;
 
   constructor(
     private backend: BackendService,
@@ -389,6 +389,18 @@ export class TimetablePage implements OnInit {
       error: (err: any) => {
         this.errorMessage = err.error?.message || 'Failed to delete timetable slot.';
       }
+    });
+  }
+
+  downloadTeacherTimetable(): void {
+    if (!this.userId) return;
+    this.backend.getBlob(`/exports/timetables/teachers/${this.userId}.pdf`).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'teacher-timetable.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
     });
   }
 }

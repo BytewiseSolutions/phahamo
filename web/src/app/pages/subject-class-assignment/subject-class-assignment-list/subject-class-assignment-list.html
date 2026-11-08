@@ -3,12 +3,14 @@
   <div class="section-header">
     <h2>Subjects</h2>
 
-    <button
-      type="button"
-      class="primary-button"
-      (click)="toggleCreateForm()">
-      {{ showForm ? 'Cancel' : '+ Add Subject' }}
-    </button>
+    <div class="section-actions">
+      <button type="button" class="secondary-button" (click)="download('/exports/classes/' + schoolClassId + '/students.pdf', 'class-list.pdf')">Class list PDF</button>
+      <button type="button" class="secondary-button" (click)="download('/exports/classes/' + schoolClassId + '/students.xlsx', 'class-list.xlsx')">Excel</button>
+      <button type="button" class="secondary-button" (click)="download('/exports/timetables/classes/' + schoolClassId + '.pdf', 'class-timetable.pdf')">Timetable PDF</button>
+      <button type="button" class="primary-button" (click)="toggleCreateForm()">
+        {{ showForm ? 'Cancel' : '+ Add Subject' }}
+      </button>
+    </div>
   </div>
 
   @if (errorMessage) {

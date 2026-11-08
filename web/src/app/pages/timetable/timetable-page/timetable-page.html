@@ -21,6 +21,9 @@
         <button type="button" class="primary-button" (click)="toggleTimetableForm()">+ Add Slot</button>
       }
     }
+    @if (isTeacher && userId) {
+      <button type="button" class="secondary-button" (click)="downloadTeacherTimetable()">Download timetable PDF</button>
+    }
   </div>
 
   @if (errorMessage) {

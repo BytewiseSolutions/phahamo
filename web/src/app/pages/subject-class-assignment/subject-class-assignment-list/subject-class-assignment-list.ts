@@ -58,6 +58,17 @@ export class SubjectClassAssignmentList implements OnChanges {
     this.errorMessage = '';
   }
 
+  download(path: string, filename: string): void {
+    this.backend.getBlob(path).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
   onEdit(assignment: SubjectClassAssignment): void {
     this.editingAssignment = assignment;
     this.showForm = true;
