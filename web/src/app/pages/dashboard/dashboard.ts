@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../util/auth.service';
 import { BackendService } from '../../util/backend.service';
 import { Router } from '@angular/router';
@@ -7,8 +9,8 @@ import { Announcement } from '../announcements/announcement';
 import { DashboardStats } from './dashboard-stats';
 import { StudentDashboardStats } from './student-dashboard-stats';
 import { EChartsOption } from 'echarts';
-import {TeacherDashboardStats} from './teacher-dashboard-stats';
-import {SystemDashboardStats} from './system-dashboard-stats';
+import { TeacherDashboardStats } from './teacher-dashboard-stats';
+import { SystemDashboardStats } from './system-dashboard-stats';
 import { StudentFeePayment } from '../student-fees/student-fee-payment';
 import { UpcomingExam } from './upcoming-exam';
 import { Birthday } from './birthday';
@@ -22,11 +24,27 @@ import { FinanceDashboardStats } from './finance-dashboard-stats';
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
+  setupChecklistVisible = false;
+  setupChecklistLoading = false;
+  setupChecklist = [
+    { key: 'profile', label: 'Complete school profile', path: '/school-profile', done: false },
+    { key: 'academicYear', label: 'Create an academic year', path: '/academic-years', done: false },
+    { key: 'terms', label: 'Add terms', path: '/academic-years', done: false },
+    { key: 'classes', label: 'Create classes', path: '/classes', done: false },
+    { key: 'subjects', label: 'Add subjects', path: '/subjects', done: false },
+    { key: 'teachers', label: 'Add teachers', path: '/users', done: false },
+    { key: 'students', label: 'Add students', path: '/users', done: false },
+    { key: 'periods', label: 'Set lesson periods', path: '/lessons/range', done: false },
+    { key: 'timetable', label: 'Create the timetable', path: '/timetable', done: false },
+    { key: 'fees', label: 'Set up fee structures', path: '/fees/structures', done: false }
+  ];
+
   subscription: Subscription | null = null;
   announcements: Announcement[] = [];
 
   stats: DashboardStats | null = null;
   isAdmin = false;
+  isSchoolAdmin = false;
 
   studentStats: StudentDashboardStats | null = null;
   isStudent = false;
@@ -58,12 +76,13 @@ export class Dashboard implements OnInit {
     private backend: BackendService,
     private router: Router,
     private messageUnreadService: MessageUnreadService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.isAdmin = this.authService.hasRole('SCHOOL_ADMIN')
       || this.authService.hasRole('SYSTEM_ADMIN')
       || this.authService.hasRole('PRINCIPAL');
+    this.isSchoolAdmin = this.authService.hasRole('SCHOOL_ADMIN');
 
     this.isSystemAdmin = this.authService.hasRole('SYSTEM_ADMIN');
     this.isStudent = this.authService.hasRole('STUDENT');
@@ -90,6 +109,11 @@ export class Dashboard implements OnInit {
       this.loadBirthdays();
     }
 
+    if (this.authService.hasRole('SCHOOL_ADMIN')) {
+      this.setupChecklistVisible = localStorage.getItem('phahamo_setup_checklist_hidden') !== 'true';
+      this.loadSetupChecklist();
+    }
+
     if (this.isStudent) {
       this.backend.get<StudentDashboardStats>('/dashboard/student').subscribe({
         next: (data) => this.studentStats = data
@@ -109,7 +133,7 @@ export class Dashboard implements OnInit {
     if (!this.isSystemAdmin && !this.isParent) {
       this.backend.get<Subscription>('/subscriptions/me').subscribe({
         next: (sub) => this.subscription = sub,
-        error: () => {}
+        error: () => { }
       });
     }
 
@@ -132,6 +156,62 @@ export class Dashboard implements OnInit {
       this.messageUnreadService.unread$.subscribe(count => this.unreadMessages = count);
       this.messageUnreadService.refresh();
     }
+  }
+
+  get setupChecklistCompleted(): number {
+    return this.setupChecklist.filter(step => step.done).length;
+  }
+
+  hideSetupChecklist(): void {
+    this.setupChecklistVisible = false;
+    localStorage.setItem('phahamo_setup_checklist_hidden', 'true');
+  }
+
+  showSetupChecklist(): void {
+    this.setupChecklistVisible = true;
+    localStorage.removeItem('phahamo_setup_checklist_hidden');
+    this.loadSetupChecklist();
+  }
+
+  goToSetupStep(path: string): void {
+    this.router.navigate([path]);
+  }
+
+  private loadSetupChecklist(): void {
+    const schoolId = this.authService.getActiveSchoolId();
+    if (!schoolId) return;
+
+    this.setupChecklistLoading = true;
+    forkJoin({
+      profile: this.backend.get<any>(`/schools/${schoolId}`).pipe(catchError(() => of(null))),
+      academicYears: this.backend.get<any[]>('/academic-years').pipe(catchError(() => of([]))),
+      terms: this.backend.get<any[]>('/terms').pipe(catchError(() => of([]))),
+      classes: this.backend.get<any[]>('/classes').pipe(catchError(() => of([]))),
+      subjects: this.backend.get<any[]>('/subjects').pipe(catchError(() => of([]))),
+      users: this.backend.get<any[]>('/users').pipe(catchError(() => of([]))),
+      periods: this.backend.get<any[]>('/periods').pipe(catchError(() => of([]))),
+      timetable: this.backend.get<any[]>('/timetable').pipe(catchError(() => of([]))),
+      fees: this.backend.get<any[]>('/fee-structures').pipe(catchError(() => of([])))
+    }).subscribe(data => {
+      const profile = data.profile;
+      this.setSetupStep('profile', !!profile?.schoolName && !!profile?.schoolContactEmail
+        && !!profile?.schoolAddress && !!profile?.schoolContactPhone);
+      this.setSetupStep('academicYear', data.academicYears.length > 0);
+      this.setSetupStep('terms', data.terms.length > 0);
+      this.setSetupStep('classes', data.classes.length > 0);
+      this.setSetupStep('subjects', data.subjects.length > 0);
+      this.setSetupStep('teachers', data.users.some(user => user.roles?.includes('TEACHER')));
+      this.setSetupStep('students', data.users.some(user => user.roles?.includes('STUDENT')));
+      this.setSetupStep('periods', data.periods.length > 0);
+      this.setSetupStep('timetable', data.timetable.length > 0);
+      this.setSetupStep('fees', data.fees.length > 0);
+      this.setupChecklistLoading = false;
+    });
+  }
+
+  private setSetupStep(key: string, done: boolean): void {
+    const step = this.setupChecklist.find(item => item.key === key);
+    if (step) step.done = done;
   }
 
   private loadSystemStats(): void {

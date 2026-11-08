@@ -2,6 +2,119 @@
   padding: 20px;
 }
 
+.setup-checklist-card {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.setup-checklist-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.setup-checklist-header h2 {
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+
+.setup-checklist-header p:not(.setup-checklist-eyebrow) {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.setup-checklist-eyebrow {
+  margin: 0 0 8px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.setup-hide-button,
+.show-setup-button {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-sm);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.show-setup-button {
+  margin-bottom: 24px;
+}
+
+.setup-progress,
+.setup-checklist-loading {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.setup-checklist-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.setup-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.setup-step:hover {
+  border-color: var(--primary);
+}
+
+.setup-step.completed {
+  color: var(--success);
+  background: rgb(from var(--success) r g b / .08);
+}
+
+.setup-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.setup-step.completed .setup-step-icon {
+  background: var(--success);
+  color: var(--on-primary);
+}
+
+.setup-step-arrow {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .setup-checklist-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dashboard-title-row {
   display: flex;
   align-items: center;
@@ -127,8 +240,14 @@
   font-size: 14px;
 }
 
-.text-muted { color: var(--text-muted); font-weight: 500; }
-.text-success { color: var(--success); }
+.text-muted {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.text-success {
+  color: var(--success);
+}
 
 .recent-payments-card {
   margin-bottom: 32px;
@@ -491,6 +610,7 @@
 }
 
 @media (max-width: 700px) {
+
   .recent-payments-header,
   .recent-payment-row {
     align-items: flex-start;
@@ -728,7 +848,7 @@
   text-align: left;
 }
 
-.teacher-task-row > div {
+.teacher-task-row>div {
   min-width: 0;
   display: flex;
   flex-direction: column;
