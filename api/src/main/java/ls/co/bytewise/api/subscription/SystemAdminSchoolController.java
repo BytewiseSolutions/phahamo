@@ -30,8 +30,35 @@ public class SystemAdminSchoolController {
     @GetMapping
     public List<SystemAdminSchoolDto> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) SubscriptionStatus status) {
-        return subscriptionRepository.search(search, status).stream()
+            @RequestParam(required = false) SubscriptionStatus status,
+            @RequestParam(required = false) String filter) {
+        Instant now = Instant.now();
+        Instant trialEnd = now.plus(14, ChronoUnit.DAYS);
+        Instant monthStart = java.time.LocalDate.now().withDayOfMonth(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
+        Instant nextMonthStart = java.time.LocalDate.now().withDayOfMonth(1).plusMonths(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
+
+        return subscriptionRepository.search(search, null).stream()
+                .filter(subscription -> {
+                    if (status != null
+                            && subscriptionService.computeEffectiveStatus(subscription) != status) {
+                        return false;
+                    }
+                    if ("TRIAL_ENDING".equalsIgnoreCase(filter)) {
+                        return subscriptionService.computeEffectiveStatus(subscription) == SubscriptionStatus.TRIAL
+                                && subscription.getEndsAt() != null
+                                && subscription.getEndsAt().isAfter(now)
+                                && subscription.getEndsAt().isBefore(trialEnd);
+                    }
+                    if ("NEW_THIS_MONTH".equalsIgnoreCase(filter)) {
+                        Instant createdAt = subscription.getSchool().getCreatedAt();
+                        return createdAt != null
+                                && !createdAt.isBefore(monthStart)
+                                && createdAt.isBefore(nextMonthStart);
+                    }
+                    return true;
+                })
                 .map(this::toDto)
                 .toList();
     }

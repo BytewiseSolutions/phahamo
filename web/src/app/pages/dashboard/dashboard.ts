@@ -220,6 +220,15 @@ export class Dashboard implements OnInit {
     });
   }
 
+  goToSystemSchools(filter?: string, status?: string): void {
+    this.router.navigate(['/admin/schools'], {
+      queryParams: {
+        ...(filter ? { filter } : {}),
+        ...(status ? { status } : {})
+      }
+    });
+  }
+
   private loadSchoolsForPicker(): void {
     this.backend.get<any[]>('/admin/schools').subscribe({
       next: (data) => {
