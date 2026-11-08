@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://bytewise-sms.netlify.app/api'
+  apiUrl: 'https://school-management-system-1l68.onrender.com/api'
 };
