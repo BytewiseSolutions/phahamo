@@ -16,6 +16,8 @@ import ls.co.bytewise.api.teacher.TeacherDto;
 import ls.co.bytewise.api.teacher.TeacherService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -185,16 +187,14 @@ public class UserService {
 
     public List<UserDto> listUsers() {
         Long schoolId = TenantContext.getSchoolId();
+        if (schoolId == null) return userRepository.findAll().stream().map(this::toListDto).toList();
+        return userRepository.findAllBySchoolId(schoolId).stream().map(this::toListDto).toList();
+    }
 
-        if (schoolId == null) {
-            return userRepository.findAll().stream()
-                    .map(this::toListDto)
-                    .toList();
-        }
-
-        return userRepository.findAllBySchoolId(schoolId).stream()
-                .map(this::toListDto)
-                .toList();
+    public Page<UserDto> pageUsers(String search, UserRole role, Status status, Pageable pageable) {
+        Long schoolId = TenantContext.getSchoolId();
+        return userRepository.search(schoolId, search == null ? null : search.trim(), role, status, pageable)
+                .map(this::toListDto);
     }
 
     private UserDto toListDto(User user) {

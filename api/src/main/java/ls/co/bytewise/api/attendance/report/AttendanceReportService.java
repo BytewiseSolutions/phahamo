@@ -12,6 +12,9 @@ import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.term.*;
 import ls.co.bytewise.api.timetable.period.PeriodType;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -90,6 +93,12 @@ public class AttendanceReportService {
         return result;
     }
 
+    public Page<LessonAttendanceSummaryDto> lessonBreakdownPage(Long classId, Long subjectId,
+                                                                LocalDate fromDate, LocalDate toDate,
+                                                                Pageable pageable) {
+        return page(lessonBreakdown(classId, subjectId, fromDate, toDate), pageable);
+    }
+
     public List<StudentAttendanceSummaryDto> classBreakdown(Long classId,
                                                             Long subjectId,
                                                             LocalDate fromDate,
@@ -142,6 +151,18 @@ public class AttendanceReportService {
                 .thenComparing(StudentAttendanceSummaryDto::getLastName));
 
         return result;
+    }
+
+    public Page<StudentAttendanceSummaryDto> classBreakdownPage(Long classId, Long subjectId,
+                                                                LocalDate fromDate, LocalDate toDate,
+                                                                Pageable pageable) {
+        return page(classBreakdown(classId, subjectId, fromDate, toDate), pageable);
+    }
+
+    private <T> Page<T> page(List<T> rows, Pageable pageable) {
+        int from = (int) Math.min(pageable.getOffset(), rows.size());
+        int to = Math.min(from + pageable.getPageSize(), rows.size());
+        return new PageImpl<>(rows.subList(from, to), pageable, rows.size());
     }
 
     public StudentAttendanceReportDto studentReport(Long studentId,

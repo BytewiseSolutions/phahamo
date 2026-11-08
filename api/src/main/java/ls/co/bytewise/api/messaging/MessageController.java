@@ -5,6 +5,9 @@ import ls.co.bytewise.api.user.User;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -37,6 +40,21 @@ public class MessageController {
     @GetMapping("/sent")
     public List<MessageThreadDto> sent(@AuthenticationPrincipal User currentUser) {
         return messageService.sent(currentUser);
+    }
+
+    @GetMapping("/inbox/page")
+    public Page<MessageThreadDto> inboxPage(@AuthenticationPrincipal User currentUser, Pageable pageable) {
+        return messageService.inboxPage(currentUser, safePage(pageable));
+    }
+
+    @GetMapping("/sent/page")
+    public Page<MessageThreadDto> sentPage(@AuthenticationPrincipal User currentUser, Pageable pageable) {
+        return messageService.sentPage(currentUser, safePage(pageable));
+    }
+
+    private Pageable safePage(Pageable pageable) {
+        return PageRequest.of(Math.max(pageable.getPageNumber(), 0),
+                Math.min(Math.max(pageable.getPageSize(), 1), 100));
     }
 
     @GetMapping("/threads/{threadId}")

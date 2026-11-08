@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.result;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,6 +15,9 @@ public interface TermResultRepository extends JpaRepository<TermResult, Long> {
 
     List<TermResult> findAllBySchoolClassIdAndSubjectIdAndTermIdAndSchoolId(
             Long schoolClassId, Long subjectId, Long termId, Long schoolId);
+
+    Page<TermResult> findAllBySchoolClassIdAndSubjectIdAndTermIdAndSchoolId(
+            Long schoolClassId, Long subjectId, Long termId, Long schoolId, Pageable pageable);
 
     List<TermResult> findAllByStudentIdAndTermIdAndSchoolId(
             Long studentId, Long termId, Long schoolId);

@@ -63,7 +63,19 @@ public class StudentFeeAccountController {
     @GetMapping("/class/{classId}")
     public List<StudentFeeAccountDto> listForClass(@PathVariable Long classId,
                                                    @RequestParam Long termId) {
-        return feeService.listForClass(classId, termId);
+        return feeService.listForClass(classId, termId, "all",
+                Pageable.unpaged()).getContent();
+    }
+
+    @GetMapping("/class/{classId}/page")
+    public Page<StudentFeeAccountDto> listForClassPage(@PathVariable Long classId,
+                                                       @RequestParam Long termId,
+                                                       @RequestParam(defaultValue = "all") String status,
+                                                       Pageable pageable) {
+        return feeService.listForClass(classId, termId, status,
+                org.springframework.data.domain.PageRequest.of(
+                        Math.max(pageable.getPageNumber(), 0),
+                        Math.min(Math.max(pageable.getPageSize(), 1), 100)));
     }
 
     @PostMapping("/{accountId}/adjustments")
@@ -99,8 +111,10 @@ public class StudentFeeAccountController {
     }
 
     @GetMapping("/payments")
-    public Page<StudentFeePaymentDto> listPayments(Pageable pageable) {
-        return feeService.listPayments(pageable);
+    public Page<StudentFeePaymentDto> listPayments(
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        return feeService.listPayments(search, pageable);
     }
 
     @PostMapping("/{accountId}/payments")

@@ -66,7 +66,6 @@
     @for (tab of tabs; track tab.role) {
       <button class="tab" [class.active]="activeTab === tab.role" (click)="setTab(tab.role)">
         {{ tab.label }}
-        <span class="tab-count">{{ countByRole(tab.role) }}</span>
       </button>
     }
   </div>
@@ -98,7 +97,7 @@
 
   @if (loading) {
     <div class="loading-state">Loading users...</div>
-  } @else if (filteredUsers.length === 0) {
+  } @else if (users.length === 0) {
     <div class="empty-state">
       <p>No users in this category yet.</p>
     </div>

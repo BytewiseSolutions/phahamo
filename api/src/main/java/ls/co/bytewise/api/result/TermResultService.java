@@ -22,6 +22,8 @@ import ls.co.bytewise.api.term.Term;
 import ls.co.bytewise.api.term.TermRepository;
 import ls.co.bytewise.api.user.User;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -70,6 +72,14 @@ public class TermResultService {
                 .stream()
                 .map(TermResultDto::new)
                 .toList();
+    }
+
+    public Page<TermResultDto> pageFor(Long classId, Long subjectId, Long termId, Pageable pageable) {
+        Long schoolId = TenantContext.getSchoolId();
+        return termResultRepository
+                .findAllBySchoolClassIdAndSubjectIdAndTermIdAndSchoolId(
+                        classId, subjectId, termId, schoolId, pageable)
+                .map(TermResultDto::new);
     }
 
     public List<TermResultDto> listForClassAndTerm(Long classId, Long termId) {

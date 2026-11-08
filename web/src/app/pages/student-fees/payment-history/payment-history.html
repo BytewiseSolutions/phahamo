@@ -10,6 +10,12 @@
     <div class="error-banner">{{ errorMessage }}</div>
   }
 
+  <div class="filters-bar">
+    <input class="search-input" type="search" placeholder="Search student, admission number or reference..."
+           [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+           [ngModelOptions]="{ standalone: true }">
+  </div>
+
   @if (loading) {
     <div class="loading-state">Loading payment history...</div>
   } @else if (payments.length === 0) {
