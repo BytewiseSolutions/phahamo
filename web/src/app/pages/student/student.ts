@@ -14,6 +14,7 @@ export interface Student {
   status: StudentStatus;
   schoolClassId?: number;
   currentClassName?: string;
+  photoUrl?: string;
 }
 
 export interface StudentPayload {

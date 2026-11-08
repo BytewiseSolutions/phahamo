@@ -89,7 +89,14 @@
             </td>
             <td>{{ i + 1 }}</td>
             <td>{{ student.admissionNumber }}</td>
-            <td>{{ student.firstName }} {{ student.lastName }}</td>
+            <td class="student-name-cell">
+              @if (student.photoUrl) {
+                <img class="student-list-photo" [src]="photoSrc(student.photoUrl, student.id)" alt="">
+              } @else {
+                <span class="student-list-initials">{{ initials(student) }}</span>
+              }
+              <span>{{ student.firstName }} {{ student.lastName }}</span>
+            </td>
             <td>{{ student.gender }}</td>
             <td>
               <span class="status-badge" [class.inactive]="student.status !== 'ACTIVE'">

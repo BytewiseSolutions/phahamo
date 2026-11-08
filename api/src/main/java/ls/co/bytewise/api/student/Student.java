@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import ls.co.bytewise.api.common.SchoolScopedEntity;
+import ls.co.bytewise.api.common.DataFile;
 import ls.co.bytewise.api.parent.Parent;
 import ls.co.bytewise.api.schoolclass.SchoolClass;
 import ls.co.bytewise.api.user.User;
@@ -45,6 +46,10 @@ public class Student extends SchoolScopedEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StudentStatus status = StudentStatus.ACTIVE;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "photo_file_id")
+    private DataFile photo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_class_id")

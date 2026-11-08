@@ -34,6 +34,7 @@ export class ClassStudentList implements OnChanges, OnDestroy {
   selectedForRemoval: number[] = [];
   transferringStudent: Student | null = null;
   errorMessage = '';
+  private photoUrls = new Map<number, string>();
 
   typeahead$ = new Subject<string>();
 
@@ -68,6 +69,8 @@ export class ClassStudentList implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.typeahead$.complete();
+    this.photoUrls.forEach(url => URL.revokeObjectURL(url));
+    this.photoUrls.clear();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -80,6 +83,27 @@ export class ClassStudentList implements OnChanges, OnDestroy {
     return this.students.length > 0 && this.selectedForRemoval.length === this.students.length;
   }
 
+  photoSrc(photoUrl: string | undefined, studentId: number): string {
+    return photoUrl ? this.photoUrls.get(studentId) ?? '' : '';
+  }
+
+  private loadStudentPhotos(students: Student[]): void {
+    this.photoUrls.forEach(url => URL.revokeObjectURL(url));
+    this.photoUrls.clear();
+
+    students
+      .filter(student => !!student.photoUrl)
+      .forEach(student => {
+        this.backend.getBlob(student.photoUrl!).subscribe({
+          next: blob => this.photoUrls.set(student.id, URL.createObjectURL(blob))
+        });
+      });
+  }
+
+  initials(student: Student): string {
+    return `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`.toUpperCase();
+  }
+
   loadStudents(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -88,6 +112,7 @@ export class ClassStudentList implements OnChanges, OnDestroy {
     this.backend.get<Student[]>(`/students/class/${this.schoolClassId}`).subscribe({
       next: (students) => {
         this.students = students;
+        this.loadStudentPhotos(students);
         this.loading = false;
       },
       error: () => {

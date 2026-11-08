@@ -50,33 +50,115 @@
   border-radius: var(--border-radius-md);
 }
 
-.user-header {
+.profile-card {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 28px;
+  align-items: flex-start;
 }
 
-.avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+.profile-photo-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 160px;
+  gap: 12px;
+}
+
+.profile-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--border-light);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-avatar-initials {
   background: var(--primary);
   color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 48px;
   font-weight: 600;
-  flex-shrink: 0;
   text-transform: uppercase;
 }
 
-.user-header-info h1 {
+.student-photo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+.photo-upload-button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 12px;
+  width: 100%;
+  justify-content: center;
+}
+.photo-upload-button input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.remove-photo-btn {
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.photo-hint { color: var(--text-muted); font-size: 11px; }
+
+.profile-info-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name-row {
+  margin-bottom: 16px;
+}
+
+.profile-name-row h1 {
   margin: 0 0 8px;
   font-size: 22px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-photo-col {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .profile-avatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .profile-info-col {
+    width: 100%;
+  }
+
+  .profile-name-row h1 {
+    text-align: center;
+  }
+
+  .user-meta {
+    justify-content: center;
+  }
 }
 
 .user-meta {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BackendService } from '../../../util/backend.service';
 import { User } from '../../../util/user';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
@@ -12,7 +12,7 @@ import { StudentDuplicate } from '../../../util/student-duplicate';
   templateUrl: './user-list.html',
   styleUrl: './user-list.scss'
 })
-export class UserList implements OnInit {
+export class UserList implements OnInit, OnDestroy {
   users: User[] = [];
   loading = false;
   showCreateForm = false;
@@ -25,6 +25,7 @@ export class UserList implements OnInit {
   readonly pageSize = 20;
   duplicateMatches: StudentDuplicate[] = [];
   pendingDuplicatePayload: any | null = null;
+  private photoUrls = new Map<number, string>();
 
   constructor(
     private backend: BackendService,
@@ -35,6 +36,27 @@ export class UserList implements OnInit {
 
   get canManageUsers(): boolean {
     return this.authService.hasRole('SCHOOL_ADMIN') || this.authService.hasRole('SYSTEM_ADMIN');
+  }
+
+  photoSrc(photoUrl: string | undefined, userId: number): string {
+    return photoUrl ? this.photoUrls.get(userId) ?? '' : '';
+  }
+
+  private loadStudentPhotos(users: User[]): void {
+    this.photoUrls.forEach(url => URL.revokeObjectURL(url));
+    this.photoUrls.clear();
+
+    users
+      .filter(user => !!user.student?.photoUrl)
+      .forEach(user => {
+        this.backend.getBlob(user.student!.photoUrl!).subscribe({
+          next: blob => this.photoUrls.set(user.id, URL.createObjectURL(blob))
+        });
+      });
+  }
+
+  initials(user: User): string {
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   }
 
   tabs = [
@@ -119,6 +141,7 @@ export class UserList implements OnInit {
     this.backend.get<User[]>('/users').subscribe({
       next: (users) => {
         this.users = users;
+        this.loadStudentPhotos(users);
         this.currentPage = 1;
         this.loading = false;
       },
@@ -127,6 +150,11 @@ export class UserList implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.photoUrls.forEach(url => URL.revokeObjectURL(url));
+    this.photoUrls.clear();
   }
 
   toggleCreateForm(): void {

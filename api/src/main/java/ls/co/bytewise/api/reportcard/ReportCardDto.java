@@ -15,8 +15,11 @@ public class ReportCardDto {
     private String schoolEmail;
     private byte[] schoolLogo;
     private String schoolLogoMimeType;
+    private byte[] studentPhoto;
+    private String studentPhotoMimeType;
 
     private String studentFullName;
+    private String studentInitials;
     private String admissionNumber;
     private String className;
     private String termName;

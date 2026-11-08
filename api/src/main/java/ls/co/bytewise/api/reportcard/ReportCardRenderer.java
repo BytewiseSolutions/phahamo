@@ -34,6 +34,11 @@ public class ReportCardRenderer {
             ctx.setVariable("logoDataUri",
                     "data:" + dto.getSchoolLogoMimeType() + ";base64," + b64);
         }
+        if (dto.getStudentPhoto() != null && dto.getStudentPhoto().length > 0) {
+            String b64 = Base64.getEncoder().encodeToString(dto.getStudentPhoto());
+            ctx.setVariable("studentPhotoDataUri",
+                    "data:" + dto.getStudentPhotoMimeType() + ";base64," + b64);
+        }
 
         String html = TEMPLATE_ENGINE.process("report-card", ctx);
 

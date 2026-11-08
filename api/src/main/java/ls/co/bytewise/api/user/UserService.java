@@ -188,13 +188,21 @@ public class UserService {
 
         if (schoolId == null) {
             return userRepository.findAll().stream()
-                    .map(UserDto::new)
+                    .map(this::toListDto)
                     .toList();
         }
 
         return userRepository.findAllBySchoolId(schoolId).stream()
-                .map(UserDto::new)
+                .map(this::toListDto)
                 .toList();
+    }
+
+    private UserDto toListDto(User user) {
+        UserDto dto = new UserDto(user);
+        if (user.hasRole(UserRole.STUDENT)) {
+            dto.setStudent(studentService.getByUserId(user.getId()));
+        }
+        return dto;
     }
 
     public List<UserDto> listTeachers() {

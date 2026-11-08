@@ -5,11 +5,14 @@ import ls.co.bytewise.api.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/students")
@@ -37,6 +40,33 @@ public class StudentController {
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
     public StudentDto get(@PathVariable Long id) {
         return studentService.getStudent(id);
+    }
+
+    @GetMapping("/{id}/photo")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
+    public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
+        var photo = studentService.getPhoto(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + photo.getOriginalFileName() + "\"")
+                .contentType(MediaType.parseMediaType(photo.getContentType()))
+                .body(photo.getContents());
+    }
+
+    @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public StudentDto uploadPhoto(@AuthenticationPrincipal User currentUser,
+                                  @PathVariable Long id,
+                                  @RequestParam("file") org.springframework.web.multipart.MultipartFile file)
+            throws IOException {
+        return studentService.uploadPhoto(currentUser, id, file);
+    }
+
+    @DeleteMapping("/{id}/photo")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN"})
+    public ResponseEntity<Void> removePhoto(@AuthenticationPrincipal User currentUser,
+                                            @PathVariable Long id) {
+        studentService.removePhoto(currentUser, id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")

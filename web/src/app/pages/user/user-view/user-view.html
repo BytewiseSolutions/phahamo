@@ -14,80 +14,106 @@
   } @else if (user) {
 
     <section class="detail-section">
-      <div class="user-header">
-        <div class="avatar">
-          {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
-        </div>
-        <div class="user-header-info">
-          <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-          <div class="user-meta">
-            <span class="role-badge">{{ roleLabel }}</span>
-            <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
-              {{ formatEnum(user.status) }}
-            </span>
-          </div>
-        </div>
-      </div>
+      <div class="profile-card">
 
-      <div class="meta-list">
-        <div class="meta-item">
-          <span class="label">Email:</span>
-          <span class="value">{{ user.email }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Phone:</span>
-          <span class="value">{{ user.phone }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="label">Created At:</span>
-          <span class="value">{{ formatDate(user.createdAt) }}</span>
+        <!-- Left: photo / avatar -->
+        <div class="profile-photo-col">
+          @if (user.student?.photoUrl) {
+            <img class="profile-avatar" [src]="photoSrc()" alt="Student photo">
+          } @else {
+            <div class="profile-avatar profile-avatar-initials">{{ studentInitials() }}</div>
+          }
+          @if (user.student) {
+            <div class="student-photo-actions">
+              <label class="secondary-button photo-upload-button">
+                <i class="fa-solid fa-camera"></i>
+                {{ photoUploading ? 'Uploading...' : (user.student.photoUrl ? 'Replace photo' : 'Upload photo') }}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" [disabled]="photoUploading" (change)="uploadStudentPhoto($event)">
+              </label>
+              @if (user.student.photoUrl) {
+                <button type="button" class="link-button danger remove-photo-btn" (click)="removeStudentPhoto()">
+                  <i class="fa-solid fa-trash"></i> Remove
+                </button>
+              }
+              <span class="photo-hint">JPG, PNG, WEBP or GIF · max 2MB</span>
+            </div>
+          }
         </div>
 
-        @if (user.student) {
-          <div class="meta-item">
-            <span class="label">Admission Number:</span>
-            <span class="value">{{ user.student.admissionNumber }}</span>
+        <!-- Right: name, badges, meta -->
+        <div class="profile-info-col">
+          <div class="profile-name-row">
+            <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+            <div class="user-meta">
+              <span class="role-badge">{{ roleLabel }}</span>
+              <span class="status-badge" [class.inactive]="user.status !== 'ACTIVE'">
+                {{ formatEnum(user.status) }}
+              </span>
+            </div>
           </div>
-          <div class="meta-item">
-            <span class="label">Date of Birth:</span>
-            <span class="value">{{ formatDate(user.student.dateOfBirth) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Gender:</span>
-            <span class="value">{{ formatEnum(user.student.gender) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Current Class:</span>
-            <span class="value">{{ user.student.currentClassName || '—' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Academic Status:</span>
-            <span class="value">{{ formatEnum(user.student.status) }}</span>
-          </div>
-        }
 
-        @if (user.teacher) {
-          <div class="meta-item">
-            <span class="label">Employee Number:</span>
-            <span class="value">{{ user.teacher.employeeNumber }}</span>
+          <div class="meta-list">
+            <div class="meta-item">
+              <span class="label">Email:</span>
+              <span class="value">{{ user.email }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Phone:</span>
+              <span class="value">{{ user.phone }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Created At:</span>
+              <span class="value">{{ formatDate(user.createdAt) }}</span>
+            </div>
+
+            @if (user.student) {
+              <div class="meta-item">
+                <span class="label">Admission Number:</span>
+                <span class="value">{{ user.student.admissionNumber }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Date of Birth:</span>
+                <span class="value">{{ formatDate(user.student.dateOfBirth) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Gender:</span>
+                <span class="value">{{ formatEnum(user.student.gender) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Current Class:</span>
+                <span class="value">{{ user.student.currentClassName || '—' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Academic Status:</span>
+                <span class="value">{{ formatEnum(user.student.status) }}</span>
+              </div>
+            }
+
+            @if (user.teacher) {
+              <div class="meta-item">
+                <span class="label">Employee Number:</span>
+                <span class="value">{{ user.teacher.employeeNumber }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Employment Type:</span>
+                <span class="value">{{ formatEnum(user.teacher.employmentType) }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Qualifications:</span>
+                <span class="value">{{ user.teacher.qualifications || '—' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Specialization:</span>
+                <span class="value">{{ user.teacher.specialization || '—' }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Date Joined:</span>
+                <span class="value">{{ formatDate(user.teacher.dateJoined) }}</span>
+              </div>
+            }
           </div>
-          <div class="meta-item">
-            <span class="label">Employment Type:</span>
-            <span class="value">{{ formatEnum(user.teacher.employmentType) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Qualifications:</span>
-            <span class="value">{{ user.teacher.qualifications || '—' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Specialization:</span>
-            <span class="value">{{ user.teacher.specialization || '—' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="label">Date Joined:</span>
-            <span class="value">{{ formatDate(user.teacher.dateJoined) }}</span>
-          </div>
-        }
+        </div>
+
       </div>
     </section>
 

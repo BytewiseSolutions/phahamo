@@ -10,4 +10,5 @@ export interface User {
   status: string;
   lockedUntil?: string | null;
   roles: string[];
+  student?: import('../pages/student/student').Student | null;
 }
