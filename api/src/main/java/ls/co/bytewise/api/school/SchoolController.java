@@ -6,7 +6,7 @@ import ls.co.bytewise.api.user.UserDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,25 +29,25 @@ public class SchoolController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN')")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_PRINCIPAL", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<SchoolDto> getSchool(@PathVariable Long id) {
         return ResponseEntity.ok(schoolService.getSchoolProfile(id));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SCHOOL_ADMIN')")
+    @Secured("ROLE_SCHOOL_ADMIN")
     public ResponseEntity<SchoolDto> updateSchool(@PathVariable Long id, @Valid @RequestBody SchoolDto dto) {
         return ResponseEntity.ok(schoolService.updateSchoolProfile(id, dto));
     }
 
     @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('SCHOOL_ADMIN')")
+    @Secured("ROLE_SCHOOL_ADMIN")
     public ResponseEntity<SchoolDto> uploadLogo(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(schoolService.updateSchoolLogo(id, file));
     }
 
     @GetMapping("/{id}/logo")
-    @PreAuthorize("hasAnyRole('SCHOOL_ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN')")
+    @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_PRINCIPAL", "ROLE_SYSTEM_ADMIN"})
     public ResponseEntity<byte[]> getLogo(@PathVariable Long id) {
         DataFile logo = schoolService.getSchoolLogoFile(id);
         return ResponseEntity.ok()

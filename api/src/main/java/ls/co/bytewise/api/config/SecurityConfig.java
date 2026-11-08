@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/api/auth/reset-password"
                         ).permitAll()
                         .requestMatchers("/api/schools/register").permitAll()
+                        .requestMatchers("/api/legal/terms", "/api/legal/privacy").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )

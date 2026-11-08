@@ -4,7 +4,8 @@ import ls.co.bytewise.api.audit.AuditAction;
 import ls.co.bytewise.api.audit.AuditLogService;
 import ls.co.bytewise.api.common.Status;
 import ls.co.bytewise.api.mail.MailService;
-import ls.co.bytewise.api.legal.LegalPolicy;
+import ls.co.bytewise.api.legal.LegalDocumentService;
+import ls.co.bytewise.api.legal.LegalDocumentType;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.security.JwtService;
 import ls.co.bytewise.api.security.PasswordResetToken;
@@ -41,6 +42,7 @@ public class AuthenticationService {
     private final MailService mailService;
     private final AuditLogService auditLogService;
     private final String frontendUrl;
+    private final LegalDocumentService legalDocumentService;
     private final ConcurrentMap<String, IpAttemptWindow> ipAttempts = new ConcurrentHashMap<>();
 
     public AuthenticationService(UserRepository userRepository,
@@ -50,7 +52,8 @@ public class AuthenticationService {
                                  PasswordResetTokenRepository passwordResetTokenRepository,
                                  MailService mailService,
                                  AuditLogService auditLogService,
-                                 @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl) {
+                                 @Value("${app.frontend-url:http://localhost:4200}") String frontendUrl,
+                                 LegalDocumentService legalDocumentService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -59,6 +62,7 @@ public class AuthenticationService {
         this.mailService = mailService;
         this.auditLogService = auditLogService;
         this.frontendUrl = frontendUrl.replaceAll("/$", "");
+        this.legalDocumentService = legalDocumentService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -133,8 +137,8 @@ public class AuthenticationService {
                 schoolName,
                 user.isMustChangePassword(),
                 requiresLegalAcceptance(user),
-                LegalPolicy.TERMS_VERSION,
-                LegalPolicy.PRIVACY_VERSION
+                currentLegalVersionOrNull(LegalDocumentType.TERMS),
+                currentLegalVersionOrNull(LegalDocumentType.PRIVACY)
         );
     }
 
@@ -145,16 +149,31 @@ public class AuthenticationService {
         }
         Instant acceptedAt = Instant.now();
         user.setTermsAcceptedAt(acceptedAt);
-        user.setTermsVersion(LegalPolicy.TERMS_VERSION);
+        user.setTermsVersion(currentLegalVersion(LegalDocumentType.TERMS));
         user.setPrivacyAcceptedAt(acceptedAt);
-        user.setPrivacyVersion(LegalPolicy.PRIVACY_VERSION);
+        user.setPrivacyVersion(currentLegalVersion(LegalDocumentType.PRIVACY));
         userRepository.save(user);
     }
 
     private boolean requiresLegalAcceptance(User user) {
-        return user.hasRole(ls.co.bytewise.api.common.UserRole.SCHOOL_ADMIN)
-                && (!LegalPolicy.TERMS_VERSION.equals(user.getTermsVersion())
-                || !LegalPolicy.PRIVACY_VERSION.equals(user.getPrivacyVersion()));
+        if (!user.hasRole(ls.co.bytewise.api.common.UserRole.SCHOOL_ADMIN)) return false;
+        String termsVersion = currentLegalVersionOrNull(LegalDocumentType.TERMS);
+        String privacyVersion = currentLegalVersionOrNull(LegalDocumentType.PRIVACY);
+        return termsVersion != null && privacyVersion != null
+                && (!termsVersion.equals(user.getTermsVersion())
+                || !privacyVersion.equals(user.getPrivacyVersion()));
+    }
+
+    private String currentLegalVersion(LegalDocumentType type) {
+        return legalDocumentService.currentVersion(type);
+    }
+
+    private String currentLegalVersionOrNull(LegalDocumentType type) {
+        try {
+            return currentLegalVersion(type);
+        } catch (IllegalStateException ignored) {
+            return null;
+        }
     }
 
     public void logout(String token, User user) {

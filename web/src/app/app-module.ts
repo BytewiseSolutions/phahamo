@@ -108,6 +108,7 @@ import { AuditLogPage } from './pages/audit/audit-log-page/audit-log-page';
 import { HelpPage } from './pages/help/help-page';
 import { LegalPage } from './pages/legal/legal-page';
 import { LegalAcceptance } from './pages/legal/legal-acceptance';
+import { LegalDocumentsPage } from './pages/legal/legal-documents-page';
 
 @NgModule({
   declarations: [
@@ -210,6 +211,7 @@ import { LegalAcceptance } from './pages/legal/legal-acceptance';
     HelpPage,
     LegalPage,
     LegalAcceptance,
+    LegalDocumentsPage,
   ],
   imports: [
     BrowserModule,

@@ -55,6 +55,7 @@ import {AuditLogPage} from './pages/audit/audit-log-page/audit-log-page';
 import {HelpPage} from './pages/help/help-page';
 import {LegalPage} from './pages/legal/legal-page';
 import {LegalAcceptance} from './pages/legal/legal-acceptance';
+import {LegalDocumentsPage} from './pages/legal/legal-documents-page';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -88,6 +89,7 @@ const routes: Routes = [
       { path: 'my-classes/:assignmentId/attendance/:lessonId', component: AttendancePage },
       { path: 'subscriptions', component: SubscriptionList },
       { path: 'admin/schools', component: AdminSchoolList, canActivate: [systemAdminGuard] },
+      { path: 'legal-documents', component: LegalDocumentsPage, canActivate: [systemAdminGuard] },
       { path: 'plan-prices', component: PlanPriceList },
       { path: 'plans', component: Plans },
       { path: 'payment-methods', component: PaymentMethodList },

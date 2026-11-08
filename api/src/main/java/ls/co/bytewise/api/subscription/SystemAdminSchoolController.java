@@ -3,7 +3,7 @@ package ls.co.bytewise.api.subscription;
 import jakarta.validation.Valid;
 import ls.co.bytewise.api.school.School;
 import ls.co.bytewise.api.school.SchoolRepository;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/schools")
-@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+@Secured("ROLE_SYSTEM_ADMIN")
 public class SystemAdminSchoolController {
 
     private final SubscriptionService subscriptionService;
