@@ -38,6 +38,7 @@ public class StudentDto extends BaseDto {
     private boolean duplicateConfirmed;
 
     private String currentClassName;
+    private String photoUrl;
 
     public StudentDto(Student student) {
         super(student);
@@ -58,6 +59,9 @@ public class StudentDto extends BaseDto {
         if (student.getCurrentClass() != null) {
             this.schoolClassId = student.getCurrentClass().getId();
             this.currentClassName = student.getCurrentClass().getName();
+        }
+        if (student.getPhoto() != null) {
+            this.photoUrl = "/students/" + student.getId() + "/photo";
         }
     }
 }

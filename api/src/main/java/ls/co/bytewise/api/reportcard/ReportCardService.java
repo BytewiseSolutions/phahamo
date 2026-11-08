@@ -84,6 +84,14 @@ public class ReportCardService {
         }
 
         dto.setStudentFullName(student.getUser().getFullName());
+        String firstName = student.getUser().getFirstName();
+        String lastName = student.getUser().getLastName();
+        dto.setStudentInitials((firstName == null ? "" : firstName.substring(0, Math.min(1, firstName.length())))
+                + (lastName == null ? "" : lastName.substring(0, Math.min(1, lastName.length()))));
+        if (student.getPhoto() != null) {
+            dto.setStudentPhoto(student.getPhoto().getContents());
+            dto.setStudentPhotoMimeType(student.getPhoto().getType());
+        }
         dto.setAdmissionNumber(student.getAdmissionNumber());
         dto.setClassName(schoolClass.getName());
         dto.setTermName(term.getName());

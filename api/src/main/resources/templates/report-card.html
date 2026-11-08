@@ -54,7 +54,13 @@
 <table class="info-table">
     <tr>
         <td class="info-label">Student</td>
-        <td th:text="${card.studentFullName}">Name</td>
+        <td>
+            <img th:if="${studentPhotoDataUri != null}" th:src="${studentPhotoDataUri}"
+                 width="48" height="48" alt="" style="float: left; margin-right: 8px;"/>
+            <span th:if="${studentPhotoDataUri == null}"
+                  th:text="${card.studentInitials}" style="display: inline-block; margin-right: 8px; font-weight: bold;">AB</span>
+            <span th:text="${card.studentFullName}">Name</span>
+        </td>
         <td class="info-label">Term</td>
         <td th:text="${card.termName}">Term</td>
     </tr>

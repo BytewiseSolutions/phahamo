@@ -2,6 +2,8 @@ package ls.co.bytewise.api.student;
 
 import ls.co.bytewise.api.audit.AuditAction;
 import ls.co.bytewise.api.audit.AuditLogService;
+import ls.co.bytewise.api.common.DataFile;
+import ls.co.bytewise.api.common.DataFileRepository;
 import ls.co.bytewise.api.schoolclass.SchoolClassRepository;
 import ls.co.bytewise.api.studentfee.StudentFeeAccountService;
 import ls.co.bytewise.api.security.TenantContext;
@@ -11,6 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.Set;
 
 import java.time.Year;
 import java.util.List;
@@ -22,15 +27,18 @@ public class StudentService {
     private final SchoolClassRepository schoolClassRepository;
     private final StudentFeeAccountService feeAccountService;
     private final AuditLogService auditLogService;
+    private final DataFileRepository dataFileRepository;
 
     public StudentService(StudentRepository studentRepository,
                            SchoolClassRepository schoolClassRepository,
                            StudentFeeAccountService feeAccountService,
-                           AuditLogService auditLogService) {
+                           AuditLogService auditLogService,
+                           DataFileRepository dataFileRepository) {
         this.studentRepository = studentRepository;
         this.schoolClassRepository = schoolClassRepository;
         this.feeAccountService = feeAccountService;
         this.auditLogService = auditLogService;
+        this.dataFileRepository = dataFileRepository;
     }
 
     @Transactional
@@ -98,6 +106,55 @@ public class StudentService {
 
     public StudentDto getStudent(Long id) {
         return new StudentDto(findOrThrow(id));
+    }
+
+    @Transactional
+    public StudentDto uploadPhoto(User editor, Long id, MultipartFile file) throws IOException {
+        Student student = findOrThrow(id);
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("A student photo is required");
+        }
+        if (file.getSize() > 2 * 1024 * 1024) {
+            throw new IllegalArgumentException("Student photos must be 2MB or smaller");
+        }
+        String contentType = file.getContentType();
+        Set<String> allowedTypes = Set.of("image/jpeg", "image/png", "image/webp", "image/gif");
+        if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Only JPG, PNG, WEBP and GIF images are accepted");
+        }
+
+        DataFile previous = student.getPhoto();
+        DataFile photo = DataFile.builder()
+                .name(file.getOriginalFilename() == null ? "student-photo" : file.getOriginalFilename())
+                .type(contentType)
+                .contents(file.getBytes())
+                .fileSize(file.getSize())
+                .build();
+        photo.setCreatedBy(editor);
+        DataFile savedPhoto = dataFileRepository.save(photo);
+        student.setPhoto(savedPhoto);
+        student.setUpdatedBy(editor);
+        Student saved = studentRepository.save(student);
+        if (previous != null) dataFileRepository.delete(previous);
+        return new StudentDto(saved);
+    }
+
+    @Transactional
+    public void removePhoto(User editor, Long id) {
+        Student student = findOrThrow(id);
+        DataFile previous = student.getPhoto();
+        if (previous == null) return;
+        student.setPhoto(null);
+        student.setUpdatedBy(editor);
+        studentRepository.save(student);
+        dataFileRepository.delete(previous);
+    }
+
+    @Transactional(readOnly = true)
+    public DataFile getPhoto(Long id) {
+        DataFile photo = findOrThrow(id).getPhoto();
+        if (photo == null) throw new IllegalArgumentException("Student has no photo");
+        return photo;
     }
 
     @Transactional

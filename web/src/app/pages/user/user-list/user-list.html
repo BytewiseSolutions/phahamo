@@ -119,7 +119,14 @@
         @for (user of paginatedUsers; track user.id; let i = $index) {
           <tr>
             <td class="index-column">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
-            <td>{{ user.firstName }} {{ user.lastName }}</td>
+            <td class="user-name-cell">
+              @if (user.student?.photoUrl) {
+                <img class="user-list-photo" [src]="photoSrc(user.student?.photoUrl, user.id)" alt="">
+              } @else if (user.roles.includes('STUDENT')) {
+                <span class="user-list-initials">{{ initials(user) }}</span>
+              }
+              <span>{{ user.firstName }} {{ user.lastName }}</span>
+            </td>
             <td>{{ user.email }}</td>
             <td>{{ user.phone }}</td>
             <td>{{ user.roles.join(', ') }}</td>
