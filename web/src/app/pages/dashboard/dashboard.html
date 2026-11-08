@@ -2,433 +2,467 @@
   <div class="dashboard-title-row">
     <h1>Dashboard</h1>
     @if (unreadMessages > 0) {
-      <button type="button" class="unread-messages-badge" (click)="goToMessages()">
-        <i class="fa-solid fa-envelope"></i>
-        {{ unreadMessages }} unread {{ unreadMessages === 1 ? 'message' : 'messages' }}
-      </button>
+    <button type="button" class="unread-messages-badge" (click)="goToMessages()">
+      <i class="fa-solid fa-envelope"></i>
+      {{ unreadMessages }} unread {{ unreadMessages === 1 ? 'message' : 'messages' }}
+    </button>
     }
   </div>
 
   <app-upgrade-banner [subscription]="subscription"></app-upgrade-banner>
 
-  @if (isSystemAdmin) {
-    <div class="school-picker-card">
-      <label class="picker-label">View as school</label>
-      <select class="picker-select"
-              [(ngModel)]="selectedSchoolId"
-              (ngModelChange)="onSchoolSelected()"
-              [ngModelOptions]="{ standalone: true }">
-        <option [ngValue]="null">— All Schools (Platform Overview) —</option>
-        @for (s of schoolsForPicker; track s.schoolId) {
-          <option [ngValue]="s.schoolId">{{ s.schoolName }}</option>
-        }
-      </select>
+  @if (isSchoolAdmin && setupChecklistVisible) {
+  <section class="setup-checklist-card">
+    <div class="setup-checklist-header">
+      <div>
+        <p class="setup-checklist-eyebrow">GETTING STARTED</p>
+        <h2>Set up your school</h2>
+        <p>Complete these steps before you start using Phahamo.</p>
+      </div>
+      <button type="button" class="setup-hide-button" (click)="hideSetupChecklist()">Hide</button>
     </div>
+    @if (setupChecklistLoading) {
+    <p class="setup-checklist-loading">Checking your setup...</p>
+    } @else {
+    <p class="setup-progress">{{ setupChecklistCompleted }} of {{ setupChecklist.length }} completed</p>
+    <div class="setup-checklist-list">
+      @for (step of setupChecklist; track step.key) {
+      <button type="button" class="setup-step" [class.completed]="step.done" (click)="goToSetupStep(step.path)">
+        <span class="setup-step-icon"><i class="fa-solid" [class.fa-check]="step.done"
+            [class.fa-arrow-right]="!step.done"></i></span>
+        <span>{{ step.label }}</span>
+        <i class="fa-solid fa-chevron-right setup-step-arrow"></i>
+      </button>
+      }
+    </div>
+    }
+  </section>
+  } @else if (isSchoolAdmin) {
+  <button type="button" class="show-setup-button" (click)="showSetupChecklist()">Show setup checklist</button>
+  }
+
+  @if (isSystemAdmin) {
+  <div class="school-picker-card">
+    <label class="picker-label">View as school</label>
+    <select class="picker-select" [(ngModel)]="selectedSchoolId" (ngModelChange)="onSchoolSelected()"
+      [ngModelOptions]="{ standalone: true }">
+      <option [ngValue]="null">— All Schools (Platform Overview) —</option>
+      @for (s of schoolsForPicker; track s.schoolId) {
+      <option [ngValue]="s.schoolId">{{ s.schoolName }}</option>
+      }
+    </select>
+  </div>
   }
 
   @if (isSystemAdmin && !selectedSchoolId && systemStats) {
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-label">Total Schools</span>
-        <span class="stat-value">{{ systemStats.totalSchools }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Active Schools</span>
-        <span class="stat-value">{{ systemStats.activeSchools }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Trial Schools</span>
-        <span class="stat-value">{{ systemStats.trialSchools }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Suspended</span>
-        <span class="stat-value">{{ systemStats.suspendedSchools }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Expiring in 7 Days</span>
-        <span class="stat-value">{{ systemStats.expiringSoonSchools }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Total Users</span>
-        <span class="stat-value">{{ systemStats.totalUsers }}</span>
-      </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Schools</span>
+      <span class="stat-value">{{ systemStats.totalSchools }}</span>
     </div>
+    <div class="stat-card">
+      <span class="stat-label">Active Schools</span>
+      <span class="stat-value">{{ systemStats.activeSchools }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Trial Schools</span>
+      <span class="stat-value">{{ systemStats.trialSchools }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Suspended</span>
+      <span class="stat-value">{{ systemStats.suspendedSchools }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Expiring in 7 Days</span>
+      <span class="stat-value">{{ systemStats.expiringSoonSchools }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total Users</span>
+      <span class="stat-value">{{ systemStats.totalUsers }}</span>
+    </div>
+  </div>
   }
 
   @if (stats) {
-    <div class="stats-grid">
-      <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
-        <span class="stat-label">Total Students</span>
-        <span class="stat-value">{{ stats.totalStudents }}</span>
+  <div class="stats-grid">
+    <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
+      <span class="stat-label">Total Students</span>
+      <span class="stat-value">{{ stats.totalStudents }}</span>
+    </div>
+    <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
+      <span class="stat-label">Total Teachers</span>
+      <span class="stat-value">{{ stats.totalTeachers }}</span>
+    </div>
+    <div class="stat-card" (click)="goToAttendanceHistory()" role="link" tabindex="0">
+      <span class="stat-label">Today's Attendance Rate</span>
+      <span class="stat-value">{{ stats.attendanceRateToday | number:'1.1-1' }}%</span>
+    </div>
+    <div class="stat-card" (click)="goToTimetable()" role="link" tabindex="0">
+      <span class="stat-label">Lessons Changed Today</span>
+      <span class="stat-value">{{ stats.lessonsCancelledToday + stats.lessonsSubstitutedToday }}</span>
+      <span class="stat-note">{{ stats.lessonsCancelledToday }} cancelled · {{ stats.lessonsSubstitutedToday }}
+        substituted</span>
+    </div>
+    <div class="stat-card" (click)="goToExaminations()" role="link" tabindex="0">
+      <span class="stat-label">Exams in Next 7 Days</span>
+      <span class="stat-value">{{ stats.upcomingExamsCount }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Attendance Rate (Term)</span>
+      <span class="stat-value">{{ stats.attendanceRateTerm | number:'1.1-1' }}%</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Fee Collection (Term)</span>
+      <span class="stat-value">{{ stats.feeCollectionRateTerm | number:'1.1-1' }}%</span>
+    </div>
+  </div>
+
+  <div class="dashboard-graphs-grid">
+    <div class="graph-card">
+      <div echarts [options]="adminAttendanceLineOptions" class="chart-container"></div>
+    </div>
+    <div class="graph-card">
+      <div echarts [options]="adminFeePieOptions" class="chart-container"></div>
+    </div>
+  </div>
+
+  <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+    <div class="recent-payments-header">
+      <div>
+        <h2>Recent Payments</h2>
+        <p>Latest fee payments recorded</p>
       </div>
-      <div class="stat-card" (click)="goToUsers()" role="link" tabindex="0">
-        <span class="stat-label">Total Teachers</span>
-        <span class="stat-value">{{ stats.totalTeachers }}</span>
-      </div>
-      <div class="stat-card" (click)="goToAttendanceHistory()" role="link" tabindex="0">
-        <span class="stat-label">Today's Attendance Rate</span>
-        <span class="stat-value">{{ stats.attendanceRateToday | number:'1.1-1' }}%</span>
-      </div>
-      <div class="stat-card" (click)="goToTimetable()" role="link" tabindex="0">
-        <span class="stat-label">Lessons Changed Today</span>
-        <span class="stat-value">{{ stats.lessonsCancelledToday + stats.lessonsSubstitutedToday }}</span>
-        <span class="stat-note">{{ stats.lessonsCancelledToday }} cancelled · {{ stats.lessonsSubstitutedToday }} substituted</span>
-      </div>
-      <div class="stat-card" (click)="goToExaminations()" role="link" tabindex="0">
-        <span class="stat-label">Exams in Next 7 Days</span>
-        <span class="stat-value">{{ stats.upcomingExamsCount }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Attendance Rate (Term)</span>
-        <span class="stat-value">{{ stats.attendanceRateTerm | number:'1.1-1' }}%</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Fee Collection (Term)</span>
-        <span class="stat-value">{{ stats.feeCollectionRateTerm | number:'1.1-1' }}%</span>
-      </div>
+      <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
     </div>
 
-    <div class="dashboard-graphs-grid">
-      <div class="graph-card">
-        <div echarts [options]="adminAttendanceLineOptions" class="chart-container"></div>
-      </div>
-      <div class="graph-card">
-        <div echarts [options]="adminFeePieOptions" class="chart-container"></div>
-      </div>
-    </div>
-
-    <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
-      <div class="recent-payments-header">
-        <div>
-          <h2>Recent Payments</h2>
-          <p>Latest fee payments recorded</p>
+    @if (recentPaymentsLoading) {
+    <div class="recent-payments-empty">Loading payments...</div>
+    } @else if (recentPayments.length === 0) {
+    <div class="recent-payments-empty">No payments recorded yet.</div>
+    } @else {
+    <div class="recent-payments-list">
+      @for (payment of recentPayments; track payment.id) {
+      <div class="recent-payment-row">
+        <div class="payment-student">
+          <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
+          <div>
+            <strong>{{ payment.studentName || 'Unknown student' }}</strong>
+            <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
+          </div>
         </div>
-        <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
+        <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
+        <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
       </div>
-
-      @if (recentPaymentsLoading) {
-        <div class="recent-payments-empty">Loading payments...</div>
-      } @else if (recentPayments.length === 0) {
-        <div class="recent-payments-empty">No payments recorded yet.</div>
-      } @else {
-        <div class="recent-payments-list">
-          @for (payment of recentPayments; track payment.id) {
-            <div class="recent-payment-row">
-              <div class="payment-student">
-                <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
-                <div>
-                  <strong>{{ payment.studentName || 'Unknown student' }}</strong>
-                  <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
-                </div>
-              </div>
-              <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
-              <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
-            </div>
-          }
-        </div>
       }
-    </section>
+    </div>
+    }
+  </section>
   }
 
   @if (isStudent && studentStats) {
-    <div class="student-widgets-grid">
-      <div class="widget-card" (click)="goToTimetable()">
-        <div class="widget-icon"><i class="fa-solid fa-calendar-days"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Today's Timetable</span>
-          @if (studentStats.todayTimetable.length > 0) {
-            <span class="widget-value">{{ studentStats.todayTimetable.length }} periods scheduled</span>
-          } @else {
-            <span class="widget-value text-muted">No classes today</span>
-          }
-        </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
+  <div class="student-widgets-grid">
+    <div class="widget-card" (click)="goToTimetable()">
+      <div class="widget-icon"><i class="fa-solid fa-calendar-days"></i></div>
+      <div class="widget-content">
+        <span class="widget-label">Today's Timetable</span>
+        @if (studentStats.todayTimetable.length > 0) {
+        <span class="widget-value">{{ studentStats.todayTimetable.length }} periods scheduled</span>
+        } @else {
+        <span class="widget-value text-muted">No classes today</span>
+        }
       </div>
-
-      <div class="widget-card" (click)="goToAttendance()">
-        <div class="widget-icon"><i class="fa-solid fa-clipboard-check"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Attendance (This Term)</span>
-          <span class="widget-value">{{ studentStats.attendanceRateTerm | number:'1.1-1' }}% Present</span>
-        </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
-
-      <div class="widget-card" (click)="goToResults()">
-        <div class="widget-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Latest Result</span>
-          @if (studentStats.latestResultSubject) {
-            <span class="widget-value">{{ studentStats.latestResultSubject }}: {{ studentStats.latestResultGrade }} ({{ studentStats.latestResultMark }}%)</span>
-          } @else {
-            <span class="widget-value text-muted">No results published yet</span>
-          }
-        </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
-
-      <div class="widget-card" (click)="goToFees()">
-        <div class="widget-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-        <div class="widget-content">
-          <span class="widget-label">Outstanding Balance</span>
-          <span class="widget-value" [class.text-success]="(studentStats.feeBalance || 0) === 0">
-            M {{ (studentStats.feeBalance || 0) | number:'1.2-2' }}
-          </span>
-        </div>
-        <i class="fa-solid fa-chevron-right widget-arrow"></i>
-      </div>
+      <i class="fa-solid fa-chevron-right widget-arrow"></i>
     </div>
 
-    <div class="dashboard-graphs">
-      <div class="graph-card">
-        <div echarts [options]="studentAttendanceLineOptions" class="chart-container"></div>
+    <div class="widget-card" (click)="goToAttendance()">
+      <div class="widget-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+      <div class="widget-content">
+        <span class="widget-label">Attendance (This Term)</span>
+        <span class="widget-value">{{ studentStats.attendanceRateTerm | number:'1.1-1' }}% Present</span>
       </div>
+      <i class="fa-solid fa-chevron-right widget-arrow"></i>
     </div>
+
+    <div class="widget-card" (click)="goToResults()">
+      <div class="widget-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="widget-content">
+        <span class="widget-label">Latest Result</span>
+        @if (studentStats.latestResultSubject) {
+        <span class="widget-value">{{ studentStats.latestResultSubject }}: {{ studentStats.latestResultGrade }} ({{
+          studentStats.latestResultMark }}%)</span>
+        } @else {
+        <span class="widget-value text-muted">No results published yet</span>
+        }
+      </div>
+      <i class="fa-solid fa-chevron-right widget-arrow"></i>
+    </div>
+
+    <div class="widget-card" (click)="goToFees()">
+      <div class="widget-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+      <div class="widget-content">
+        <span class="widget-label">Outstanding Balance</span>
+        <span class="widget-value" [class.text-success]="(studentStats.feeBalance || 0) === 0">
+          M {{ (studentStats.feeBalance || 0) | number:'1.2-2' }}
+        </span>
+      </div>
+      <i class="fa-solid fa-chevron-right widget-arrow"></i>
+    </div>
+  </div>
+
+  <div class="dashboard-graphs">
+    <div class="graph-card">
+      <div echarts [options]="studentAttendanceLineOptions" class="chart-container"></div>
+    </div>
+  </div>
   }
 
   @if (isFinanceOfficer && financeStats) {
-    <div class="stats-grid finance-dashboard-grid">
-      <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
-        <span class="stat-label">Fees Collected This Term</span>
-        <span class="stat-value">M {{ financeStats.feesCollectedThisTerm | number:'1.2-2' }}</span>
+  <div class="stats-grid finance-dashboard-grid">
+    <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
+      <span class="stat-label">Fees Collected This Term</span>
+      <span class="stat-value">M {{ financeStats.feesCollectedThisTerm | number:'1.2-2' }}</span>
+    </div>
+    <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
+      <span class="stat-label">Total Outstanding</span>
+      <span class="stat-value text-error">M {{ financeStats.totalOutstanding | number:'1.2-2' }}</span>
+    </div>
+    <div class="stat-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+      <span class="stat-label">Payments Recorded Today</span>
+      <span class="stat-value">{{ financeStats.paymentsRecordedToday }}</span>
+    </div>
+  </div>
+
+  <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
+    <div class="recent-payments-header">
+      <div>
+        <h2>Recent Payments</h2>
+        <p>Latest fee payments recorded</p>
       </div>
-      <div class="stat-card" (click)="goToFeeAccounts()" role="link" tabindex="0">
-        <span class="stat-label">Total Outstanding</span>
-        <span class="stat-value text-error">M {{ financeStats.totalOutstanding | number:'1.2-2' }}</span>
-      </div>
-      <div class="stat-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
-        <span class="stat-label">Payments Recorded Today</span>
-        <span class="stat-value">{{ financeStats.paymentsRecordedToday }}</span>
-      </div>
+      <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
     </div>
 
-    <section class="recent-payments-card" (click)="goToPaymentHistory()" role="link" tabindex="0">
-      <div class="recent-payments-header">
-        <div>
-          <h2>Recent Payments</h2>
-          <p>Latest fee payments recorded</p>
+    @if (recentPaymentsLoading) {
+    <div class="recent-payments-empty">Loading payments...</div>
+    } @else if (recentPayments.length === 0) {
+    <div class="recent-payments-empty">No payments recorded yet.</div>
+    } @else {
+    <div class="recent-payments-list">
+      @for (payment of recentPayments; track payment.id) {
+      <div class="recent-payment-row">
+        <div class="payment-student">
+          <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
+          <div>
+            <strong>{{ payment.studentName || 'Unknown student' }}</strong>
+            <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
+          </div>
         </div>
-        <span class="view-history">View payment history <i class="fa-solid fa-arrow-right"></i></span>
+        <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
+        <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
       </div>
-
-      @if (recentPaymentsLoading) {
-        <div class="recent-payments-empty">Loading payments...</div>
-      } @else if (recentPayments.length === 0) {
-        <div class="recent-payments-empty">No payments recorded yet.</div>
-      } @else {
-        <div class="recent-payments-list">
-          @for (payment of recentPayments; track payment.id) {
-            <div class="recent-payment-row">
-              <div class="payment-student">
-                <span class="payment-avatar"><i class="fa-solid fa-user"></i></span>
-                <div>
-                  <strong>{{ payment.studentName || 'Unknown student' }}</strong>
-                  <span>{{ payment.paidAt | date:'dd MMM yyyy' }}</span>
-                </div>
-              </div>
-              <div class="payment-recorded-by">Recorded by {{ payment.receivedByName || '—' }}</div>
-              <strong class="payment-amount">M {{ payment.amount | number:'1.2-2' }}</strong>
-            </div>
-          }
-        </div>
       }
-    </section>
+    </div>
+    }
+  </section>
   }
 
   @if (isTeacher && teacherStats) {
-    <div class="teacher-dashboard-grid">
-      <section class="teacher-action-card" (click)="goToTimetable()">
-        <div class="teacher-action-header">
-          <div>
-            <h2>My Lessons Today</h2>
-            <p>{{ teacherStats.todayPeriods }} lesson{{ teacherStats.todayPeriods === 1 ? '' : 's' }} scheduled</p>
-          </div>
-          <i class="fa-solid fa-calendar-days teacher-action-icon"></i>
+  <div class="teacher-dashboard-grid">
+    <section class="teacher-action-card" (click)="goToTimetable()">
+      <div class="teacher-action-header">
+        <div>
+          <h2>My Lessons Today</h2>
+          <p>{{ teacherStats.todayPeriods }} lesson{{ teacherStats.todayPeriods === 1 ? '' : 's' }} scheduled</p>
         </div>
-        @if (teacherStats.todayLessons.length === 0) {
-          <div class="teacher-empty">No lessons scheduled today.</div>
-        } @else {
-          <div class="teacher-task-list">
-            @for (lesson of (teacherStats.todayLessons | slice:0:3); track lesson.id) {
-              <div class="teacher-task-row">
-                <span class="task-time">{{ lesson.periodStartTime }}</span>
-                <div>
-                  <strong>{{ lesson.subjectName }}</strong>
-                  <span>{{ lesson.schoolClassName }} · {{ lesson.periodName }}</span>
-                </div>
-              </div>
-            }
-            @if (teacherStats.todayLessons.length > 3) {
-              <div class="teacher-more-note">Showing the first 3 lessons. Open Timetable to view all.</div>
-            }
+        <i class="fa-solid fa-calendar-days teacher-action-icon"></i>
+      </div>
+      @if (teacherStats.todayLessons.length === 0) {
+      <div class="teacher-empty">No lessons scheduled today.</div>
+      } @else {
+      <div class="teacher-task-list">
+        @for (lesson of (teacherStats.todayLessons | slice:0:3); track lesson.id) {
+        <div class="teacher-task-row">
+          <span class="task-time">{{ lesson.periodStartTime }}</span>
+          <div>
+            <strong>{{ lesson.subjectName }}</strong>
+            <span>{{ lesson.schoolClassName }} · {{ lesson.periodName }}</span>
           </div>
+        </div>
         }
-      </section>
-
-      <section class="teacher-action-card" (click)="goToTeacherAttendance()">
-        <div class="teacher-action-header">
-          <div>
-            <h2>Attendance to Mark</h2>
-            @if (teacherStats.pendingAttendance > 0) {
-              <p class="text-error">{{ teacherStats.pendingAttendance }} lesson{{ teacherStats.pendingAttendance === 1 ? '' : 's' }} pending</p>
-            } @else {
-              <p class="text-success">All caught up for today</p>
-            }
-          </div>
-          <i class="fa-solid fa-clipboard-check teacher-action-icon"></i>
-        </div>
-        <div class="teacher-action-summary">
-          {{ teacherStats.pendingAttendance > 0 ? 'Open My Classes to mark attendance.' : 'No attendance actions remaining.' }}
-        </div>
-      </section>
-
-      <section class="teacher-action-card" (click)="goToGrades()">
-        <div class="teacher-action-header">
-          <div>
-            <h2>Marks to Complete</h2>
-            @if (teacherStats.missingMarks > 0) {
-              <p class="text-error">{{ teacherStats.missingMarks }} missing mark{{ teacherStats.missingMarks === 1 ? '' : 's' }}</p>
-            } @else {
-              <p class="text-success">All marks are complete</p>
-            }
-          </div>
-          <i class="fa-solid fa-graduation-cap teacher-action-icon"></i>
-        </div>
-        @if (teacherStats.assessmentsMissingMarks.length === 0) {
-          <div class="teacher-empty">No assessments need marks.</div>
-        } @else {
-          <div class="teacher-task-list">
-            @for (task of teacherStats.assessmentsMissingMarks; track task.id) {
-              <button type="button" class="teacher-task-row task-button" (click)="$event.stopPropagation(); goToAssessment(task.id)">
-                <div>
-                  <strong>{{ task.name }}</strong>
-                  <span>{{ task.subjectName }} · {{ task.className }}</span>
-                </div>
-                <b>{{ task.missingMarks }}</b>
-              </button>
-            }
-          </div>
+        @if (teacherStats.todayLessons.length > 3) {
+        <div class="teacher-more-note">Showing the first 3 lessons. Open Timetable to view all.</div>
         }
-      </section>
+      </div>
+      }
+    </section>
 
-      <section class="teacher-action-card" (click)="goToAnnouncements()">
-        <div class="teacher-action-header">
-          <div>
-            <h2>Recent Announcements</h2>
-            <p>Updates for your school</p>
-          </div>
-          <i class="fa-solid fa-bullhorn teacher-action-icon"></i>
+    <section class="teacher-action-card" (click)="goToTeacherAttendance()">
+      <div class="teacher-action-header">
+        <div>
+          <h2>Attendance to Mark</h2>
+          @if (teacherStats.pendingAttendance > 0) {
+          <p class="text-error">{{ teacherStats.pendingAttendance }} lesson{{ teacherStats.pendingAttendance === 1 ? ''
+            : 's' }} pending</p>
+          } @else {
+          <p class="text-success">All caught up for today</p>
+          }
         </div>
-        @if (announcements.length === 0) {
-          <div class="teacher-empty">No recent announcements.</div>
-        } @else {
-          <div class="teacher-task-list">
-            @for (announcement of announcements.slice(0, 3); track announcement.id) {
-              <div class="teacher-task-row announcement-task">
-                <div>
-                  <strong>{{ announcement.title }}</strong>
-                  <span>{{ announcement.publishAt | date:'dd MMM yyyy' }}</span>
-                </div>
-              </div>
-            }
+        <i class="fa-solid fa-clipboard-check teacher-action-icon"></i>
+      </div>
+      <div class="teacher-action-summary">
+        {{ teacherStats.pendingAttendance > 0 ? 'Open My Classes to mark attendance.' : 'No attendance actions
+        remaining.' }}
+      </div>
+    </section>
+
+    <section class="teacher-action-card" (click)="goToGrades()">
+      <div class="teacher-action-header">
+        <div>
+          <h2>Marks to Complete</h2>
+          @if (teacherStats.missingMarks > 0) {
+          <p class="text-error">{{ teacherStats.missingMarks }} missing mark{{ teacherStats.missingMarks === 1 ? '' :
+            's' }}</p>
+          } @else {
+          <p class="text-success">All marks are complete</p>
+          }
+        </div>
+        <i class="fa-solid fa-graduation-cap teacher-action-icon"></i>
+      </div>
+      @if (teacherStats.assessmentsMissingMarks.length === 0) {
+      <div class="teacher-empty">No assessments need marks.</div>
+      } @else {
+      <div class="teacher-task-list">
+        @for (task of teacherStats.assessmentsMissingMarks; track task.id) {
+        <button type="button" class="teacher-task-row task-button"
+          (click)="$event.stopPropagation(); goToAssessment(task.id)">
+          <div>
+            <strong>{{ task.name }}</strong>
+            <span>{{ task.subjectName }} · {{ task.className }}</span>
           </div>
+          <b>{{ task.missingMarks }}</b>
+        </button>
         }
-      </section>
-    </div>
+      </div>
+      }
+    </section>
+
+    <section class="teacher-action-card" (click)="goToAnnouncements()">
+      <div class="teacher-action-header">
+        <div>
+          <h2>Recent Announcements</h2>
+          <p>Updates for your school</p>
+        </div>
+        <i class="fa-solid fa-bullhorn teacher-action-icon"></i>
+      </div>
+      @if (announcements.length === 0) {
+      <div class="teacher-empty">No recent announcements.</div>
+      } @else {
+      <div class="teacher-task-list">
+        @for (announcement of announcements.slice(0, 3); track announcement.id) {
+        <div class="teacher-task-row announcement-task">
+          <div>
+            <strong>{{ announcement.title }}</strong>
+            <span>{{ announcement.publishAt | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </section>
+  </div>
   }
 
   @if (showBirthdays) {
-    <section class="birthdays-card">
-      <div class="birthdays-header">
-        <div>
-          <h2>Upcoming Birthdays</h2>
-          <p>Students and staff celebrating in the next 7 days</p>
-        </div>
-        <i class="fa-solid fa-cake-candles birthdays-icon"></i>
+  <section class="birthdays-card">
+    <div class="birthdays-header">
+      <div>
+        <h2>Upcoming Birthdays</h2>
+        <p>Students and staff celebrating in the next 7 days</p>
       </div>
+      <i class="fa-solid fa-cake-candles birthdays-icon"></i>
+    </div>
 
-      @if (birthdays.length === 0) {
-        <div class="birthdays-empty">
-          <i class="fa-solid fa-calendar-check"></i>
-          <span>No birthdays in the next 7 days</span>
+    @if (birthdays.length === 0) {
+    <div class="birthdays-empty">
+      <i class="fa-solid fa-calendar-check"></i>
+      <span>No birthdays in the next 7 days</span>
+    </div>
+    } @else {
+    <div class="birthdays-list">
+      @for (birthday of birthdays; track birthday.type + '-' + birthday.personId) {
+      <div class="birthday-row" [class.birthday-today]="birthday.today">
+        <span class="birthday-date">
+          <strong>{{ birthday.date | date:'dd' }}</strong>
+          <span>{{ birthday.date | date:'MMM' }}</span>
+        </span>
+        <div class="birthday-person">
+          <strong>{{ birthday.name }}</strong>
+          <span>
+            {{ birthday.type === 'STUDENT' ? 'Student' : 'Staff' }}
+            @if (birthday.className) { · {{ birthday.className }} }
+          </span>
         </div>
-      } @else {
-        <div class="birthdays-list">
-          @for (birthday of birthdays; track birthday.type + '-' + birthday.personId) {
-            <div class="birthday-row" [class.birthday-today]="birthday.today">
-              <span class="birthday-date">
-                <strong>{{ birthday.date | date:'dd' }}</strong>
-                <span>{{ birthday.date | date:'MMM' }}</span>
-              </span>
-              <div class="birthday-person">
-                <strong>{{ birthday.name }}</strong>
-                <span>
-                  {{ birthday.type === 'STUDENT' ? 'Student' : 'Staff' }}
-                  @if (birthday.className) { · {{ birthday.className }} }
-                </span>
-              </div>
-              @if (birthday.today) {
-                <span class="today-badge">Today</span>
-              }
-            </div>
-          }
-        </div>
+        @if (birthday.today) {
+        <span class="today-badge">Today</span>
+        }
+      </div>
       }
-    </section>
+    </div>
+    }
+  </section>
   }
 
   @if (showUpcomingExams) {
-    <section class="upcoming-exams-card">
-      <div class="upcoming-exams-header">
-        <div>
-          <h2>Upcoming Exams</h2>
-          <p>Exams happening in the next 7 days</p>
-        </div>
-        <i class="fa-solid fa-calendar-days upcoming-exams-icon"></i>
+  <section class="upcoming-exams-card">
+    <div class="upcoming-exams-header">
+      <div>
+        <h2>Upcoming Exams</h2>
+        <p>Exams happening in the next 7 days</p>
       </div>
+      <i class="fa-solid fa-calendar-days upcoming-exams-icon"></i>
+    </div>
 
-      @if (upcomingExams.length === 0) {
-        <div class="upcoming-exams-empty">
-          <i class="fa-solid fa-circle-check"></i>
-          <span>No upcoming exams</span>
-        </div>
-      } @else {
-        <div class="upcoming-exams-list">
-          @for (exam of upcomingExams; track exam.examId) {
-            <button type="button" class="upcoming-exam-row" (click)="goToExam(exam.examId)">
-              <span class="exam-date">
-                <strong>{{ exam.date | date:'dd' }}</strong>
-                <span>{{ exam.date | date:'MMM' }}</span>
-              </span>
-              <span class="exam-details">
-                <strong>{{ exam.name }}</strong>
-                <span>{{ exam.subjectName }} · {{ exam.date | date:'dd MMM' }}–{{ exam.endDate | date:'dd MMM yyyy' }}</span>
-              </span>
-              <i class="fa-solid fa-chevron-right exam-arrow"></i>
-            </button>
-          }
-        </div>
+    @if (upcomingExams.length === 0) {
+    <div class="upcoming-exams-empty">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>No upcoming exams</span>
+    </div>
+    } @else {
+    <div class="upcoming-exams-list">
+      @for (exam of upcomingExams; track exam.examId) {
+      <button type="button" class="upcoming-exam-row" (click)="goToExam(exam.examId)">
+        <span class="exam-date">
+          <strong>{{ exam.date | date:'dd' }}</strong>
+          <span>{{ exam.date | date:'MMM' }}</span>
+        </span>
+        <span class="exam-details">
+          <strong>{{ exam.name }}</strong>
+          <span>{{ exam.subjectName }} · {{ exam.date | date:'dd MMM' }}–{{ exam.endDate | date:'dd MMM yyyy' }}</span>
+        </span>
+        <i class="fa-solid fa-chevron-right exam-arrow"></i>
+      </button>
       }
-    </section>
+    </div>
+    }
+  </section>
   }
 
   @if (announcements.length > 0) {
-    <div class="section">
-      <h2>Announcements</h2>
-      <div class="announcement-list">
-        @for (a of announcements; track a.id) {
-          <div class="announcement-card">
-            <div class="announcement-header">
-              <h3>{{ a.title }}</h3>
-              <span class="date">{{ a.publishAt | date:'dd MMM yyyy, HH:mm' }}</span>
-            </div>
-            <div class="announcement-body">{{ a.body }}</div>
-            <div class="announcement-footer">
-              Posted by {{ a.authorName }}
-            </div>
-          </div>
-        }
+  <div class="section">
+    <h2>Announcements</h2>
+    <div class="announcement-list">
+      @for (a of announcements; track a.id) {
+      <div class="announcement-card">
+        <div class="announcement-header">
+          <h3>{{ a.title }}</h3>
+          <span class="date">{{ a.publishAt | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="announcement-body">{{ a.body }}</div>
+        <div class="announcement-footer">
+          Posted by {{ a.authorName }}
+        </div>
       </div>
+      }
     </div>
+  </div>
   }
 </div>
