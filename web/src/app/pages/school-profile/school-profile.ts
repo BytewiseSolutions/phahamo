@@ -26,6 +26,7 @@ export class SchoolProfile implements OnInit, OnDestroy {
   logoPreviewUrl: string | null = null;
   selectedLogoFile: File | null = null;
   uploadingLogo = false;
+  exportingData = false;
 
   termStructureOptions = TERM_STRUCTURE_OPTIONS;
   currencyOptions = CURRENCY_OPTIONS;
@@ -172,6 +173,21 @@ export class SchoolProfile implements OnInit, OnDestroy {
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedLogoFile = input.files?.[0] ?? null;
+  }
+
+  requestDataExport(): void {
+    this.exportingData = true;
+    this.errorMessage = '';
+    this.backend.postSilently<{ status: string }>('/data-exports', {}).subscribe({
+      next: () => {
+        this.successMessage = 'Your export is being prepared. A download link will be emailed when it is ready.';
+        this.exportingData = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Could not start the school data export.';
+        this.exportingData = false;
+      }
+    });
   }
 
   uploadLogo(): void {

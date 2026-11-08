@@ -59,6 +59,7 @@ public class SecurityConfig {
                                 "/api/legal/terms", "/api/legal/privacy",
                                 "/api/legal/terms/file", "/api/legal/privacy/file"
                         ).permitAll()
+                        .requestMatchers("/api/data-exports/download/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )

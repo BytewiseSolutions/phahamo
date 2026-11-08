@@ -64,6 +64,15 @@
       </div>
     </div>
 
+    <div class="card data-export-card">
+      <h2 class="card-title">Download School Data</h2>
+      <p class="data-export-description">Request a ZIP containing Excel spreadsheets for students, parents, teachers, classes, attendance, results, fees and payments.</p>
+      <button type="button" class="secondary-button" [disabled]="exportingData" (click)="requestDataExport()">
+        {{ exportingData ? 'Preparing export...' : 'Request data export' }}
+      </button>
+      <p class="data-export-hint">The download link is emailed to you and expires after 24 hours.</p>
+    </div>
+
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="card">
         <h2 class="card-title">School Details</h2>
