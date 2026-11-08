@@ -16,4 +16,5 @@ export class ClassView {
   onBack(): void {
     this.back.emit();
   }
+
 }
