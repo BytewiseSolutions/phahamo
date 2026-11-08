@@ -103,7 +103,7 @@
 
     <div class="filter-group">
       <label>Status</label>
-      <select [(ngModel)]="statusFilter" [ngModelOptions]="{ standalone: true }">
+      <select [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()" [ngModelOptions]="{ standalone: true }">
         <option value="all">All Students</option>
         <option value="owing">Owing Balance</option>
         <option value="paid">Fully Paid</option>
@@ -114,7 +114,7 @@
   @if (filteredAccounts.length > 0) {
     <div class="toolbar">
       <div class="toolbar-info">
-        <strong>{{ filteredAccounts.length }}</strong> students shown ·
+        <strong>{{ totalElements }}</strong> students shown ·
         <strong>{{ sendableCount }}</strong> can receive reminders
         @if (selectedCount > 0) {
           · <strong>{{ selectedCount }}</strong> selected
@@ -208,6 +208,14 @@
         </tbody>
       </table>
     </div>
+
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button type="button" class="pagination-button" [disabled]="page === 0" (click)="previousPage()">Previous</button>
+        <span>Page {{ page + 1 }} of {{ totalPages }}</span>
+        <button type="button" class="pagination-button" [disabled]="page + 1 >= totalPages" (click)="nextPage()">Next</button>
+      </div>
+    }
 
   }
 

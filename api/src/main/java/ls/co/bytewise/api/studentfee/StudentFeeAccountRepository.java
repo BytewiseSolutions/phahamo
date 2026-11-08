@@ -1,6 +1,8 @@
 package ls.co.bytewise.api.studentfee;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,6 +28,23 @@ public interface StudentFeeAccountRepository extends JpaRepository<StudentFeeAcc
 
     List<StudentFeeAccount> findAllBySchoolClassIdAndTermIdAndSchoolId(
             Long classId, Long termId, Long schoolId);
+
+    @Query("""
+        SELECT a FROM StudentFeeAccount a
+        WHERE a.schoolClass.id = :classId
+          AND a.term.id = :termId
+          AND a.school.id = :schoolId
+          AND (:status = 'all'
+               OR (:status = 'owing' AND a.totalFees - a.totalAdjustments - a.amountPaid > 0)
+               OR (:status = 'paid' AND a.totalFees - a.totalAdjustments - a.amountPaid <= 0))
+        ORDER BY a.student.user.lastName, a.student.user.firstName, a.student.admissionNumber
+        """)
+    Page<StudentFeeAccount> searchClass(
+            @Param("classId") Long classId,
+            @Param("termId") Long termId,
+            @Param("schoolId") Long schoolId,
+            @Param("status") String status,
+            Pageable pageable);
 
     Optional<StudentFeeAccount> findByStudentIdAndTermIdAndSchoolId(
             Long studentId, Long termId, Long schoolId);

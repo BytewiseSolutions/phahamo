@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { BackendService } from '../../../util/backend.service';
 import { StudentFeePayment } from '../student-fee-payment';
 import { PaymentPage } from './payment-page';
@@ -10,15 +12,18 @@ import { AuthService } from '../../../util/auth.service';
   templateUrl: './payment-history.html',
   styleUrl: './payment-history.scss'
 })
-export class PaymentHistory implements OnInit {
+export class PaymentHistory implements OnInit, OnDestroy {
   payments: StudentFeePayment[] = [];
   page = 0;
   totalPages = 0;
   totalElements = 0;
   loading = false;
   errorMessage = '';
+  searchTerm = '';
   showReversalForm = false;
   selectedPayment: StudentFeePayment | null = null;
+  private searchSubject = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   get canReversePayments(): boolean {
     return this.authService.hasRole('SCHOOL_ADMIN')
@@ -29,13 +34,27 @@ export class PaymentHistory implements OnInit {
   constructor(private backend: BackendService, private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.page = 0;
+      this.load();
+    });
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.backend.get<PaymentPage>(`/student-fees/payments?page=${this.page}&size=20`).subscribe({
+    const search = this.searchTerm.trim() ? `&search=${encodeURIComponent(this.searchTerm.trim())}` : '';
+    this.backend.get<PaymentPage>(`/student-fees/payments?page=${this.page}&size=20${search}`).subscribe({
       next: (result) => {
         const metadata = result.page ?? result;
         this.payments = result.content;
@@ -49,6 +68,10 @@ export class PaymentHistory implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onSearchChange(): void {
+    this.searchSubject.next();
   }
 
   previousPage(): void {

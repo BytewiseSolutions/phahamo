@@ -7,6 +7,7 @@ import { Term } from '../../terms/term';
 import { Subject } from '../../subject/subject';
 import { SchoolClass } from '../../class/class';
 import {TermResultStatus} from '../term-result-status';
+import { Page } from '../../../util/page';
 
 @Component({
   selector: 'app-class-results',
@@ -25,6 +26,9 @@ export class ClassResults implements OnInit {
   selectedTermId: number | null = null;
 
   results: TermResult[] = [];
+  page = 0;
+  totalPages = 0;
+  totalElements = 0;
 
   loadingFilters = false;
   loadingResults = false;
@@ -106,6 +110,7 @@ export class ClassResults implements OnInit {
 
   onFilterChange(): void {
     if (this.selectedClassId && this.selectedSubjectId && this.selectedTermId) {
+      this.page = 0;
       this.loadResults();
     }
   }
@@ -114,11 +119,16 @@ export class ClassResults implements OnInit {
     this.loadingResults = true;
     this.errorMessage = '';
 
-    const url = `/term-results?classId=${this.selectedClassId}&subjectId=${this.selectedSubjectId}&termId=${this.selectedTermId}`;
+    const url = `/term-results?classId=${this.selectedClassId}&subjectId=${this.selectedSubjectId}`
+      + `&termId=${this.selectedTermId}&page=${this.page}&size=20`;
 
-    this.backend.get<TermResult[]>(url).subscribe({
-      next: (results) => {
-        this.results = this.sortByName(results);
+    this.backend.get<Page<TermResult>>(url).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        this.results = this.sortByName(result.content);
+        this.page = metadata.number ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.totalElements = metadata.totalElements ?? 0;
         this.loadingResults = false;
       },
       error: (err) => {
@@ -127,6 +137,14 @@ export class ClassResults implements OnInit {
         this.loadingResults = false;
       }
     });
+  }
+
+  previousPage(): void {
+    if (this.page > 0) { this.page--; this.loadResults(); }
+  }
+
+  nextPage(): void {
+    if (this.page + 1 < this.totalPages) { this.page++; this.loadResults(); }
   }
 
   private sortByName(list: TermResult[]): TermResult[] {

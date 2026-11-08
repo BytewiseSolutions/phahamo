@@ -43,6 +43,14 @@
           </button>
         }
       }
+
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button type="button" class="pagination-button" [disabled]="page === 0" (click)="previousPage()">Previous</button>
+          <span>Page {{ page + 1 }} of {{ totalPages }} · {{ totalElements }} conversations</span>
+          <button type="button" class="pagination-button" [disabled]="page + 1 >= totalPages" (click)="nextPage()">Next</button>
+        </div>
+      }
     </section>
 
     <section class="message-thread-panel">

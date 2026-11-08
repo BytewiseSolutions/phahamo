@@ -192,6 +192,14 @@
     }
   }
 
+  @if (totalPages > 1 && !studentReport) {
+    <div class="pagination">
+      <button type="button" class="pagination-button" [disabled]="page === 0" (click)="previousPage()">Previous</button>
+      <span>Page {{ page + 1 }} of {{ totalPages }} · {{ totalElements }} records</span>
+      <button type="button" class="pagination-button" [disabled]="page + 1 >= totalPages" (click)="nextPage()">Next</button>
+    </div>
+  }
+
   @if (studentReport) {
     <div class="modal-overlay" (click)="closeStudentReport()">
       <div class="modal-content" (click)="$event.stopPropagation()">

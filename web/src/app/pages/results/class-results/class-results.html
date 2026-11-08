@@ -87,7 +87,7 @@
         <tbody>
           @for (r of results; track r.id; let i = $index) {
             <tr [class.finalised]="r.status === 'FINALISED'">
-              <td>{{ i + 1 }}</td>
+              <td>{{ page * 20 + i + 1 }}</td>
               <td>{{ r.admissionNumber }}</td>
               <td>{{ r.studentLastName }} {{ r.studentFirstName }}</td>
               <td class="mark-cell">{{ r.finalMark | number:'1.0-2' }}</td>
@@ -113,6 +113,14 @@
           }
         </tbody>
       </table>
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button type="button" class="pagination-button" [disabled]="page === 0" (click)="previousPage()">Previous</button>
+      <span>Page {{ page + 1 }} of {{ totalPages }} · {{ totalElements }} results</span>
+      <button type="button" class="pagination-button" [disabled]="page + 1 >= totalPages" (click)="nextPage()">Next</button>
     </div>
   }
 

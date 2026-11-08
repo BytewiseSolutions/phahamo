@@ -7,6 +7,7 @@ import { Term } from '../../terms/term';
 import { StudentFeeAccount } from '../student-fee-account';
 import {BulkFeeEmailResult} from '../bulk-fee-email-result';
 import {SendReminderRequest} from '../send-reminder-request';
+import { Page } from '../../../util/page';
 
 type StatusFilter = 'all' | 'owing' | 'paid';
 
@@ -26,6 +27,9 @@ export class StudentFeesPage implements OnInit {
   statusFilter: StatusFilter = 'all';
 
   accounts: StudentFeeAccount[] = [];
+  page = 0;
+  totalPages = 0;
+  totalElements = 0;
 
   loading = false;
   generating = false;
@@ -175,12 +179,6 @@ export class StudentFeesPage implements OnInit {
   }
 
   get filteredAccounts(): StudentFeeAccount[] {
-    if (this.statusFilter === 'owing') {
-      return this.accounts.filter(a => a.balance > 0);
-    }
-    if (this.statusFilter === 'paid') {
-      return this.accounts.filter(a => a.balance <= 0);
-    }
     return this.accounts;
   }
 
@@ -209,13 +207,16 @@ export class StudentFeesPage implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    const url = `/student-fees/class/${this.selectedClassId}?termId=${this.selectedTermId}`;
+    const url = `/student-fees/class/${this.selectedClassId}/page?termId=${this.selectedTermId}`
+      + `&status=${this.statusFilter}&page=${this.page}&size=20`;
 
-    this.backend.get<StudentFeeAccount[]>(url).subscribe({
-      next: (rows) => {
-        this.accounts = rows.sort((a, b) =>
-          a.admissionNumber.localeCompare(b.admissionNumber, undefined, { numeric: true })
-        );
+    this.backend.get<Page<StudentFeeAccount>>(url).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        this.accounts = result.content;
+        this.page = metadata.number ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.totalElements = metadata.totalElements ?? 0;
         this.selectedAccountIds.clear();
         this.loading = false;
       },
@@ -228,7 +229,16 @@ export class StudentFeesPage implements OnInit {
   }
 
   onFilterChange(): void {
+    this.page = 0;
     this.load();
+  }
+
+  previousPage(): void {
+    if (this.page > 0) { this.page--; this.load(); }
+  }
+
+  nextPage(): void {
+    if (this.page + 1 < this.totalPages) { this.page++; this.load(); }
   }
 
   async generateForClass(): Promise<void> {

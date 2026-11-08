@@ -9,6 +9,8 @@ import ls.co.bytewise.api.security.TenantContext;
 import ls.co.bytewise.api.user.User;
 import ls.co.bytewise.api.user.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -61,6 +63,18 @@ public class MessageService {
     public List<MessageThreadDto> sent(User currentUser) {
         return summarize(messageRepository.findAllBySchoolIdAndSenderIdOrderBySentAtDesc(
                 currentSchoolId(), currentUser.getId()), currentUser);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MessageThreadDto> inboxPage(User currentUser, Pageable pageable) {
+        return messageRepository.findInboxThreads(currentSchoolId(), currentUser.getId(), pageable)
+                .map(message -> toThread(message, currentUser));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MessageThreadDto> sentPage(User currentUser, Pageable pageable) {
+        return messageRepository.findSentThreads(currentSchoolId(), currentUser.getId(), pageable)
+                .map(message -> toThread(message, currentUser));
     }
 
     @Transactional
@@ -164,6 +178,15 @@ public class MessageService {
             return new MessageThreadDto(latest.getThreadId(), latest.getSubject(), other.getFullName(),
                     other.getId(), latest.getBody(), latest.getSentAt(), unread);
         }).toList();
+    }
+
+    private MessageThreadDto toThread(Message latest, User currentUser) {
+        User other = latest.getSender().getId().equals(currentUser.getId())
+                ? latest.getRecipient() : latest.getSender();
+        boolean unread = latest.getRecipient().getId().equals(currentUser.getId())
+                && latest.getReadAt() == null;
+        return new MessageThreadDto(latest.getThreadId(), latest.getSubject(), other.getFullName(),
+                other.getId(), latest.getBody(), latest.getSentAt(), unread);
     }
 
     private boolean canMessage(User sender, User recipient) {

@@ -8,6 +8,7 @@ import {
 import { SchoolClass } from '../../class/class';
 import { Subject } from '../../subject/subject';
 import { Term } from '../../terms/term';
+import { Page } from '../../../util/page';
 
 type Mode = 'byLesson' | 'byStudent';
 
@@ -36,6 +37,9 @@ export class AttendanceHistory implements OnInit {
   lessonRows: LessonAttendanceSummary[] = [];
   classRows: StudentAttendanceSummary[] = [];
   studentReport: StudentAttendanceReport | null = null;
+  page = 0;
+  totalPages = 0;
+  totalElements = 0;
 
   loadingFilters = false;
   loading = false;
@@ -97,6 +101,7 @@ export class AttendanceHistory implements OnInit {
 
   setMode(mode: Mode): void {
     this.mode = mode;
+    this.page = 0;
     this.errorMessage = '';
     this.loadForMode();
   }
@@ -138,7 +143,7 @@ export class AttendanceHistory implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    let url = `/attendance/report/lessons?from=${this.fromDate}&to=${this.toDate}`;
+    let url = `/attendance/report/lessons?from=${this.fromDate}&to=${this.toDate}&page=${this.page}&size=20`;
 
     if (this.selectedClassId) {
       url += `&classId=${this.selectedClassId}`;
@@ -148,9 +153,13 @@ export class AttendanceHistory implements OnInit {
       url += `&subjectId=${this.selectedSubjectId}`;
     }
 
-    this.backend.get<LessonAttendanceSummary[]>(url).subscribe({
-      next: (rows) => {
-        this.lessonRows = rows;
+    this.backend.get<Page<LessonAttendanceSummary>>(url).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        this.lessonRows = result.content;
+        this.page = metadata.number ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.totalElements = metadata.totalElements ?? 0;
         this.loading = false;
       },
       error: (err) => {
@@ -170,16 +179,20 @@ export class AttendanceHistory implements OnInit {
     this.errorMessage = '';
 
     let url = this.selectedClassId
-      ? `/attendance/report/class/${this.selectedClassId}?from=${this.fromDate}&to=${this.toDate}`
-      : `/attendance/report/class?from=${this.fromDate}&to=${this.toDate}`;
+      ? `/attendance/report/class/${this.selectedClassId}?from=${this.fromDate}&to=${this.toDate}&page=${this.page}&size=20`
+      : `/attendance/report/class?from=${this.fromDate}&to=${this.toDate}&page=${this.page}&size=20`;
 
     if (this.selectedSubjectId) {
       url += `&subjectId=${this.selectedSubjectId}`;
     }
 
-    this.backend.get<StudentAttendanceSummary[]>(url).subscribe({
-      next: (rows) => {
-        this.classRows = rows;
+    this.backend.get<Page<StudentAttendanceSummary>>(url).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        this.classRows = result.content;
+        this.page = metadata.number ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.totalElements = metadata.totalElements ?? 0;
         this.loading = false;
       },
       error: (err) => {
@@ -188,6 +201,14 @@ export class AttendanceHistory implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  previousPage(): void {
+    if (this.page > 0) { this.page--; this.loadForMode(); }
+  }
+
+  nextPage(): void {
+    if (this.page + 1 < this.totalPages) { this.page++; this.loadForMode(); }
   }
 
   openStudent(studentId: number): void {

@@ -6,6 +6,7 @@ import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { Message } from '../message';
 import { MessageThread } from '../message-thread';
 import { MessageUser } from '../message-user';
+import { Page } from '../../../util/page';
 
 type Folder = 'inbox' | 'sent';
 
@@ -26,6 +27,9 @@ export class MessagesPage implements OnInit {
   sending = false;
   composing = false;
   errorMessage = '';
+  page = 0;
+  totalPages = 0;
+  totalElements = 0;
   currentUserId: number | null;
   editingMessageId: number | null = null;
   editSubject = '';
@@ -65,7 +69,7 @@ export class MessagesPage implements OnInit {
   }
 
   get sentThreadCount(): number {
-    return this.sent.length;
+    return this.folder === 'sent' ? this.totalElements : this.sent.length;
   }
 
   loadRecipients(): void {
@@ -77,12 +81,21 @@ export class MessagesPage implements OnInit {
 
   loadFolder(folder: Folder): void {
     this.folder = folder;
+    this.page = 0;
+    this.loadCurrentPage();
+  }
+
+  loadCurrentPage(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.backend.get<MessageThread[]>(`/messages/${folder}`).subscribe({
-      next: (rows) => {
-        if (folder === 'inbox') this.inbox = rows;
-        else this.sent = rows;
+    this.backend.get<Page<MessageThread>>(`/messages/${this.folder}/page?page=${this.page}&size=20`).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        if (this.folder === 'inbox') this.inbox = result.content;
+        else this.sent = result.content;
+        this.page = metadata.number ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.totalElements = metadata.totalElements ?? 0;
         this.loading = false;
       },
       error: () => {
@@ -90,6 +103,14 @@ export class MessagesPage implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  previousPage(): void {
+    if (this.page > 0) { this.page--; this.loadCurrentPage(); }
+  }
+
+  nextPage(): void {
+    if (this.page + 1 < this.totalPages) { this.page++; this.loadCurrentPage(); }
   }
 
   openThread(thread: MessageThread): void {
@@ -201,8 +222,7 @@ export class MessagesPage implements OnInit {
         this.selectedThreadId = message.threadId;
         this.thread = [...this.thread, message];
         this.messageUnreadService.refresh();
-        this.loadFolder(this.folder);
-        this.loadFolder('sent');
+        this.loadCurrentPage();
       },
       error: (err) => {
         this.sending = false;

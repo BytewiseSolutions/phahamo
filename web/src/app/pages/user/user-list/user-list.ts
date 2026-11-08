@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { BackendService } from '../../../util/backend.service';
 import { User } from '../../../util/user';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import {Router} from '@angular/router';
 import {AuthService} from '../../../util/auth.service';
 import { StudentDuplicate } from '../../../util/student-duplicate';
+import { Page } from '../../../util/page';
 
 @Component({
   selector: 'app-user-list',
@@ -23,9 +26,13 @@ export class UserList implements OnInit, OnDestroy {
   statusFilter = 'ALL';
   currentPage = 1;
   readonly pageSize = 20;
+  totalElements = 0;
+  totalPages = 0;
   duplicateMatches: StudentDuplicate[] = [];
   pendingDuplicatePayload: any | null = null;
   private photoUrls = new Map<number, string>();
+  private searchSubject = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private backend: BackendService,
@@ -69,45 +76,15 @@ export class UserList implements OnInit, OnDestroy {
   ];
 
   get filteredUsers(): User[] {
-    let list = this.users;
-
-    if (this.activeTab !== 'ALL') {
-      list = list.filter(u => u.roles.includes(this.activeTab));
-    }
-
-    if (this.statusFilter !== 'ALL') {
-      list = list.filter(u => u.status === this.statusFilter);
-    }
-
-    const q = this.searchTerm.trim().toLowerCase();
-    if (q) {
-      list = list.filter(u =>
-        u.firstName.toLowerCase().includes(q) ||
-        u.lastName.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.phone.toLowerCase().includes(q)
-      );
-    }
-
-    return list;
+    return this.users;
   }
 
   get paginatedUsers(): User[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredUsers.slice(start, start + this.pageSize);
-  }
-
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredUsers.length / this.pageSize));
+    return this.users;
   }
 
   get pageNumbers(): number[] {
     return Array.from({ length: this.totalPages }, (_, index) => index + 1);
-  }
-
-  countByRole(role: string): number {
-    if (role === 'ALL') return this.users.length;
-    return this.users.filter(u => u.roles.includes(role)).length;
   }
 
   isLocked(user: User): boolean {
@@ -118,19 +95,29 @@ export class UserList implements OnInit, OnDestroy {
     this.activeTab = role;
     this.currentPage = 1;
     this.errorMessage = '';
+    this.loadUsers();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      this.loadUsers();
     }
   }
 
   resetPagination(): void {
-    this.currentPage = 1;
+    this.searchSubject.next();
   }
 
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.loadUsers();
+    });
     this.loadUsers();
   }
 
@@ -138,11 +125,21 @@ export class UserList implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.backend.get<User[]>('/users').subscribe({
-      next: (users) => {
-        this.users = users;
-        this.loadStudentPhotos(users);
-        this.currentPage = 1;
+    const params = new URLSearchParams();
+    params.set('page', String(this.currentPage - 1));
+    params.set('size', String(this.pageSize));
+    if (this.searchTerm.trim()) params.set('search', this.searchTerm.trim());
+    if (this.activeTab !== 'ALL') params.set('role', this.activeTab);
+    if (this.statusFilter !== 'ALL') params.set('status', this.statusFilter);
+
+    this.backend.get<Page<User>>(`/users/page?${params.toString()}`).subscribe({
+      next: (result) => {
+        const metadata = result.page ?? result;
+        this.users = result.content;
+        this.totalElements = metadata.totalElements ?? 0;
+        this.totalPages = metadata.totalPages ?? 0;
+        this.currentPage = (metadata.number ?? 0) + 1;
+        this.loadStudentPhotos(this.users);
         this.loading = false;
       },
       error: () => {
@@ -153,6 +150,8 @@ export class UserList implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.photoUrls.forEach(url => URL.revokeObjectURL(url));
     this.photoUrls.clear();
   }
@@ -190,7 +189,7 @@ export class UserList implements OnInit, OnDestroy {
         this.showCreateForm = false;
         this.duplicateMatches = [];
         this.pendingDuplicatePayload = null;
-        this.users = [created, ...this.users];
+        this.loadUsers();
 
         const createdRole = created.roles?.[0];
         if (createdRole && this.tabs.some(t => t.role === createdRole)) {
@@ -235,7 +234,7 @@ export class UserList implements OnInit, OnDestroy {
     this.backend.postSilently<User>('/users', payload).subscribe({
       next: (created) => {
         this.showCreateForm = false;
-        this.users = [created, ...this.users];
+        this.loadUsers();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to create user.';

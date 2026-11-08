@@ -408,11 +408,14 @@ public class StudentFeeAccountService {
                 .stream().map(this::toDto).toList();
     }
 
-    public List<StudentFeeAccountDto> listForClass(Long classId, Long termId) {
+    public Page<StudentFeeAccountDto> listForClass(Long classId, Long termId, String status, Pageable pageable) {
         Long schoolId = TenantContext.getSchoolId();
-        return accountRepository
-                .findAllBySchoolClassIdAndTermIdAndSchoolId(classId, termId, schoolId)
-                .stream().map(this::toDto).toList();
+        return accountRepository.searchClass(classId, termId, schoolId,
+                status == null ? "all" : status, pageable).map(this::toDto);
+    }
+
+    public List<StudentFeeAccountDto> listForClass(Long classId, Long termId) {
+        return listForClass(classId, termId, "all", Pageable.unpaged()).getContent();
     }
 
     @Transactional
@@ -551,9 +554,10 @@ public class StudentFeeAccountService {
     }
 
     @Transactional(readOnly = true)
-    public Page<StudentFeePaymentDto> listPayments(Pageable pageable) {
+    public Page<StudentFeePaymentDto> listPayments(String search, Pageable pageable) {
         Long schoolId = TenantContext.getSchoolId();
-        return paymentRepository.findAllBySchoolIdOrderByPaidAtDescIdDesc(schoolId, pageable)
+        return paymentRepository.searchBySchoolId(schoolId,
+                search == null ? null : search.trim(), pageable)
                 .map(StudentFeePaymentDto::new);
     }
 

@@ -4,6 +4,9 @@ import ls.co.bytewise.api.user.User;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -19,10 +22,13 @@ public class TermResultController {
 
     @GetMapping
     @Secured({"ROLE_SCHOOL_ADMIN", "ROLE_SYSTEM_ADMIN", "ROLE_PRINCIPAL", "ROLE_TEACHER"})
-    public List<TermResultDto> list(@RequestParam Long classId,
+    public Page<TermResultDto> list(@RequestParam Long classId,
                                     @RequestParam Long subjectId,
-                                    @RequestParam Long termId) {
-        return termResultService.listFor(classId, subjectId, termId);
+                                    @RequestParam Long termId,
+                                    Pageable pageable) {
+        return termResultService.pageFor(classId, subjectId, termId,
+                PageRequest.of(Math.max(pageable.getPageNumber(), 0),
+                        Math.min(Math.max(pageable.getPageSize(), 1), 100)));
     }
 
     @GetMapping("/class")
