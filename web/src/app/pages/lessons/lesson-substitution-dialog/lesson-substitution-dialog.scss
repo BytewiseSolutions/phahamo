@@ -117,7 +117,7 @@
 
 .error-message {
   margin-bottom: 16px;
-  background: #fdf0f0;
+  background: rgb(from var(--error) r g b / 0.1);
   color: var(--error);
 }
 

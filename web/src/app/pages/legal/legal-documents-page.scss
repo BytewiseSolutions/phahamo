@@ -5,11 +5,11 @@
 }
 
 .card {
-    background: #fff;
-    border-radius: 12px;
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
     padding: 24px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, .08);
+    box-shadow: var(--shadow-md);
 }
 
 .upload-row {
@@ -18,7 +18,7 @@
     gap: 16px;
     flex-wrap: wrap;
     padding: 16px 0;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border-light);
 }
 
 .upload-row h2 {
@@ -39,6 +39,9 @@ input {
 button {
     padding: 9px 16px;
     cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    background: var(--primary);
+    color: var(--on-primary);
 }
 
 .history-row {
@@ -49,15 +52,15 @@ button {
 }
 
 .delete-button {
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-    background: #fff;
+    color: var(--error);
+    border: 1px solid rgb(from var(--error) r g b / 0.3);
+    background: var(--surface);
 }
 
 .success {
-    color: #166534;
+    color: var(--success);
 }
 
 .error {
-    color: #b91c1c;
+    color: var(--error);
 }

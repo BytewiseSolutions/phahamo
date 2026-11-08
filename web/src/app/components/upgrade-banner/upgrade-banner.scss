@@ -5,10 +5,10 @@
   gap: 16px;
   padding: 14px 20px;
   margin-bottom: 20px;
-  background: rgb(245, 158, 11, 0.1);
-  border: 1px solid rgb(245, 158, 11, 0.3);
+  background: rgb(from var(--warning) r g b / 0.1);
+  border: 1px solid rgb(from var(--warning) r g b / 0.3);
   border-radius: var(--border-radius-md);
-  color: #92400e;
+  color: var(--warning);
 }
 
 .upgrade-banner.expired {

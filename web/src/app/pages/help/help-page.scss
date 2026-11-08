@@ -11,10 +11,10 @@
 .support-card form { display: grid; gap: 16px; margin-top: 20px; }
 .support-card label { display: grid; gap: 7px; font-weight: 600; font-size: 13px; }
 .support-card input, .support-card textarea { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid var(--border); border-radius: 7px; font: inherit; resize: vertical; }
-.support-card button { justify-self: start; border: 0; border-radius: 7px; padding: 11px 18px; color: #fff; background: var(--primary); cursor: pointer; }
+.support-card button { justify-self: start; border: 0; border-radius: var(--border-radius-sm); padding: 11px 18px; color: var(--on-primary); background: var(--primary); cursor: pointer; }
 .support-card button:disabled { opacity: .6; cursor: wait; }
 .success-message, .error-message { padding: 12px; border-radius: 7px; margin-top: 14px; }
-.success-message { color: #166534; background: #dcfce7; }
-.error-message { color: #991b1b; background: #fee2e2; }
+.success-message { color: var(--success); background: rgb(from var(--success) r g b / 0.1); }
+.error-message { color: var(--error); background: rgb(from var(--error) r g b / 0.1); }
 @media (max-width: 900px) { .guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .help-page { padding: 20px 16px; } .guide-grid { grid-template-columns: 1fr; } }

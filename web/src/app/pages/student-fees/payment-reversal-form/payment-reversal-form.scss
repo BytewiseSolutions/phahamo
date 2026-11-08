@@ -122,7 +122,7 @@
 .danger-button {
   border: 0;
   background: var(--error);
-  color: var(--on-error, #fff);
+  color: var(--on-error);
 }
 
 .danger-button:hover {

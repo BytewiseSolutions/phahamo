@@ -21,7 +21,7 @@
   border-radius: 999px;
   padding: 8px 12px;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -297,7 +297,7 @@
   padding-right: 8px;
   padding-left: 8px;
   border-radius: var(--border-radius-sm);
-  background: #fff8e7;
+  background: rgb(from var(--warning) r g b / 0.1);
 }
 
 .birthday-date {
@@ -314,8 +314,8 @@
 }
 
 .birthday-today .birthday-date {
-  background: #ffe7a8;
-  color: #875d00;
+  background: rgb(from var(--warning) r g b / 0.25);
+  color: var(--warning);
 }
 
 .birthday-date strong {
@@ -354,8 +354,8 @@
 .today-badge {
   padding: 4px 8px;
   border-radius: 999px;
-  background: #ffe7a8;
-  color: #875d00;
+  background: rgb(from var(--warning) r g b / 0.25);
+  color: var(--warning);
   font-size: 11px;
   font-weight: 700;
 }
