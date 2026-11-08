@@ -48,6 +48,18 @@
   flex-shrink: 0;
 }
 
+.help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.help-link:hover { color: var(--primary); }
+
 .user-info {
   display: flex;
   align-items: center;

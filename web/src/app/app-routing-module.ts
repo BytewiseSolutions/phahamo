@@ -52,6 +52,7 @@ import {MessagesPage} from './pages/messages/messages-page/messages-page';
 import {ParentPortal} from './pages/parent/parent-portal/parent-portal';
 import {HolidayList} from './pages/holidays/holiday-list/holiday-list';
 import {AuditLogPage} from './pages/audit/audit-log-page/audit-log-page';
+import {HelpPage} from './pages/help/help-page';
 import {LegalPage} from './pages/legal/legal-page';
 import {LegalAcceptance} from './pages/legal/legal-acceptance';
 
@@ -71,6 +72,7 @@ const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'help', component: HelpPage },
       { path: 'users', component: UserList },
       { path: 'audit-log', component: AuditLogPage },
       { path: 'import', component: BulkImport },

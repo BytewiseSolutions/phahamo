@@ -5,6 +5,10 @@
   </div>
 
   <div class="header-right">
+    <a class="help-link" routerLink="/help" title="Help and support">
+      <i class="fa-regular fa-circle-question"></i>
+      <span>Help</span>
+    </a>
     <button type="button" class="user-info" (click)="goToProfile()" title="View my profile">
       <div class="user-avatar">{{ initials }}</div>
       <div class="user-details">
