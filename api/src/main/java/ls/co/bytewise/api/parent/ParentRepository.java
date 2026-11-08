@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface ParentRepository extends JpaRepository<Parent, Long> {
 
+    List<Parent> findAllBySchoolId(Long schoolId);
+
     Optional<Parent> findByIdAndSchoolId(Long id, Long schoolId);
 
     @Query("""

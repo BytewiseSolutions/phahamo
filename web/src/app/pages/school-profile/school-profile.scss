@@ -51,6 +51,21 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+.data-export-description,
+.data-export-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.data-export-description {
+  margin: 0 0 16px;
+}
+
+.data-export-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+}
+
 .logo-section {
   display: flex;
   align-items: center;

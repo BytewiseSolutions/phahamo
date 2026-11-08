@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface StudentFeePaymentRepository extends JpaRepository<StudentFeePayment, Long> {
+    List<StudentFeePayment> findAllBySchoolId(Long schoolId);
     Optional<StudentFeePayment> findByIdAndAccount_SchoolId(Long id, Long schoolId);
 
     @org.springframework.data.jpa.repository.Query("""

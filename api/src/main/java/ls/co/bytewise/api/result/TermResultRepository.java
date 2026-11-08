@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface TermResultRepository extends JpaRepository<TermResult, Long> {
 
+    List<TermResult> findAllBySchoolId(Long schoolId);
+
     List<TermResult> findAllBySchoolClassIdAndSubjectIdAndTermIdAndSchoolId(
             Long schoolClassId, Long subjectId, Long termId, Long schoolId);
 

@@ -13,6 +13,8 @@ import java.util.Optional;
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
+    List<Attendance> findAllBySchoolId(Long schoolId);
+
     @Modifying
     @Query("delete from Attendance a where a.lesson.id in :lessonIds")
     void deleteAllByLessonIdIn(@Param("lessonIds") List<Long> lessonIds);
