@@ -56,30 +56,26 @@
 
   @if (isSystemAdmin && !selectedSchoolId && systemStats) {
   <div class="stats-grid">
-    <div class="stat-card">
+    <button type="button" class="stat-card system-stat-card" (click)="goToSystemSchools()">
       <span class="stat-label">Total Schools</span>
       <span class="stat-value">{{ systemStats.totalSchools }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Active Schools</span>
-      <span class="stat-value">{{ systemStats.activeSchools }}</span>
-    </div>
-    <div class="stat-card">
+    </button>
+    <button type="button" class="stat-card system-stat-card" (click)="goToSystemSchools('','TRIAL')">
       <span class="stat-label">Trial Schools</span>
       <span class="stat-value">{{ systemStats.trialSchools }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Suspended</span>
-      <span class="stat-value">{{ systemStats.suspendedSchools }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Expiring in 7 Days</span>
-      <span class="stat-value">{{ systemStats.expiringSoonSchools }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Total Users</span>
-      <span class="stat-value">{{ systemStats.totalUsers }}</span>
-    </div>
+    </button>
+    <button type="button" class="stat-card system-stat-card" (click)="goToSystemSchools('','ACTIVE')">
+      <span class="stat-label">Active Subscriptions</span>
+      <span class="stat-value">{{ systemStats.activeSubscriptionSchools }}</span>
+    </button>
+    <button type="button" class="stat-card system-stat-card" (click)="goToSystemSchools('TRIAL_ENDING')">
+      <span class="stat-label">Trials Ending in 14 Days</span>
+      <span class="stat-value">{{ systemStats.trialsEndingNext14Days }}</span>
+    </button>
+    <button type="button" class="stat-card system-stat-card" (click)="goToSystemSchools('NEW_THIS_MONTH')">
+      <span class="stat-label">New Schools This Month</span>
+      <span class="stat-value">{{ systemStats.newSchoolsThisMonth }}</span>
+    </button>
   </div>
   }
 

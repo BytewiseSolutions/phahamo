@@ -112,32 +112,41 @@ public class DashboardService {
         SystemDashboardStats stats = new SystemDashboardStats();
 
         stats.setTotalSchools(schoolRepository.count());
-        stats.setTotalUsers(userRepository.count());
-
         List<Subscription> subs = subscriptionRepository.findAll();
         Instant now = Instant.now();
-        Instant sevenDaysFromNow = now.plus(7, ChronoUnit.DAYS);
+        Instant fourteenDaysFromNow = now.plus(14, ChronoUnit.DAYS);
+        LocalDate firstDayOfMonth = LocalDate.now().withDayOfMonth(1);
+        Instant monthStart = firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant nextMonthStart = firstDayOfMonth.plusMonths(1)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        long active = 0, trial = 0, suspended = 0, expiring = 0;
+        long active = 0, trial = 0, endingSoon = 0, newSchools = 0;
 
         for (Subscription sub : subs) {
             SubscriptionStatus effective = subscriptionService.computeEffectiveStatus(sub);
 
-            if (effective == SubscriptionStatus.SUSPENDED) suspended++;
-            else if (effective == SubscriptionStatus.ACTIVE) active++;
-            else if (effective == SubscriptionStatus.TRIAL) trial++;
+            if (effective == SubscriptionStatus.ACTIVE) active++;
+            if (effective == SubscriptionStatus.TRIAL) trial++;
 
             if (sub.getEndsAt() != null
+                    && effective == SubscriptionStatus.TRIAL
                     && sub.getEndsAt().isAfter(now)
-                    && sub.getEndsAt().isBefore(sevenDaysFromNow)) {
-                expiring++;
+                    && sub.getEndsAt().isBefore(fourteenDaysFromNow)) {
+                endingSoon++;
+            }
+
+            Instant schoolCreatedAt = sub.getSchool().getCreatedAt();
+            if (schoolCreatedAt != null
+                    && !schoolCreatedAt.isBefore(monthStart)
+                    && schoolCreatedAt.isBefore(nextMonthStart)) {
+                newSchools++;
             }
         }
 
-        stats.setActiveSchools(active);
         stats.setTrialSchools(trial);
-        stats.setSuspendedSchools(suspended);
-        stats.setExpiringSoonSchools(expiring);
+        stats.setActiveSubscriptionSchools(active);
+        stats.setTrialsEndingNext14Days(endingSoon);
+        stats.setNewSchoolsThisMonth(newSchools);
         return stats;
     }
 

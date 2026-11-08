@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BackendService } from '../../../util/backend.service';
 import { ConfirmDialogService } from '../../../util/confirm-dialog.service';
 import { SystemAdminSchool } from '../system-admin-school';
@@ -17,6 +18,7 @@ export class AdminSchoolList implements OnInit {
 
   searchTerm = '';
   statusFilter = 'ALL';
+  dashboardFilter = '';
 
   showExtendDialog = false;
   showActivateDialog = false;
@@ -26,11 +28,16 @@ export class AdminSchoolList implements OnInit {
 
   constructor(
     private backend: BackendService,
-    private confirmDialog: ConfirmDialogService
-  ) {}
+    private confirmDialog: ConfirmDialogService,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
-    this.loadSchools();
+    this.route.queryParamMap.subscribe(params => {
+      this.dashboardFilter = params.get('filter') || '';
+      this.statusFilter = params.get('status') || 'ALL';
+      this.loadSchools();
+    });
   }
 
   get filteredSchools(): SystemAdminSchool[] {
@@ -44,6 +51,7 @@ export class AdminSchoolList implements OnInit {
     const params = new URLSearchParams();
     if (this.searchTerm.trim()) params.append('search', this.searchTerm.trim());
     if (this.statusFilter !== 'ALL') params.append('status', this.statusFilter);
+    if (this.dashboardFilter) params.append('filter', this.dashboardFilter);
     const query = params.toString();
 
     this.backend.get<SystemAdminSchool[]>(
@@ -67,11 +75,20 @@ export class AdminSchoolList implements OnInit {
   clearFilters(): void {
     this.searchTerm = '';
     this.statusFilter = 'ALL';
+    this.dashboardFilter = '';
     this.loadSchools();
   }
 
   get hasFilters(): boolean {
-    return this.searchTerm.trim().length > 0 || this.statusFilter !== 'ALL';
+    return this.searchTerm.trim().length > 0 || this.statusFilter !== 'ALL' || !!this.dashboardFilter;
+  }
+
+  get filterDescription(): string {
+    if (this.dashboardFilter === 'TRIAL_ENDING') return 'Trials ending in the next 14 days';
+    if (this.dashboardFilter === 'NEW_THIS_MONTH') return 'New schools registered this month';
+    if (this.statusFilter === 'TRIAL') return 'Schools on trial';
+    if (this.statusFilter === 'ACTIVE') return 'Schools with an active subscription';
+    return '';
   }
 
   openExtendDialog(school: SystemAdminSchool): void {

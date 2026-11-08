@@ -19,6 +19,12 @@
   }
 }
 
+.filter-description {
+  margin-top: 8px !important;
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
 .filters-bar {
   display: flex;
   align-items: center;
@@ -123,11 +129,30 @@
   font-weight: 600;
 }
 
-.badge-active { background: rgb(from var(--success) r g b / 0.12); color: var(--success); }
-.badge-trial { background: rgb(from var(--warning) r g b / 0.12); color: var(--warning); }
-.badge-expired { background: rgb(from var(--error) r g b / 0.12); color: var(--error); }
-.badge-suspended { background: rgb(from var(--error) r g b / 0.12); color: var(--error); }
-.badge-cancelled { background: var(--background); color: var(--text-secondary); }
+.badge-active {
+  background: rgb(from var(--success) r g b / 0.12);
+  color: var(--success);
+}
+
+.badge-trial {
+  background: rgb(from var(--warning) r g b / 0.12);
+  color: var(--warning);
+}
+
+.badge-expired {
+  background: rgb(from var(--error) r g b / 0.12);
+  color: var(--error);
+}
+
+.badge-suspended {
+  background: rgb(from var(--error) r g b / 0.12);
+  color: var(--error);
+}
+
+.badge-cancelled {
+  background: var(--background);
+  color: var(--text-secondary);
+}
 
 .link-button {
   background: none;
@@ -138,9 +163,17 @@
   color: var(--text-secondary);
 }
 
-.link-button.edit { color: var(--primary); }
-.link-button.danger { color: var(--error); }
-.link-button:hover { text-decoration: underline; }
+.link-button.edit {
+  color: var(--primary);
+}
+
+.link-button.danger {
+  color: var(--error);
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
 
 .actions-cell {
   display: flex;

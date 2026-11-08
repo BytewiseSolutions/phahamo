@@ -1,8 +1,7 @@
 export interface SystemDashboardStats {
   totalSchools: number;
-  activeSchools: number;
   trialSchools: number;
-  suspendedSchools: number;
-  expiringSoonSchools: number;
-  totalUsers: number;
+  activeSubscriptionSchools: number;
+  trialsEndingNext14Days: number;
+  newSchoolsThisMonth: number;
 }
