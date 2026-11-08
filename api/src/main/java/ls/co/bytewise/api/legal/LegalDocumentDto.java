@@ -7,10 +7,14 @@ public record LegalDocumentDto(
         LegalDocumentType documentType,
         String version,
         String content,
-        Instant effectiveAt
+        Instant effectiveAt,
+        String originalFilename,
+        String mimeType,
+        String fileUrl
 ) {
     public LegalDocumentDto(LegalDocument document) {
         this(document.getId(), document.getDocumentType(), document.getVersion(),
-                document.getContent(), document.getEffectiveAt());
+                document.getContent(), document.getEffectiveAt(), document.getOriginalFilename(),
+                document.getMimeType(), "/legal/" + document.getDocumentType().name().toLowerCase() + "/file");
     }
 }

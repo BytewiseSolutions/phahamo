@@ -8,6 +8,11 @@
     @if (document) {
       <p class="version">Version {{ document.version }} · Effective {{ document.effectiveAt | date:'longDate' }}</p>
       <div class="document-content">{{ document.content }}</div>
+      @if (document.mimeType === 'application/pdf') {
+        <a class="document-link" [href]="document.fileUrl" target="_blank" rel="noopener">Open PDF document</a>
+      } @else if (document.mimeType.includes('wordprocessingml')) {
+        <a class="document-link" [href]="document.fileUrl" target="_blank" rel="noopener">Download original Word document</a>
+      }
     }
   </article>
 </main>

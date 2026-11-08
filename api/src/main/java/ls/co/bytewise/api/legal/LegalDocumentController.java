@@ -5,6 +5,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +24,15 @@ public class LegalDocumentController {
 
     @GetMapping("/privacy")
     public LegalDocumentDto privacy() { return service.getCurrent(LegalDocumentType.PRIVACY); }
+
+    @GetMapping("/{type}/file")
+    public ResponseEntity<byte[]> file(@PathVariable LegalDocumentType type) {
+        LegalDocument document = service.file(type);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getOriginalFilename() + "\"")
+                .contentType(MediaType.parseMediaType(document.getMimeType()))
+                .body(document.getFileData());
+    }
 
     @GetMapping("/admin/documents")
     @Secured("ROLE_SYSTEM_ADMIN")

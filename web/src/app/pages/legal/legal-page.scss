@@ -53,6 +53,13 @@ p {
 
 .error { color: #b91c1c; }
 
+.document-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
 @media (max-width: 600px) {
   .legal-page {
     padding: 16px 10px;
