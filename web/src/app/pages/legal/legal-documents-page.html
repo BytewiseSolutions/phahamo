@@ -17,7 +17,9 @@
   <section class="card">
     <h2>Published history</h2>
     @for (document of documents; track document.documentType + document.version) {
-      <p><strong>{{ document.documentType }}</strong> · v{{ document.version }} · {{ document.effectiveAt | date:'medium' }}</p>
+      <p class="history-row"><span><strong>{{ document.documentType }}</strong> · v{{ document.version }} · {{ document.effectiveAt | date:'medium' }}</span>
+        <button type="button" class="delete-button" (click)="delete(document)">Delete</button>
+      </p>
     } @empty { <p>No documents have been published yet.</p> }
   </section>
 </main>

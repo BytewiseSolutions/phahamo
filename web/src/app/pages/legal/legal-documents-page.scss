@@ -41,6 +41,19 @@ button {
     cursor: pointer;
 }
 
+.history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.delete-button {
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    background: #fff;
+}
+
 .success {
     color: #166534;
 }

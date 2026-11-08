@@ -79,6 +79,13 @@ public class LegalDocumentService {
 
     public LegalDocument file(LegalDocumentType type) { return currentEntity(type); }
 
+    @Transactional
+    public void delete(Long id) {
+        LegalDocument document = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Legal document not found"));
+        repository.delete(document);
+    }
+
     private String mimeType(String filename) {
         if (filename.endsWith(".pdf")) return "application/pdf";
         if (filename.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";

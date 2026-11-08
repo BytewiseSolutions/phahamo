@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { BackendService } from '../../util/backend.service';
+import { ConfirmDialogService } from '../../util/confirm-dialog.service';
 
-interface LegalDocument { documentType: 'TERMS' | 'PRIVACY'; version: string; effectiveAt: string; }
+interface LegalDocument { id: number; documentType: 'TERMS' | 'PRIVACY'; version: string; effectiveAt: string; }
 
 @Component({
   selector: 'app-legal-documents-page',
@@ -18,7 +19,10 @@ export class LegalDocumentsPage implements OnInit {
   message = '';
   errorMessage = '';
 
-  constructor(private backend: BackendService) {}
+  constructor(
+    private backend: BackendService,
+    private confirmDialog: ConfirmDialogService
+  ) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -49,6 +53,21 @@ export class LegalDocumentsPage implements OnInit {
     this.backend.upload<LegalDocument>('/legal/admin/documents', form).subscribe({
       next: () => { this.loading = false; this.message = `${type === 'TERMS' ? 'Terms' : 'Privacy Policy'} published.`; this.load(); },
       error: err => { this.loading = false; this.errorMessage = err.error?.message || 'Document could not be published.'; }
+    });
+  }
+
+  async delete(document: LegalDocument): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete Legal Document',
+      message: `Delete ${document.documentType} version ${document.version}?`,
+      confirmText: 'Delete',
+      danger: true
+    });
+    if (!confirmed) return;
+
+    this.backend.delete<void>(`/legal/admin/documents/${document.id}`).subscribe({
+      next: () => { this.message = 'Legal document deleted.'; this.load(); },
+      error: err => this.errorMessage = err.error?.message || 'Document could not be deleted.'
     });
   }
 }

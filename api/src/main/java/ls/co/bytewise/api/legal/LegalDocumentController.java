@@ -26,8 +26,14 @@ public class LegalDocumentController {
     public LegalDocumentDto privacy() { return service.getCurrent(LegalDocumentType.PRIVACY); }
 
     @GetMapping("/{type}/file")
-    public ResponseEntity<byte[]> file(@PathVariable LegalDocumentType type) {
-        LegalDocument document = service.file(type);
+    public ResponseEntity<byte[]> file(@PathVariable String type) {
+        LegalDocumentType documentType;
+        try {
+            documentType = LegalDocumentType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Unknown legal document type: " + type);
+        }
+        LegalDocument document = service.file(documentType);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getOriginalFilename() + "\"")
                 .contentType(MediaType.parseMediaType(document.getMimeType()))
@@ -46,5 +52,12 @@ public class LegalDocumentController {
                                     @RequestPart MultipartFile file,
                                     @AuthenticationPrincipal User currentUser) {
         return service.publish(type, version, effectiveAt, file, currentUser);
+    }
+
+    @DeleteMapping("/admin/documents/{id}")
+    @Secured("ROLE_SYSTEM_ADMIN")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
