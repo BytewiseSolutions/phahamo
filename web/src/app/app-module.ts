@@ -105,8 +105,10 @@ import { ParentPortal } from './pages/parent/parent-portal/parent-portal';
 import { HolidayList } from './pages/holidays/holiday-list/holiday-list';
 import { HolidayForm } from './pages/holidays/holiday-form/holiday-form';
 import { AuditLogPage } from './pages/audit/audit-log-page/audit-log-page';
+import { HelpPage } from './pages/help/help-page';
 import { LegalPage } from './pages/legal/legal-page';
 import { LegalAcceptance } from './pages/legal/legal-acceptance';
+import { LegalDocumentsPage } from './pages/legal/legal-documents-page';
 
 @NgModule({
   declarations: [
@@ -206,8 +208,10 @@ import { LegalAcceptance } from './pages/legal/legal-acceptance';
     HolidayList,
     HolidayForm,
     AuditLogPage,
+    HelpPage,
     LegalPage,
     LegalAcceptance,
+    LegalDocumentsPage,
   ],
   imports: [
     BrowserModule,

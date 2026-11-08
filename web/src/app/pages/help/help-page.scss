@@ -1,0 +1,20 @@
+.help-page { max-width: 1200px; margin: 0 auto; padding: 28px; color: var(--text-primary); }
+.help-heading h1 { margin: 4px 0 8px; }
+.help-heading p:not(.eyebrow) { color: var(--text-secondary); }
+.eyebrow { margin: 0 0 8px; color: var(--primary); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 28px 0; }
+.guide-card, .support-card { padding: 22px; background: var(--surface); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: var(--shadow-sm); }
+.guide-card h2, .support-card h2 { margin-top: 0; font-size: 18px; }
+.guide-card ol { margin: 0; padding-left: 22px; color: var(--text-secondary); line-height: 1.6; }
+.guide-card li + li { margin-top: 10px; }
+.support-card { max-width: 760px; }
+.support-card form { display: grid; gap: 16px; margin-top: 20px; }
+.support-card label { display: grid; gap: 7px; font-weight: 600; font-size: 13px; }
+.support-card input, .support-card textarea { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid var(--border); border-radius: 7px; font: inherit; resize: vertical; }
+.support-card button { justify-self: start; border: 0; border-radius: var(--border-radius-sm); padding: 11px 18px; color: var(--on-primary); background: var(--primary); cursor: pointer; }
+.support-card button:disabled { opacity: .6; cursor: wait; }
+.success-message, .error-message { padding: 12px; border-radius: 7px; margin-top: 14px; }
+.success-message { color: var(--success); background: rgb(from var(--success) r g b / 0.1); }
+.error-message { color: var(--error); background: rgb(from var(--error) r g b / 0.1); }
+@media (max-width: 900px) { .guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .help-page { padding: 20px 16px; } .guide-grid { grid-template-columns: 1fr; } }

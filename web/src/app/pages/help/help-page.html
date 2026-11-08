@@ -1,0 +1,35 @@
+<div class="help-page">
+  <div class="help-heading">
+    <div>
+      <p class="eyebrow">SUPPORT CENTRE</p>
+      <h1>How can we help?</h1>
+      <p>Short guides for your role, plus a direct line to Bytewise support.</p>
+    </div>
+  </div>
+
+  <section class="guide-grid">
+    @for (guide of guides; track guide.title) {
+      <article class="guide-card">
+        <h2>{{ guide.title }}</h2>
+        <ol>
+          @for (step of guide.steps; track step) { <li>{{ step }}</li> }
+        </ol>
+      </article>
+    }
+  </section>
+
+  <section class="support-card">
+    <div>
+      <p class="eyebrow">CONTACT SUPPORT</p>
+      <h2>Ask Bytewise a question</h2>
+      <p>Your name, role and school are included automatically with your request.</p>
+    </div>
+    @if (supportMessage) { <div class="success-message">{{ supportMessage }}</div> }
+    @if (supportError) { <div class="error-message">{{ supportError }}</div> }
+    <form [formGroup]="supportForm" (ngSubmit)="submitSupport()">
+      <label>Subject<input type="text" formControlName="subject" placeholder="What do you need help with?"/></label>
+      <label>Question<textarea rows="6" formControlName="question" placeholder="Describe the problem or question..."></textarea></label>
+      <button type="submit" [disabled]="sending">{{ sending ? 'Sending...' : 'Send to support' }}</button>
+    </form>
+  </section>
+</div>

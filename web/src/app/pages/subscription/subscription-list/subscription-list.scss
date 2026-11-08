@@ -420,7 +420,7 @@
 }
 
 .primary-button.danger:hover {
-  background: #a83a3a;
+  background: var(--error);
 }
 
 .secondary-button {

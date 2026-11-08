@@ -145,7 +145,7 @@
     transition: border-color var(--transition), box-shadow var(--transition);
 
     &:hover {
-      border-color: #b9c9ce;
+      border-color: var(--border);
     }
 
     &:focus {
@@ -170,7 +170,7 @@
   padding: 0 24px;
   border-radius: var(--border-radius-md);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

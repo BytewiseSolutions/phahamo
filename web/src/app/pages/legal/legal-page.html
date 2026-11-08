@@ -3,41 +3,16 @@
     <a routerLink="/register" class="back-link">← Back to registration</a>
     <p class="eyebrow">PHAHAMO LEGAL</p>
     <h1>{{ isPrivacy ? 'Privacy Policy' : 'Terms of Use' }}</h1>
-    <p class="version">Version 1.0 · Effective 7 November 2026</p>
-
-    @if (isPrivacy) {
-    <h2>How school information is handled</h2>
-    <p>Phahamo helps schools manage learners, staff, parents, attendance, academic results and fees. This policy
-      explains the information we collect, why we use it, and the safeguards we apply.</p>
-    <h2>Information we process</h2>
-    <p>Information may include school and contact details, user accounts, learner records, attendance, results, fee
-      information and messages entered by the school.</p>
-    <h2>Use and sharing</h2>
-    <p>We use this information to provide, secure and improve the service, support the school, and meet legal
-      obligations. We do not sell learner information. Schools remain responsible for deciding what information to enter
-      and who may access it.</p>
-    <h2>Security and retention</h2>
-    <p>We apply reasonable technical and organisational safeguards and retain information only as needed for the
-      service, the school’s instructions, and applicable law.</p>
-    <h2>Questions and rights</h2>
-    <p>For questions about information held for a school, contact the school first. Questions about Phahamo can be sent
-      to Bytewise through the support channel provided to your school.</p>
-    } @else {
-    <h2>Using Phahamo</h2>
-    <p>Phahamo provides school-management tools for authorised school users. The school owner and administrators are
-      responsible for maintaining accurate information and granting access only to people who need it.</p>
-    <h2>Acceptable use</h2>
-    <p>You must keep login details confidential, use the service lawfully, respect other people’s information, and
-      promptly report suspected unauthorised access.</p>
-    <h2>School responsibilities</h2>
-    <p>The school is responsible for its instructions, users, content and compliance with laws that apply to its
-      processing of learner, parent and staff information.</p>
-    <h2>Changes</h2>
-    <p>We may update these Terms to reflect changes to the service or law. School administrators will be asked to accept
-      the current version before continuing to use the service.</p>
-    <h2>Important notice</h2>
-    <p>This document is a product draft and must be reviewed and approved by a qualified data-protection and legal
-      professional familiar with Lesotho and South African requirements before launch.</p>
+    @if (loading) { <p>Loading document…</p> }
+    @if (errorMessage) { <p class="error">{{ errorMessage }}</p> }
+    @if (document) {
+      <p class="version">Version {{ document.version }} · Effective {{ document.effectiveAt | date:'longDate' }}</p>
+      <div class="document-content">{{ document.content }}</div>
+      @if (document.mimeType === 'application/pdf') {
+        <a class="document-link" [href]="document.fileUrl" target="_blank" rel="noopener">Open PDF document</a>
+      } @else if (document.mimeType.includes('wordprocessingml')) {
+        <a class="document-link" [href]="document.fileUrl" target="_blank" rel="noopener">Download original Word document</a>
+      }
     }
   </article>
 </main>

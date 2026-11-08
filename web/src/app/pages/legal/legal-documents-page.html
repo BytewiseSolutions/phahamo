@@ -1,0 +1,25 @@
+<main class="admin-page">
+  <section class="card">
+    <h1>Legal Documents</h1>
+    <p>Upload a reviewed TXT, Markdown, PDF or DOCX document. Publishing a new version requires school admins to accept it at their next login.</p>
+    @if (message) { <p class="success">{{ message }}</p> }
+    @if (errorMessage) { <p class="error">{{ errorMessage }}</p> }
+
+    @for (type of documentTypes; track type) {
+      <div class="upload-row">
+        <h2>{{ type === 'TERMS' ? 'Terms of Use' : 'Privacy Policy' }}</h2>
+        <label>Version <input [(ngModel)]="version[type]" placeholder="e.g. 1.0"></label>
+        <input type="file" accept=".txt,.md,.pdf,.docx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" (change)="selectFile(type === 'TERMS' ? 'TERMS' : 'PRIVACY', $event)">
+        <button type="button" (click)="publish(type)" [disabled]="loading">Publish</button>
+      </div>
+    }
+  </section>
+  <section class="card">
+    <h2>Published history</h2>
+    @for (document of documents; track document.documentType + document.version) {
+      <p class="history-row"><span><strong>{{ document.documentType }}</strong> · v{{ document.version }} · {{ document.effectiveAt | date:'medium' }}</span>
+        <button type="button" class="delete-button" (click)="delete(document)">Delete</button>
+      </p>
+    } @empty { <p>No documents have been published yet.</p> }
+  </section>
+</main>

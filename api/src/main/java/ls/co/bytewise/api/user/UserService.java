@@ -63,6 +63,32 @@ public class UserService {
     }
 
     @Transactional
+    public boolean seedDefaultAdmin(String email, String password) {
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+            return false;
+        }
+        if (userRepository.existsByRole(UserRole.SYSTEM_ADMIN)) {
+            return false;
+        }
+        if (userRepository.existsByEmail(email.trim())) {
+            throw new IllegalStateException("Cannot seed system admin: email already belongs to another user");
+        }
+
+        User admin = new User();
+        admin.setFirstName("System");
+        admin.setLastName("Administrator");
+        admin.setEmail(email.trim());
+        admin.setPhone("N/A");
+        admin.setPassword(passwordEncoder.encode(password));
+        admin.setMustChangePassword(false);
+        admin.setStatus(Status.ACTIVE);
+        admin.setRoles(Set.of(UserRole.SYSTEM_ADMIN));
+        admin.setSchools(Set.of());
+        userRepository.save(admin);
+        return true;
+    }
+
+    @Transactional
     public UserDto createUser(User creator, UserDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new DataIntegrityViolationException("A user with this email already exists");

@@ -53,6 +53,7 @@ export class Header implements OnInit {
     '/fees/structures': 'Fee Structures',
     '/student-fees': 'Student Fees',
     '/my-fees': 'My Fees',
+    '/help': 'Help & Support',
 
   };
 

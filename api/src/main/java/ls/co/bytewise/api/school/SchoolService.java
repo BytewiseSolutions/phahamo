@@ -1,7 +1,8 @@
 package ls.co.bytewise.api.school;
 
 import ls.co.bytewise.api.common.*;
-import ls.co.bytewise.api.legal.LegalPolicy;
+import ls.co.bytewise.api.legal.LegalDocumentService;
+import ls.co.bytewise.api.legal.LegalDocumentType;
 import ls.co.bytewise.api.subscription.Subscription;
 import ls.co.bytewise.api.subscription.SubscriptionPlan;
 import ls.co.bytewise.api.subscription.SubscriptionRepository;
@@ -29,17 +30,20 @@ public class SchoolService {
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionRepository subscriptionRepository;
     private final DataFileRepository dataFileRepository;
+    private final LegalDocumentService legalDocumentService;
 
     public SchoolService(SchoolRepository schoolRepository,
                          UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          SubscriptionRepository subscriptionRepository,
-                         DataFileRepository dataFileRepository) {
+                         DataFileRepository dataFileRepository,
+                         LegalDocumentService legalDocumentService) {
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subscriptionRepository = subscriptionRepository;
         this.dataFileRepository = dataFileRepository;
+        this.legalDocumentService = legalDocumentService;
     }
 
     @Transactional
@@ -92,9 +96,9 @@ public class SchoolService {
         newAdmin.setStatus(Status.ACTIVE);
         Instant acceptedAt = Instant.now();
         newAdmin.setTermsAcceptedAt(acceptedAt);
-        newAdmin.setTermsVersion(LegalPolicy.TERMS_VERSION);
+        newAdmin.setTermsVersion(legalDocumentService.currentVersion(LegalDocumentType.TERMS));
         newAdmin.setPrivacyAcceptedAt(acceptedAt);
-        newAdmin.setPrivacyVersion(LegalPolicy.PRIVACY_VERSION);
+        newAdmin.setPrivacyVersion(legalDocumentService.currentVersion(LegalDocumentType.PRIVACY));
         newAdmin.setRoles(Set.of(UserRole.SCHOOL_ADMIN));
 
         newAdmin.add(savedSchool);
